@@ -12,7 +12,16 @@ function ou_profile_get_unit_list_block() {
   
   global $user;
   
-  if (count($user->roles) > 1) { 
+  if (count($user->roles) > 1) {
+
+    // Check to see if a unit has been requested via GET
+    $unit_id = "";
+    if ($_GET['unit']) {
+      if (is_numeric($_GET['unit'])) {
+        $unit_id = $_GET['unit'];
+      }
+    }
+    
     // our block content
     $unit_list = "";
     # Get a list of units
@@ -32,10 +41,11 @@ function ou_profile_get_unit_list_block() {
     }
     $query .= "ORDER by n.title";
     
-    $result = db_query($query);
+    $results = db_query($query);
     $unit_title = "";
     
-    while ($data = db_fetch_object($result)) {
+    //while ($data = db_fetch_object($result)) {
+    foreach ($results as $data) {
       
       if ($data->field_unit_code_value == $unit_id) {
         $title = "<strong>[$data->title]</strong>";

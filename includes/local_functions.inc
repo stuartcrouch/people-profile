@@ -92,8 +92,8 @@ function ou_profile_lget_profile_data($staff_id) {
 //  $query = 'SELECT * FROM {content_type_profile} WHERE field_oup_staff_id_value="' . $staff_id . '"';
   //$data = db_fetch_array(db_query($query));
   
-  $data = db_query("SELECT * FROM {content_type_profile} WHERE field_oup_staff_id_value= :staff_id", 
-      array(":staff_id" => $staff_id))->fetchAssoc();
+  //$data = db_query("SELECT * FROM {content_type_profile} WHERE field_oup_staff_id_value= :staff_id", 
+  //    array(":staff_id" => $staff_id))->fetchAssoc();
 
   // Only if this is an active profile
   //if ($data['field_oup_active_value']) {
@@ -102,6 +102,20 @@ function ou_profile_lget_profile_data($staff_id) {
   //  $data['about_me'] = $node->body;
   //  unset($node);
   //}
+  
+  $query = new EntityFieldQuery();
+  
+  $query->entityCondition('entity_type', 'node')
+  ->entityCondition('bundle', 'profile')
+  ->propertyCondition('status', 1)
+  ->fieldCondition('field_oup_staff_id', 'value', $staff_id, '=');
+  
+  $result = $query->execute();
+  
+  if (isset($result['node'])) {
+    $news_items_nids = array_keys($result['node']);
+    $news_items = entity_load('node', $news_items_nids);
+  }
 
   // Set database back to original
   db_set_active('default');
@@ -356,6 +370,8 @@ function ou_profile_lget_site_info() {
     $a_site_info['visibility'] = $data->field_site_visibility_value;
   }
   else {
+    $a_site_info['unit_code'] = '';
+    $a_site_info['visibility'] = '';
     ou_profile_log("no site data returned");
   }
   
@@ -480,12 +496,15 @@ function ou_profile_lget_profile_visibility($nid) {
     
   $query = "SELECT * FROM {content_type_profile} AS pr WHERE pr.nid=:nid";
 
-  $result = db_query($query, array(':nid' => $nid));
-  $data = db_fetch_object($result);
+  $data = db_query($query, array(':nid' => $nid))->fetchAssoc();
+  //$data = db_fetch_object($result);
   
   // print ($data->field_pdat_staff_surname_value . " - ". $data->field_oup_visibility_value . "<br />");
+  $visibility = 0;
+  if (isset($data->field_oup_visibility_value))
+    $visibility = $data->field_oup_visibility_value;
    
-  switch ($data->field_oup_visibility_value) {
+  switch ($visibility) {
      case 1:
          return "intranet";
          break;
@@ -537,6 +556,16 @@ function ou_profile_lcreate_name($in_title, $in_forenames, $in_surname, $in_pref
     }
 
     return $staff_title . $forenames . $surname;
+}
+
+function ou_profile_node_get_field_value($node, $value) {
+  $items = field_get_items('node', $node, $value);
+  if (is_array($items)) {
+    $data = field_view_value('node', $node, $value, reset($items));
+    return $data['#markup'];
+  }
+  
+  return '';
 }
 
 /////////////////////
