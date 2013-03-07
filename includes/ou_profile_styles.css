@@ -1,0 +1,99 @@
+input#edit-profile-submit {
+	bottom: 5px;
+	position: fixed;
+	right: 5px;
+	z-index: 1000;
+	padding: 50px;
+	left: 90%;
+	/*margin: 0 0 0 0;
+	padding: 1em 50%; */
+	background-image: url(/includes/ouice/constant-shade.png);
+	background-position: center bottom;
+	background-repeat: repeat-x;
+	background-color: #BBD8E7; /*#BBD8E7;*/
+
+	font-weight: bolder;
+
+}
+
+fieldset legend
+{
+	width: 90%;
+}
+div.header-radios
+{
+	text-align: left;
+}
+
+div.profilephoto img{
+float: right;
+margin-left: 1em;
+border: 1px solid #ADD0E1;
+padding: 0.5em;
+margin-bottom: 1em;
+}
+
+/* The A to Z block */
+div.block-ou-profile ul.AtoZ {
+	background-color: #FFFFFF;
+	border: 1px solid darkGray;
+	display: block;
+	margin: 0;
+	padding: 0.25em;
+	text-align: center;
+	width: 99%;
+}
+
+div.block-ou-profile ul.AtoZ li {
+    background-image: none;
+    display: inline;
+    padding: 0.25em;
+
+}
+
+div.block-ou-profile ul.AtoZ li a {
+    background-image: none;
+    display: inline;
+    padding: 0.25em;
+    background-color: #FFF;
+    border-color: none;
+    border-style: none;
+    border-width: 0;
+}
+
+div.block-ou-profile ul.ou_profile_names li a {
+	display: inline;
+	background-color: #FFF;
+	background-image: none;
+	border-color: none;
+	border-style: none;
+	border-width: 0;
+	padding: 0 1em 0 0;
+}
+
+div.block-ou-profile ul.ou_profile_names li {
+	display: block;
+	padding: 0 0 0 1em;
+}
+
+div.block-ou-profile a.to-top {
+	float: right;
+	display: inline-block;
+	padding: 0.5em;
+}
+
+div.block-ou-profile {
+	padding-bottom: 3em;
+	}
+	
+.ou-odd {
+	background-color: #BBD8E7;
+	padding:0.2em;
+}
+.ou-even {
+	padding:0.2em;
+}
+.form-item {
+	margin-left: 0.2em;
+	margin-right: 0.2em;
+}
