@@ -15,8 +15,10 @@ files[] = includes/local_functions.inc
 files[] = includes/people_functions.inc
 files[] = install/ou_profile_content_type.inc
 
-// dependencies[] = content 
+dependencies[] = services
 dependencies[] = trigger
-// dependencies[] = content_copy
 dependencies[] = pathauto
+
+// dependencies[] = content 
 // dependencies[] = jquery_ui
+// dependencies[] = content_copy

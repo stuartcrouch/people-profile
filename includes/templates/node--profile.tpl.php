@@ -14,18 +14,18 @@ include_once($modulepath . '/includes/people_functions.inc');
     $profile_header = '';
     $profile_content = '';
     $inpage_navigation = array();
-    
+
     //===============================================================
     // Create profile header
     //===============================================================
-	    
+
     if ($node->ou_profile['pdata']['group_header']['field_oup_photo']['value']) {
-        
+
         // Required during the d6 -> d7 upgrade.
         // CAUTION!!!!
         // If you override this theme, you will have to upgrade it at the point the people server moves.
         $photo = $node->ou_profile['pdata']['group_header']['field_oup_photo']['value'];
-               
+
         $host = "http://www8";
         $env = getenv('OUENV');
         switch ($env) {
@@ -35,57 +35,57 @@ include_once($modulepath . '/includes/people_functions.inc');
           case 'dev':
           case 'test':
             $host .= "-" . $env;
-            break; 
+            break;
           default:
             $host .= "-dev";
             break;
         }
-        
+
         $host .= ".open.ac.uk/people/";
-        
+
         $profile_header .= '<div class="profilephoto"><img src="' . $host . $photo .'" alt="Profile Photo"></div>';
     }
-    
+
     if ($node->ou_profile['pdata']['group_header']['field_oup_job_title']['value'] || $node->ou_profile['pdata']['group_header']['field_pdat_l1_estab_unit_desc']['value']) {
         $profile_header .= '<h2>';
-        
+
         if ($node->ou_profile['pdata']['group_header']['field_oup_job_title']['value'])
             $profile_header .= $node->ou_profile['pdata']['group_header']['field_oup_job_title']['value'];
         else if ($node->ou_profile['pdata']['group_header']['field_pdat_appt_job_title']['value'])
             $profile_header .= $node->ou_profile['pdata']['group_header']['field_pdat_appt_job_title']['value'];
-            
+
         if  ($node->ou_profile['pdata']['group_header']['field_pdat_l1_estab_unit_desc']['value'])
             $profile_header .= " - " . $node->ou_profile['pdata']['group_header']['field_pdat_l1_estab_unit_desc']['value'];
-        
+
         $profile_header .= "</h2>";
     }
-	
+
 	if ($node->ou_profile['pdata']['group_header']['field_pdat_appt_role_desc']['value']) {
         $profile_header .= '<h3>'.$node->ou_profile['pdata']['group_header']['field_pdat_appt_role_desc']['value'].'</h3>';
     }
-	
-    
+
+
     if ($centre = $node->ou_profile['pdata']['group_header']['field_pdat_l2_estab_unit_name']['value']) {
         $profile_header .= "<h3>".$centre."</h3>";
     }
-	
+
 	if ($centre = $node->ou_profile['pdata']['group_header']['field_pdat_l3_estab_unit_name']['value']) {
         $profile_header .= "<h3>".$centre."</h3>";
     }
-	
+
 	if ($centre = $node->ou_profile['pdata']['group_header']['field_pdat_l4_estab_unit_name']['value']) {
        $profile_header .= "<h3>".$centre."</h3>";
     }
-		
+
 	if ($node->ou_profile['pdata']['group_header']['field_pdat_ou_email_address']['value']) {
         $profile_header .= '<p><a href="mailto:'.$node->ou_profile['pdata']['group_header']['field_pdat_ou_email_address']['value'].'@open.ac.uk">'.$node->ou_profile['pdata']['group_header']['field_pdat_ou_email_address']['value'] ."</a></p>\n";
     }
-	
+
 	if ($node->ou_profile['pdata']['group_header']['field_oup_alternative_email']['value']) {
         $profile_header .= '<p><a href="mailto:'.$node->ou_profile['pdata']['group_header']['field_oup_alternative_email']['value'].'@open.ac.uk">'.$node->ou_profile['pdata']['group_header']['field_oup_alternative_email']['value'] ."</a></p>\n";
     }
-	
-		
+
+
     //===============================================================
     // Create inline navigation and populate profile content variable
     //
@@ -110,16 +110,16 @@ include_once($modulepath . '/includes/people_functions.inc');
 				}
 			}
 		  }
-		
+
 		//===============================================================
 		// Create weblinks
 		//===============================================================
 		$weblinks = "";
-		
+
 		if($weblink = $node->ou_profile['pdata']['group_external_profiles_accounts']['field_pdat_personal_website']['value']){
 			$weblinks .= '<li><a href="'.$weblink.'">'.$node->ou_profile['pdata']['group_external_profiles_accounts']['field_pdat_personal_website']['label'].'</a></li>';
 		}
-		
+
 		if($node->ou_profile['pdata']['group_external_profiles_accounts']['field_oup_web_links']['value']){
 			foreach ($node->ou_profile['pdata']['group_external_profiles_accounts']['field_oup_web_links']['value'] as $item) {
 				if ($item['url']) {
@@ -135,14 +135,14 @@ include_once($modulepath . '/includes/people_functions.inc');
 				}
 			  }
 		}
-		
+
 
 		// append other web links
 		$other_links = array('field_oup_linkedin','field_oup_slideshare','field_oup_blog','field_oup_flickr');
 		foreach ($other_links as $link_field) {
 		  if (!empty($node->ou_profile['pdata']['group_external_profiles_accounts'][$link_field]['value']['url'])) {
-			$weblinks .= '<li><a href="' . 
-			 			    $node->ou_profile['pdata']['group_external_profiles_accounts'][$link_field]['value']['url'] . 
+			$weblinks .= '<li><a href="' .
+			 			    $node->ou_profile['pdata']['group_external_profiles_accounts'][$link_field]['value']['url'] .
 			 			  '">' . $node->ou_profile['pdata']['group_external_profiles_accounts'][$link_field]['label'] .
 			              '</a></li>';
 		  }
@@ -156,7 +156,7 @@ include_once($modulepath . '/includes/people_functions.inc');
 			$inpage_navigation[] .= '<li><a href="#weblinks">Web links</a></li>';
 			$profile_content .= '<h3 id="weblinks">Web links</h3>'."\n<ul>".$weblinks."</ul>";
 		}
-		
+
 		//===============================================================
 		// Now render the inline profile navigation and content
 		//===============================================================
@@ -169,8 +169,8 @@ include_once($modulepath . '/includes/people_functions.inc');
 			print "</ul></div>\n";
 		 }
 		if ($profile_content) print '<div class="profile-content">'.$profile_content."</div>\n";
-		
-		
+
+
 	}
   ?>
   </div>
@@ -190,7 +190,7 @@ include_once($modulepath . '/includes/people_functions.inc');
     <?php print $node_bottom; ?>
   </div>
   <?php endif; ?>
-  
+
    <div class="meta">
     <?php if ($submitted): ?>
     <span class="submitted"><?php print $submitted ?></span>
