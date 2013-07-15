@@ -25,20 +25,14 @@
 
 ?>
 <root>
-     <fields>
-     <?php
+     <fields><?php
 	  foreach ($fields as $key => $value) {
 	  
 	  //print "<$key>$value</$key>\n";
 	  print ou_profile_render_content_as_xml($key, $value);
-	  
-	  
 	  } 
-	 ?>
-     </fields>
-
-</root>
-<?php
+	 ?></fields>
+</root><?php
 
 
 

@@ -4,6 +4,7 @@
  * @file
  * Open University Intranet basic page template HR Schema.
  */
+header("Content-type: application/xml");
 print '<?xml version="1.0" encoding="utf-8"?>';
 
 

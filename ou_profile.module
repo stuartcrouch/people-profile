@@ -2266,7 +2266,7 @@ function ou_profile_render_content_as_xml($in_key, $in_value) {
     }
   }
   else 
-    $node_content = $in_value;
+    $node_content = "<![CDATA[" . trim($in_value) . "]]>";
   
   return $node_start . $node_content . $node_end;
 }
