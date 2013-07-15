@@ -2240,8 +2240,8 @@ function ou_profile_render_content_as_xml($in_key, $in_value) {
     
   // If the key was set to empty, make sure we dont render a tag for it.
   if ($in_key != "") {
-    $node_start = "<" . $in_key . ">\n";
-    $node_end = "</" . $in_key . ">\n";
+    $node_start = "<" . $in_key . ">";
+    $node_end = "</" . $in_key . ">";
   }
   
   // If we are an array, recurse to create more xml nodes
