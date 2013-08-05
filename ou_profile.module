@@ -12,6 +12,7 @@
  // New D7 functionality means it cant go in settings.php as Database:: context doesnt exist.
  
   $env = strtolower(getenv('OUENV'));
+  if (!$env) $env = 'dev';
   switch ($env) {
     case 'live':
       $profile_database = array( 
@@ -54,6 +55,8 @@
  
  // replace 'YourDatabaseKey' with something that's unique to your module
  Database::addConnectionInfo('profiles', 'default', $profile_database);
+ 
+ db_set_active('default'); // stops web pages from timing out due to maximum execution time being exceeded (miw addition)
  
 /**
  * 22-8-11 Author: Lee Austin
@@ -2130,7 +2133,7 @@ function theme_get_expertise_tags() {
   $sql_result = db_query($sql_query);
 
   $tags = array();
-  while ($row = db_fetch_object($sql_result)) {
+  while ($row = $sql_result->fetchObject()) {
     $tags[] = $row->field_oup_expertise_value;
   }
   
