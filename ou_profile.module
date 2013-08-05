@@ -1284,8 +1284,8 @@ function _ou_profile_strip_private_fields($field_name, $a_field_meta, &$a_ou_pro
   $a_privacy_values = $profile['privacy_values'];
   $a_pims_data = $profile['pims_data'];
   
-  $NID = $profile['pims_data']['nid'];
-  $VID = $profile['pims_data']['vid'];
+  $NID = $profile['ou_profile_data']['nid'];
+  $VID = $profile['ou_profile_data']['vid'];
   
   if (preg_match("/^field_oup_/", $field_name)) {
     $privacy_field = preg_replace("/^field_oup_/", "field_prv_", $field_name) . "_nid";
