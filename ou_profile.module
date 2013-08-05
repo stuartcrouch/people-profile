@@ -7,30 +7,57 @@
  */
 
  global $_ou_profile_server_site_path; $_ou_profile_server_site_path = "/people/";
-
+ 
  // Set up the database connection so that Drupal can switch to it.
  // New D7 functionality means it cant go in settings.php as Database:: context doesnt exist.
-
- // TODO: Make this change based on environment
- $profile_database = array(
-     //'database' => 'people_dev', // The db name
-     //'username' => 'people_dev_db',
-     //'password' => 'people_dev_pwd',
-
-     //'database' => 'testprofile_dev',
-     //'username' => 'testprof_dev_db',
-     //'password' => 'testprof_dev_pwd',
-     //'host' => 'lovebird',
-
-     'database' => 'localhost.people',
-     'username' => 'root',
-     'password' => 'password',
-     'host' => 'localhost',
-     'driver' => 'mysql', // replace with your database driver
- );
+ 
+  $env = strtolower(getenv('OUENV'));
+  if (!$env) $env = 'dev';
+  switch ($env) {
+    case 'live':
+      $profile_database = array( 
+       'database' => 'people',
+       'username' => 'people_db',
+       'password' => 'people_pwd_a34H',
+       'host' => 'dollarbird', 
+       'driver' => 'mysql', 
+      );
+    break;
+    case 'acct':
+    $profile_database = array( 
+      'database' => 'people_acct',
+      'username' => 'people_acct_db',
+      'password' => 'people_acct_pwd',
+      'host' => 'lovebird', 
+      'driver' => 'mysql', 
+    );
+    break;
+    case 'dev':
+    $profile_database = array( 
+      'database' => 'testprofile_dev',
+      'username' => 'testprof_dev_db',
+      'password' => 'testprof_dev_pwd',
+      'host' => 'lovebird', 
+      'driver' => 'mysql', 
+    );
+    break;
+    case 'test':
+    default:
+     $profile_database = array( 
+       'database' => 'people_test',
+       'username' => 'people_test_db',
+       'password' => 'people_test_pwd',
+       'host' => 'lovebird', 
+       'driver' => 'mysql', 
+      );
+      break;
+  }
+ 
  // replace 'YourDatabaseKey' with something that's unique to your module
  Database::addConnectionInfo('profiles', 'default', $profile_database);
-
+ 
+ db_set_active('default'); // stops web pages from timing out due to maximum execution time being exceeded (miw addition)
+ 
 /**
  * 22-8-11 Author: Lee Austin
  *
@@ -1560,7 +1587,7 @@ function theme_get_expertise_tags() {
   $sql_result = db_query($sql_query);
 
   $tags = array();
-  while ($row = db_fetch_object($sql_result)) {
+  while ($row = $sql_result->fetchObject()) {
     $tags[] = $row->field_oup_expertise_value;
   }
 
