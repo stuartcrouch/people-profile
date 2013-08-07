@@ -376,7 +376,8 @@ function ou_profile_lget_site_info() {
   $query = db_select('field_data_field_site_visibility', 'sv');
 
   $query->join('field_data_field_site_path', 'sp', 'sp.entity_id = sv.entity_id');
-  $query->join('field_data_field_unit_code', 'uc', 'uc.entity_id = sv.entity_id');
+  $query->join('field_data_field_ou_unit_ref', 'ur', 'ur.entity_id = sv.entity_id');
+  $query->join('field_data_field_unit_code', 'uc', 'uc.entity_id = ur.field_ou_unit_ref_nid');
 
   $query->addField('sv', 'field_site_visibility_value', 'field_site_visibility_value');
   $query->addField('uc', 'field_unit_code_value', 'field_unit_code_value');

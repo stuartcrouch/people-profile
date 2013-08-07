@@ -1,0 +1,16 @@
+name = OU Profile Client
+description = Connects a site to the OU Profile server
+package = The Open University
+version = "7.x-1.0"
+core = 7.x
+
+files[] = ou_profile_client.module
+files[] = ou_profile_client.install
+files[] = cron/client_cron.inc
+files[] = ../includes/block_functions.inc
+files[] = ../includes/local_functions.inc
+files[] = ../includes/people_functions.inc
+
+dependencies[] = pathauto
+
+

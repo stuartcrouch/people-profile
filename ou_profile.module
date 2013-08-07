@@ -7,7 +7,7 @@
  */
 
  global $_ou_profile_server_site_path; $_ou_profile_server_site_path = "/people/";
- 
+
  // Set up the database connection so that Drupal can switch to it.
  // New D7 functionality means it cant go in settings.php as Database:: context doesnt exist.
  
