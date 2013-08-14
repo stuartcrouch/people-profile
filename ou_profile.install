@@ -125,10 +125,8 @@ function ou_profile_install() {
 
   // Now default both profile types to use the /people path for any created content
 
-  //    ou_profile: used only on the client, contains only the staff id
-  variable_set('pathauto_node_ou_profile_pattern', 'people/[title-raw]');
   //    profile: used only on the server - this is the full profile
-  variable_set('pathauto_node_profile_pattern', '[field_oup_oucu-raw]');
+  variable_set('pathauto_node_ou_profile_pattern', '[node:oucu]');
 
 }
 
@@ -258,6 +256,13 @@ function _profile_installed_fields() {
               'max_length' => 60,
           )
       ),
+      'field_oup_oucu' => array(
+          'field_name' => 'field_oup_oucu',
+          'type' => 'text',
+          'settings' => array(
+              'max_length' => 60,
+          )
+      ),
   );
 }
 
@@ -268,6 +273,13 @@ function _profile_installed_instances() {
       'field_pims_unique_id' => array(
           'field_name' => 'field_pims_unique_id',
           'label' => 'PIMS unique ID',
+          'widget' => array(
+              'type' => 'text_textfield',
+          ),
+      ),
+      'field_oup_oucu' => array(
+          'field_name' => 'field_oup_oucu',
+          'label' => 'OUCU',
           'widget' => array(
               'type' => 'text_textfield',
           ),

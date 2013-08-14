@@ -78,7 +78,7 @@ function ou_profile_lget_pims_data($unit_code, $staff_id) {
   $nid = $query->execute()->fetchField();
 
   // TODO: Update the entire codebase not to use arrays anymore.
-  $data = (array)node_load($nid, NULL, TRUE);
+  $data = node_load($nid, NULL, TRUE);
 
   // Set database back to original
   db_set_active('default');
@@ -137,54 +137,54 @@ function ou_profile_lget_profile_data($staff_id) {
 
 /*============================================================================================*/
 
-/**
- * Get list of "oup" fields, along with field type, single/multiple instance and label
- *
- * 22-8-11 l.austin: Added group-name and weight. Null group-names are given the name of 'Generic' and both are used to organise and weight fields
-**/
-function ou_profile_lget_oup_fields($unit_code) {
-  $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
+// /**
+//  * Get list of "oup" fields, along with field type, single/multiple instance and label
+//  *
+//  * 22-8-11 l.austin: Added group-name and weight. Null group-names are given the name of 'Generic' and both are used to organise and weight fields
+// **/
+// function ou_profile_lget_oup_fields($unit_code) {
+//   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
 
-  $a_oup_fields = array();
-  $a_other_fields = array();
+//   $a_oup_fields = array();
+//   $a_other_fields = array();
 
-  // Set database to profiles
-  db_set_active('profiles');
+//   // Set database to profiles
+//   db_set_active('profiles');
 
-  // Build a list of fields that belong to other units
-//   $query = "SELECT field_name FROM {content_group_fields} WHERE group_name NOT LIKE '%_" . $unit_code . "' AND group_name LIKE 'group_oup%'";
+//   // Build a list of fields that belong to other units
+// //   $query = "SELECT field_name FROM {content_group_fields} WHERE group_name NOT LIKE '%_" . $unit_code . "' AND group_name LIKE 'group_oup%'";
+// //   $result = db_query($query);
+// //   foreach ($result as $data) {
+// //     //while ($data = db_fetch_object($result)) {
+// //     array_push($a_other_fields, $data->field_name);
+// //   }
+
+//   // Build a list of fields which excludes fields from other units
+//   // /$query = 'SELECT f.field_name, f.type, f.multiple, fi.label, fi.widget_type FROM content_node_field AS f, content_node_field_instance AS fi WHERE (f.field_name LIKE "field_oup_%" OR f.field_name LIKE "field_pdat_%") AND f.field_name=fi.field_name';
+
+//   $query = "SELECT f.field_name, f.type, f.multiple, fi.label, fi.widget_type, fi.weight, g.group_name FROM " .
+//     "(content_node_field f, content_node_field_instance fi) " .
+//     "LEFT JOIN content_group_fields g on (f.field_name = g.field_name) " .
+//     "WHERE (f.field_name LIKE 'field_oup_%' OR f.field_name LIKE 'field_pdat_%') ".
+//     "AND f.field_name=fi.field_name ORDER BY fi.weight";
 //   $result = db_query($query);
+//   //print_r(db_fetch_object($result));
+//   //while ($data = db_fetch_object($result)) {
 //   foreach ($result as $data) {
-//     //while ($data = db_fetch_object($result)) {
-//     array_push($a_other_fields, $data->field_name);
+//     // If the field_name is not in $a_other_fields, then add to the list
+//     //if (!in_array($data->field_name, $a_other_fields)) {
+//       $a_oup_fields[$data->field_name]['multiple'] = $data->multiple;
+//       $a_oup_fields[$data->field_name]['type'] = $data->type;
+//       $a_oup_fields[$data->field_name]['label'] = $data->label;
+//       $a_oup_fields[$data->field_name]['widget_type'] = $data->widget_type;
+//       $a_oup_fields[$data->field_name]['group_name'] = (!empty($data->group_name) ? $data->group_name : 'generic');
+//       $a_oup_fields[$data->field_name]['weight'] = $data->weight;
+//     //}
 //   }
+//   db_set_active('default');
+//   return $a_oup_fields;
 
-  // Build a list of fields which excludes fields from other units
-  // /$query = 'SELECT f.field_name, f.type, f.multiple, fi.label, fi.widget_type FROM content_node_field AS f, content_node_field_instance AS fi WHERE (f.field_name LIKE "field_oup_%" OR f.field_name LIKE "field_pdat_%") AND f.field_name=fi.field_name';
-
-  $query = "SELECT f.field_name, f.type, f.multiple, fi.label, fi.widget_type, fi.weight, g.group_name FROM " .
-    "(content_node_field f, content_node_field_instance fi) " .
-    "LEFT JOIN content_group_fields g on (f.field_name = g.field_name) " .
-    "WHERE (f.field_name LIKE 'field_oup_%' OR f.field_name LIKE 'field_pdat_%') ".
-    "AND f.field_name=fi.field_name ORDER BY fi.weight";
-  $result = db_query($query);
-  //print_r(db_fetch_object($result));
-  //while ($data = db_fetch_object($result)) {
-  foreach ($result as $data) {
-    // If the field_name is not in $a_other_fields, then add to the list
-    //if (!in_array($data->field_name, $a_other_fields)) {
-      $a_oup_fields[$data->field_name]['multiple'] = $data->multiple;
-      $a_oup_fields[$data->field_name]['type'] = $data->type;
-      $a_oup_fields[$data->field_name]['label'] = $data->label;
-      $a_oup_fields[$data->field_name]['widget_type'] = $data->widget_type;
-      $a_oup_fields[$data->field_name]['group_name'] = (!empty($data->group_name) ? $data->group_name : 'generic');
-      $a_oup_fields[$data->field_name]['weight'] = $data->weight;
-    //}
-  }
-  db_set_active('default');
-  return $a_oup_fields;
-
-}
+// }
 
 
 /*============================================================================================*/
@@ -194,33 +194,37 @@ function ou_profile_lget_oup_fields($unit_code) {
  *
  * 22-8-11 l.austin: Added group-name and weight. Null group-names are given the name of 'Generic' and both are used to organise and weight fields
 **/
-function ou_profile_lget_pims_fields() {
+function ou_profile_lget_field_info($content_type) {
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
 
-  $a_pims_fields = array();
+  $a_fields_info = array();
 
   // Set database to profiles
   db_set_active('profiles');
 
-  // Build a list of fields
-  $query = "SELECT f.field_name, f.type, fi.label, fi.widget_type, fi.weight, g.group_name " .
-    "FROM (content_node_field AS f, content_node_field_instance AS fi) " .
-    "LEFT JOIN content_group_fields g on (f.field_name = g.field_name) " .
-    "WHERE f.field_name LIKE 'field_pims_%' AND f.field_name=fi.field_name ORDER BY fi.weight";
+  // Get the list of fields in the node
+  $fields = field_info_instances('node', $content_type);
 
-  $results = db_query($query);
-  //while ($data = db_fetch_object($result)) {
-  foreach ($results as $data) {
-    $a_pims_fields[$data->field_name]['type'] = $data->type;
-    $a_pims_fields[$data->field_name]['label'] = $data->label;
-    $a_pims_fields[$data->field_name]['widget_type'] = $data->widget_type;
-    $a_pims_fields[$data->field_name]['group_name'] = (!empty($data->group_name) ? $data->group_name : 'generic');
-    $a_pims_fields[$data->field_name]['weight'] = $data->weight;
+  foreach ($fields as $field_info) {
+    // Get the display info for each field
+    $field_group = ou_profile_lfield_get_field_group($field_info);
+    // Store the display info
+    $a_fields_info[$field_info['field_name']] = (array)$field_group;
   }
+
   db_set_active('default');
-  return $a_pims_fields;
+  return $a_fields_info;
 }
 
+function ou_profile_lfield_get_field_group($field) {
+  $group_info = field_group_read_groups(array('entity_type' => $field['entity_type'], 'bundle' => $field['bundle']));
+  foreach ($group_info[$field['entity_type']][$field['bundle']]['form'] as $group) {
+    if (in_array($field['field_name'], $group->children)) {
+      return $group;
+    }
+  }
+  return FALSE;
+}
 
 /*============================================================================================*/
 

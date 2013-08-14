@@ -119,9 +119,9 @@ function ou_profile_client_node_load($nodes, $types) {
               $unique_id = $node->field_pims_unique_id[$node->language][0]['value'];
               $staff_id = substr($unique_id, 0,  8);
 
-              $node->profile = ou_profile_client_rest_call($staff_id);
+              $node->ou_profile = ou_profile_client_rest_call($staff_id);
 
-              print_r($node->profile); die();
+              //print_r($node->profile); die();
 
               // TODO: This should be a rest request that retrieves the data and stores the array into the node
 //               db_set_active('profiles');
@@ -698,103 +698,97 @@ function _ou_profile_fix_disabled(&$elements) {
 
 }
 
+function ou_profile_client_theme ($existing, $type, $theme, $path){
+
+    $theme_path = drupal_get_path('module', 'ou_profile_client') . "/../shared";
+    return array(
+        'node--profile' => array(
+            'variables' => array('content' => NULL, 'node' => NULL, 'classes' => NULL),
+            'template' => 'node--profile',
+            'path' => $theme_path,
+        ),
+        'page--profile' => array(
+            'variables' => array('content' => NULL, 'node' => NULL, 'classes' => NULL),
+            'template' => 'page--profile',
+            'path' => $theme_path,
+        )
+    );
+}
 
 function ou_profile_client_preprocess_node(&$vars) {
 
     // Here is the way to switch to a different node-<something> template based on node properties.
     // We use this so that profile and ou_profile can share the same template file.
-  $modulepath = drupal_get_path('module', 'ou_profile');
-
     if ($vars['type'] == 'profile' || $vars['type'] == 'ou_profile') {
 
-      $hooks = theme_get_registry();
-      //print_r($hooks['profile']);
-
-      $vars['template_files'] = array(
-            'node-profile',
-            'node-' . $vars['nid'] . '-profile');
+      $vars['theme_hook_suggestions'] = array(
+            'node--profile',
+      );
     }
 
     return $vars;
 
 }
 
+function ou_profile_client_preprocess_page(&$vars) {
+
+  // Here is the way to switch to a different page-<something> template based on node properties.
+  // We use this so that profile and ou_profile can share the same template file.
+  if (isset($vars['node'])) {
+
+    if ($vars['node']->type == 'profile' || $vars['node']->type == 'ou_profile') {
+
+      $vars['theme_hook_suggestions'] = array(
+          'page--profile',
+      );
+    }
+  }
+
+  return $vars;
+
+}
+
+
 /* Add our theme directory to the list of places to check for overrides */
 
 // TODO: Rewrite me for D7
-function ou_profile_client_theme_registry_alter(&$theme_registry) {
+// function ou_profile_client_theme_registry_alter(&$theme_registry) {
 
-  // Figure out where our theme directory is
-  $modulepath = drupal_get_path('module', 'ou_profile') . '/includes/templates/';
+//   // Figure out where our theme directory is
+//   $modulepath = drupal_get_path('module', 'ou_profile_client'); //. '/../includes/templates/';
 
-  // work on a copy
-  $theme_registry_copy = $theme_registry;
+//   // work on a copy
+//   $theme_registry_copy = $theme_registry;
 
-  _theme_process_registry($theme_registry_copy, 'phptemplate', 'theme_engine', 'pow', $modulepath);
+//   _theme_process_registry($theme_registry_copy, 'phptemplate', 'theme_engine', 'pow', $modulepath);
 
-  $theme_registry += array_diff_key($theme_registry_copy, $theme_registry);
-  // Create a list of templates types we want to override
-  $template_types = array('node', 'page', 'block');
+//   $theme_registry += array_diff_key($theme_registry_copy, $theme_registry);
+//   // Create a list of templates types we want to override
+//   $template_types = array('node', 'page', 'block');
 
-  // Add our templates path for all of the types that we to allow overrides for
-  foreach ($template_types as $type) {
-    //$originalpath = array_shift($theme_registry[$type]['theme paths']);
-    //array_unshift($theme_registry[$type]['theme paths'], $originalpath, $modulepath );
+//   // Add our templates path for all of the types that we to allow overrides for
+//   foreach ($template_types as $type) {
 
-    if (is_array($theme_registry[$type]['theme path'])) {
-      $first_element = array_shift($theme_registry[$type]['theme path']);
-      array_unshift($theme_registry[$type]['theme path'], $first_element, $modulepath);
-    }
+//     // Add the key 'theme paths' if it doesn't exist in this theme's registry
+//     if (!isset($theme_registry[$type]['theme paths'])) {
+//       $theme_registry[$type]['theme paths'] = array();
+//     }
 
-  }
+//     //Shift this module's directory to the top of the theme path list
+//     if(is_array($theme_registry[$type]['theme paths'])) {
+//       $first_element = array_shift($theme_registry[$type]['theme paths']);
 
-}
+//       if ($first_element) {
+//         array_unshift($theme_registry[$type]['theme paths'], $first_element, $modulepath);
+//       } else {
+//         array_unshift($theme_registry[$type]['theme paths'], $modulepath);
+//       }
+//     }
+//   }
 
-/**
-*
-* Implementation of hook_theme()- requires cache to be cleared
-*
-* Authors: Mark Williams & Paul Dixon
-*
-* Declare functions for use in themes on profile server or client sites where this module is activated
-*
-*/
-function ou_profile_client_theme($existing, $type, $theme, $path) {
+// }
 
 
-
-  $modulepath = drupal_get_path('module', 'ou_profile');
-
-  $retarray =  array(
-    'get_profile_nodes' => array(
-      'arguments' => array('query' => NULL)
-    ),
-    'get_profile_node_list' => array(
-      'arguments' => array('query' => NULL)
-    ),
-    'ou_profile_render_xml' => array(
-      'template'  => 'ou_profile--xml',
-      'path' =>  $modulepath . '/includes/templates/',
-      'arguments' => array(
-        'title' => NULL,
-        'content' => NULL,
-        'picture' => NULL,
-        'date' => NULL,
-        'links' => NULL,
-        'name' => NULL,
-        'node_url' => NULL,
-        'oucu' => NULL,
-        'submitted' => NULL,
-        'node' => NULL,
-        'type' => NULL,
-        'nid' => NULL,
-        'fields' => NULL,
-      ),
-    ),
-  );
-
-    return $retarray;
-}
 
 
 /**
@@ -1172,7 +1166,7 @@ function ou_profile_client_block($op='list', $delta = 0) {
 }
 
 // Provide a way to automate the URL generation, rather than forcing the path
-function ou_profile_token_list($type = 'all') {
+function ou_profile_client_token_list($type = 'all') {
   $tokens = array();
 
   if ($type == 'node' || $type == 'all') {
@@ -1182,7 +1176,7 @@ function ou_profile_token_list($type = 'all') {
   return $tokens;
 }
 
-function ou_profile_token_values($type, $object = NULL, $options = array()) {
+function ou_profile_client_token_values($type, $object = NULL, $options = array()) {
     $values = array();
 
     if ($type == 'node' && !empty($object)) {

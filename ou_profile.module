@@ -10,54 +10,61 @@
 
  // Set up the database connection so that Drupal can switch to it.
  // New D7 functionality means it cant go in settings.php as Database:: context doesnt exist.
- 
+
   $env = strtolower(getenv('OUENV'));
   if (!$env) $env = 'dev';
   switch ($env) {
     case 'live':
-      $profile_database = array( 
+      $profile_database = array(
        'database' => 'people',
        'username' => 'people_db',
        'password' => 'people_pwd_a34H',
-       'host' => 'dollarbird', 
-       'driver' => 'mysql', 
+       'host' => 'dollarbird',
+       'driver' => 'mysql',
       );
     break;
     case 'acct':
-    $profile_database = array( 
+    $profile_database = array(
       'database' => 'people_acct',
       'username' => 'people_acct_db',
       'password' => 'people_acct_pwd',
-      'host' => 'lovebird', 
-      'driver' => 'mysql', 
+      'host' => 'lovebird',
+      'driver' => 'mysql',
     );
     break;
     case 'dev':
-    $profile_database = array( 
-      'database' => 'testprofile_dev',
-      'username' => 'testprof_dev_db',
-      'password' => 'testprof_dev_pwd',
-      'host' => 'lovebird', 
-      'driver' => 'mysql', 
-    );
+    $profile_database = array(
+      'database' => 'localhost.people',
+      'username' => 'root',
+      'password' => 'password',
+      'host' => 'localhost',
+      'driver' => 'mysql',
+     );
+//    $profile_database = array(
+//      'database' => 'testprofile_dev',
+//      'username' => 'testprof_dev_db',
+//      'password' => 'testprof_dev_pwd',
+//      'host' => 'lovebird',
+//      'driver' => 'mysql',
+//    );
     break;
     case 'test':
     default:
-     $profile_database = array( 
+     $profile_database = array(
        'database' => 'people_test',
        'username' => 'people_test_db',
        'password' => 'people_test_pwd',
-       'host' => 'lovebird', 
-       'driver' => 'mysql', 
+       'host' => 'lovebird',
+       'driver' => 'mysql',
       );
       break;
   }
- 
+
  // replace 'YourDatabaseKey' with something that's unique to your module
  Database::addConnectionInfo('profiles', 'default', $profile_database);
- 
+
  db_set_active('default'); // stops web pages from timing out due to maximum execution time being exceeded (miw addition)
- 
+
 /**
  * 22-8-11 Author: Lee Austin
  *
@@ -136,52 +143,52 @@ function ou_profile_load_node_info($unit_code, $node) {
   $a_privacy_values = ou_profile_lget_privacy_values();
 }
 
-function ou_profile_node_load($nodes, $types) {
+// function ou_profile_node_load($nodes, $types) {
 
-  $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
-  require_once "$INCLUDES/local_functions.inc";
-  ou_profile_log("ou_profile_node_load");
+//   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
+//   require_once "$INCLUDES/local_functions.inc";
+//   ou_profile_log("ou_profile_node_load");
 
-  if (count(array_intersect(array("profile", "ou_profile"), $types))) {
+//   if (count(array_intersect(array("profile", "ou_profile"), $types))) {
 
-    foreach ($nodes as $node) {
+//     foreach ($nodes as $node) {
 
-       // Note - node types are as follows:
-       //    ou_profile: used only on the client, contains only the staff id
-       //    profile: used only on the server - this is the full profile
+//        // Note - node types are as follows:
+//        //    ou_profile: used only on the client, contains only the staff id
+//        //    profile: used only on the server - this is the full profile
 
-       switch ($node->type) {
-         case "profile":
-           $node = ou_profile_node_load_profile($node);
+//        switch ($node->type) {
+//          case "profile":
+//            $node = ou_profile_node_load_profile($node);
 
-           break;
-         case "ou_profile":
+//            break;
+//          case "ou_profile":
 
-           // If we are asked to load a profile, actually load the normal profile
-           // This will load the pims and OU data for us.
-            if (isset($node->field_pims_unique_id[$node->language][0]['value'])) {
-              $unique_id = $node->field_pims_unique_id[$node->language][0]['value'];
-              $staff_id = substr($unique_id, 0,  8);
-              db_set_active('profiles');
+//            // If we are asked to load a profile, actually load the normal profile
+//            // This will load the pims and OU data for us.
+//             if (isset($node->field_pims_unique_id[$node->language][0]['value'])) {
+//               $unique_id = $node->field_pims_unique_id[$node->language][0]['value'];
+//               $staff_id = substr($unique_id, 0,  8);
+//               db_set_active('profiles');
 
-              // Reset the entity structure incase it loaded from the server instead of us
-              _field_info_collate_fields(TRUE);
+//               // Reset the entity structure incase it loaded from the server instead of us
+//               _field_info_collate_fields(TRUE);
 
-              $query = 'SELECT entity_id FROM {field_data_field_oup_staff_id} WHERE field_oup_staff_id_value=\'' . $staff_id . '\'';
-              $nid = db_query($query)->fetchField();
+//               $query = 'SELECT entity_id FROM {field_data_field_oup_staff_id} WHERE field_oup_staff_id_value=\'' . $staff_id . '\'';
+//               $nid = db_query($query)->fetchField();
 
-              $node = node_load($nid, NULL, FALSE);
+//               $node = node_load($nid, NULL, FALSE);
 
-              db_set_active('default');
+//               db_set_active('default');
 
-            }
-           break;
-       }
+//             }
+//            break;
+//        }
 
 
-    }
-  }
-}
+//     }
+//   }
+// }
 
 function ou_profile_node_api_params() {
   $p = array();
@@ -195,112 +202,112 @@ function ou_profile_node_api_params() {
   return $p;
 }
 
-function ou_profile_node_load_profile($node) {
+// function ou_profile_node_load_profile($node) {
 
-  return $node;
-  global $user, $user_is_admin, $staff_id, $_ou_profile_server_site_path;
-
-
-  // Prepare the required values
-  $p = ou_profile_node_api_params();
-  $staff_id = $node->field_oup_staff_id[$node->language][0]['value'];
-//    $staff_id = ou_profile_node_get_field_value($node, 'field_oup_staff_id');
-  $oucu = $node->field_oup_oucu[$node->language][0]['value']; //ou_profile_node_get_field_value($node, 'field_oup_oucu');
-
-  db_set_active('profiles');
-
-  $query = 'SELECT entity_id from {field_data_field_pims_staff_id} WHERE field_pims_staff_id_value = ' . $staff_id;
-  $pims_entity_id = db_query($query)->fetchField();
-
-//  $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {content_type_pims} WHERE ';
-//  $query .= 'field_pims_staff_id_value=' . $staff_id ;
-  $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {field_data_field_pims_l1_estab_unit_code} WHERE entity_id = ' . $pims_entity_id;
-  $unit_code = db_query($query)->fetchField();
-  db_set_active('default');
-
-  $node->do_not_show = FALSE;
-
-  $site_visibility = SITE_NOT_ALLOWED;
-  if ($p['site_path'] == $_ou_profile_server_site_path)
-    $site_visibility = SITE_PUBLIC;
+//   return $node;
+//   global $user, $user_is_admin, $staff_id, $_ou_profile_server_site_path;
 
 
+//   // Prepare the required values
+//   $p = ou_profile_node_api_params();
+//   $staff_id = $node->field_oup_staff_id[$node->language][0]['value'];
+// //    $staff_id = ou_profile_node_get_field_value($node, 'field_oup_staff_id');
+//   $oucu = $node->field_oup_oucu[$node->language][0]['value']; //ou_profile_node_get_field_value($node, 'field_oup_oucu');
 
-  if ($p['unit_code'] || $p['site_path'] == $_ou_profile_server_site_path) {
+//   db_set_active('profiles');
 
-    $profile['ou_profile_data'] = (array)$node;//ou_profile_lget_profile_data($staff_id);
-    $profile['pims_data'] = ou_profile_lget_pims_data($unit_code, $staff_id);
+//   $query = 'SELECT entity_id from {field_data_field_pims_staff_id} WHERE field_pims_staff_id_value = ' . $staff_id;
+//   $pims_entity_id = db_query($query)->fetchField();
 
-    $profile_visibility = $profile['ou_profile_data']['field_oup_visibility'][$node->language][0]['value'];
+// //  $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {content_type_pims} WHERE ';
+// //  $query .= 'field_pims_staff_id_value=' . $staff_id ;
+//   $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {field_data_field_pims_l1_estab_unit_code} WHERE entity_id = ' . $pims_entity_id;
+//   $unit_code = db_query($query)->fetchField();
+//   db_set_active('default');
 
-    if (!$profile_visibility) {
-      // Person does not want profile to be viewed
-      $node->do_not_show = TRUE;
-      return;
-    }
-    $NID = $profile['pims_data']['nid'];
-    $VID = $profile['pims_data']['vid'];
-    // Set database to profiles
-    db_set_active('profiles');
+//   $node->do_not_show = FALSE;
 
-    // Build a list of privacy values
-    //
-    ou_profile_log("building privacy values");
-//     $query = 'SELECT nid, field_privacy_value_value FROM {content_type_privacy_value}';
-//     $result = db_query($query);
-//     //while ($data = db_fetch_object($result)) {
-//     foreach ($result as $data) {
-//       $a_privacy_values[$data->nid] = $data->field_privacy_value_value;
+//   $site_visibility = SITE_NOT_ALLOWED;
+//   if ($p['site_path'] == $_ou_profile_server_site_path)
+//     $site_visibility = SITE_PUBLIC;
+
+
+
+//   if ($p['unit_code'] || $p['site_path'] == $_ou_profile_server_site_path) {
+
+//     $profile['ou_profile_data'] = (array)$node;//ou_profile_lget_profile_data($staff_id);
+//     $profile['pims_data'] = ou_profile_lget_pims_data($unit_code, $staff_id);
+
+//     $profile_visibility = $profile['ou_profile_data']['field_oup_visibility'][$node->language][0]['value'];
+
+//     if (!$profile_visibility) {
+//       // Person does not want profile to be viewed
+//       $node->do_not_show = TRUE;
+//       return;
 //     }
-    $a_privacy_values = ou_profile_lget_privacy_values();
+//     $NID = $profile['pims_data']['nid'];
+//     $VID = $profile['pims_data']['vid'];
+//     // Set database to profiles
+//     db_set_active('profiles');
 
-    $profile['privacy_values'] = $a_privacy_values;
+//     // Build a list of privacy values
+//     //
+//     ou_profile_log("building privacy values");
+// //     $query = 'SELECT nid, field_privacy_value_value FROM {content_type_privacy_value}';
+// //     $result = db_query($query);
+// //     //while ($data = db_fetch_object($result)) {
+// //     foreach ($result as $data) {
+// //       $a_privacy_values[$data->nid] = $data->field_privacy_value_value;
+// //     }
+//     $a_privacy_values = ou_profile_lget_privacy_values();
 
-    // Set database back to original
-    db_set_active('default');
+//     $profile['privacy_values'] = $a_privacy_values;
 
-    // Put some variables into $node
-    $node->ou_profile = array();
+//     // Set database back to original
+//     db_set_active('default');
 
-    // Display data according to privacy settings
+//     // Put some variables into $node
+//     $node->ou_profile = array();
 
-    $a_oup_fields = array();
+//     // Display data according to privacy settings
 
-    // Create array of allowed "oup" fields, along with field type, single/multiple instance and label
-    // Array format is:
-    //  ['field_name'] => Array
-    //    (
-    //      ['multiple'] => value
-    //      ['type'] => value
-    //      ['label'] => value
-    //    )
+//     $a_oup_fields = array();
 
-    $a_oup_fields = ou_profile_lget_oup_fields($unit_code);
-    $a_pims_fields = ou_profile_lget_pims_fields();
-    $a_ou_profile = array();
+//     // Create array of allowed "oup" fields, along with field type, single/multiple instance and label
+//     // Array format is:
+//     //  ['field_name'] => Array
+//     //    (
+//     //      ['multiple'] => value
+//     //      ['type'] => value
+//     //      ['label'] => value
+//     //    )
 
-    // Loop over all the profile fields, populating $node->ou_profile
-    foreach ($a_oup_fields as $field_name => $a_field_meta) {
-      _ou_profile_strip_private_fields($node, $field_name, $a_field_meta, $a_ou_profile, $profile, $site_visibility);
-    }
+//     $a_oup_fields = ou_profile_lget_oup_fields($unit_code);
+//     $a_pims_fields = ou_profile_lget_pims_fields();
+//     $a_ou_profile = array();
 
-    // Loop over all the pims fields, populating $node->ou_profile
-    foreach ($a_pims_fields as $field_name => $a_field_meta) {
-      _ou_profile_strip_private_fields($node, $field_name, $a_field_meta, $a_ou_profile, $profile, $site_visibility);
-    }
+//     // Loop over all the profile fields, populating $node->ou_profile
+//     foreach ($a_oup_fields as $field_name => $a_field_meta) {
+//       _ou_profile_strip_private_fields($node, $field_name, $a_field_meta, $a_ou_profile, $profile, $site_visibility);
+//     }
 
-    // l.austin - Restructure $a_ou_profile array to group the elements by the 'group_name' field and apply field weighting
-    $outArray = array();
-    ou_profile_make_group_relations($a_ou_profile, $outArray);
-    $node->ou_profile['pdata'] = $outArray;
-  }
-  else {
-    // If there's no unit code, then the site isn't allowed access to the profiles server.
-    $node->title = "Permission denied";
-  }
+//     // Loop over all the pims fields, populating $node->ou_profile
+//     foreach ($a_pims_fields as $field_name => $a_field_meta) {
+//       _ou_profile_strip_private_fields($node, $field_name, $a_field_meta, $a_ou_profile, $profile, $site_visibility);
+//     }
 
-  return $node;
-}
+//     // l.austin - Restructure $a_ou_profile array to group the elements by the 'group_name' field and apply field weighting
+//     $outArray = array();
+//     ou_profile_make_group_relations($a_ou_profile, $outArray);
+//     $node->ou_profile['pdata'] = $outArray;
+//   }
+//   else {
+//     // If there's no unit code, then the site isn't allowed access to the profiles server.
+//     $node->title = "Permission denied";
+//   }
+
+//   return $node;
+// }
 
 /////////////////////////////////////////////// VIEW NODES //////////////////////////////////////////////
 
@@ -398,7 +405,9 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
   if ($p['unit_code'] || $p['site_path'] == $_ou_profile_server_site_path) {
 
     $profile['ou_profile_data'] = (array)$node;//ou_profile_lget_profile_data($staff_id);
-    $profile['pims_data'] = ou_profile_lget_pims_data($unit_code, $staff_id);
+    $pims_record = ou_profile_lget_pims_data($unit_code, $staff_id);
+
+    $profile['pims_data'] = (array)$pims_record;
 
     $profile_visibility = $profile['ou_profile_data']['field_oup_visibility'][$node->language][0]['value'];
 
@@ -444,8 +453,9 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
     //      ['label'] => value
     //    )
 
-    $a_oup_fields = ou_profile_lget_oup_fields($unit_code);
-    $a_pims_fields = ou_profile_lget_pims_fields();
+    $a_oup_fields = ou_profile_lget_field_info('profile');//ou_profile_lget_oup_fields($unit_code);
+    $a_pims_fields = ou_profile_lget_field_info('pims');
+
     $a_ou_profile = array();
 
     // Loop over all the profile fields, populating $node->ou_profile
@@ -541,7 +551,7 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
 
 }
 
-function ou_profile_node_view_profile_page($node,$view_mode, $langcode) {
+function ou_profile_node_view_profile_page($node, $view_mode, $langcode) {
   global $user;
 
   drupal_add_css(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_styles.css');
@@ -944,7 +954,7 @@ function ou_profile_form_alter(&$form, $form_state, $form_id) {
       return;
 
     // Add PIMS data to the related PIMS data placeholder (field_pdat_*) in the profile content
-    $a_pims_data = ou_profile_lget_pims_data(0, $staff_id);
+    $a_pims_data = (array)ou_profile_lget_pims_data(0, $staff_id);
     foreach ($form['#node'] as $key => $val) {
       if (preg_match("/^field_pdat_/", $key)) {
         $pims_field_name = preg_replace("/^field_pdat_/", "field_pims_", $key);
@@ -1018,7 +1028,7 @@ function ou_profile_form_alter(&$form, $form_state, $form_id) {
 
 
     // Insert PIMS values next to privacy field settings
-    $pims_data = ou_profile_lget_pims_data(0, $staff_id);
+    $pims_data = (array)ou_profile_lget_pims_data(0, $staff_id);
     foreach ($form as $key => $val) {
 
       if (preg_match("/^group_/", $key)) {
@@ -1223,63 +1233,61 @@ function ou_profile_user($op, &$edit, &$account, $category = NULL) {
 
 }
 
-function ou_profile_preprocess_node(&$vars) {
-
-    // Here is the way to switch to a different node-<something> template based on node properties.
-    // We use this so that profile and ou_profile can share the same template file.
-  $modulepath = drupal_get_path('module', 'ou_profile');
-
-    if ($vars['type'] == 'profile' || $vars['type'] == 'ou_profile') {
-
-      $hooks = theme_get_registry();
-      //print_r($hooks['profile']);
-
-      $vars['template_files'] = array(
-            'node-profile',
-            'node-' . $vars['nid'] . '-profile');
+function ou_profile_add_body_classes(&$vars) {
+  // Do an easy check to see if this is a profile page
+  if (in_array('node-type-profile', $vars['classes_array'])) {
+    if (isset($vars['page']['content']['system_main']['nodes'])) {
+      $node = reset($vars['page']['content']['system_main']['nodes']);
+      if (isset($node)) {
+        $vars['classes_array'][] = $node['field_oup_profile_layout'][0]['#markup'];
+        $vars['classes_array'][] = $node['field_oup_profile_layout_colour'][0]['#markup'];
+      }
     }
+  }
+}
 
-    return $vars;
-
+function ou_profile_preprocess_html(&$vars) {
+  ou_profile_add_body_classes($vars);
 }
 
 /* Add our theme directory to the list of places to check for overrides */
 
 // TODO: Rewrite me for D7
-function ou_profile_theme_registry_alter(&$theme_registry) {
+// function ou_profile_theme_registry_alter(&$theme_registry) {
 
-  // Figure out where our theme directory is
-  $modulepath = drupal_get_path('module', 'ou_profile') . '/includes/templates/';
+//   // Figure out where our theme directory is
+//   $modulepath = drupal_get_path('module', 'ou_profile'); //. '/../includes/templates/';
 
-  // work on a copy
-  $theme_registry_copy = $theme_registry;
+//   // work on a copy
+//   $theme_registry_copy = $theme_registry;
 
-  _theme_process_registry($theme_registry_copy, 'phptemplate', 'theme_engine', 'pow', $modulepath);
+//   _theme_process_registry($theme_registry_copy, 'phptemplate', 'theme_engine', 'pow', $modulepath);
 
-  $theme_registry += array_diff_key($theme_registry_copy, $theme_registry);
-  // Create a list of templates types we want to override
-  $template_types = array('node', 'page', 'block');
+//   $theme_registry += array_diff_key($theme_registry_copy, $theme_registry);
+//   // Create a list of templates types we want to override
+//   $template_types = array('node', 'page', 'block');
 
-  // Add our templates path for all of the types that we to allow overrides for
-  foreach ($template_types as $type) {
-    //$originalpath = array_shift($theme_registry[$type]['theme paths']);
-    //array_unshift($theme_registry[$type]['theme paths'], $originalpath, $modulepath );
+//   // Add our templates path for all of the types that we to allow overrides for
+//   foreach ($template_types as $type) {
 
-    if (is_array($theme_registry[$type]['theme path'])) {
-      $first_element = array_shift($theme_registry[$type]['theme path']);
-      array_unshift($theme_registry[$type]['theme path'], $first_element, $modulepath);
-    }
+//     // Add the key 'theme paths' if it doesn't exist in this theme's registry
+//     if (!isset($theme_registry[$type]['theme paths'])) {
+//       $theme_registry[$type]['theme paths'] = array();
+//     }
 
-  }
+//     //Shift this module's directory to the top of the theme path list
+//     if(is_array($theme_registry[$type]['theme paths'])) {
+//       $first_element = array_shift($theme_registry[$type]['theme paths']);
 
-  //print_r($theme_registry);  die();
-
-   // Modify form_element function so that it uses our module function instead
-//   if (!empty($theme_registry['form_element'])) {
-//     $theme_registry['form_element']['function'] = 'ou_profile_form_element';
+//       if ($first_element) {
+//         array_unshift($theme_registry[$type]['theme paths'], $first_element, $modulepath);
+//       } else {
+//         array_unshift($theme_registry[$type]['theme paths'], $modulepath);
+//       }
+//     }
 //   }
-}
 
+// }
 
 /* TODO: Rewrite me for D7
 //==================================
@@ -1341,12 +1349,10 @@ if (!empty($element['//id'])) {
 *
 * Authors: Mark Williams & Paul Dixon
 *
-* Declare functions for use in themes on profile server or client sites where this module is activated
+* Declare functions for use in themes on profile server
 *
 */
 function ou_profile_theme($existing, $type, $theme, $path) {
-
-
 
   $modulepath = drupal_get_path('module', 'ou_profile');
 
@@ -1376,11 +1382,54 @@ function ou_profile_theme($existing, $type, $theme, $path) {
         'fields' => NULL,
       ),
     ),
+    'node--profile' => array(
+        'variables' => array('content' => NULL, 'node' => NULL, 'classes' => NULL),
+        'template' => 'node--profile',
+        'path' =>  $modulepath . "/shared",
+    ),
+    'page--profile' => array(
+      'variables' => array('content' => NULL, 'node' => NULL, 'classes' => NULL),
+      'template' => 'page--profile',
+      'path' =>  $modulepath . "/shared",
+    ),
   );
 
     return $retarray;
 }
 
+function ou_profile_preprocess_node(&$vars) {
+
+  // Here is the way to switch to make drupals theme layer use a module specific template file
+  if ($vars['type'] == 'profile' || $vars['type'] == 'ou_profile') {
+
+    $vars['theme_hook_suggestions'] = array(
+        'node--profile', // This needs to match a value in hook_profile_theme
+    );
+  }
+
+  return $vars;
+
+}
+
+function ou_profile_preprocess_page(&$vars) {
+
+  // Here is the way to switch to a different page-<something> template based on node properties.
+  // We use this so that profile and ou_profile can share the same template file.
+  if (isset($vars['node'])) {
+
+    if ($vars['node']->type == 'profile' || $vars['node']->type == 'ou_profile') {
+
+      $vars['theme_hook_suggestions'] = array(
+          'page--profile',
+      );
+    }
+  }
+
+  return $vars;
+
+  return $vars;
+
+}
 
 /**
 *
@@ -1435,7 +1484,7 @@ function ou_profile_get_profile_nodes($query = NULL, $type = NULL) {
     (((int)$a_site_info['visibility'])-1) . ")"; // only return visible profiles!
   $server_query .= " ORDER BY ordername ASC"; // order by preferred surname or surname if preferred surname is not set
 
-    ou_profile_log("server_query = " . $server_query);
+  ou_profile_log("server_query = " . $server_query);
 
   //debug print $server_query;
 
@@ -1886,28 +1935,57 @@ function ou_profile_block($op='list', $delta = 0) {
   }
 }
 
-// Provide a way to automate the URL generation, rather than forcing the path
-function ou_profile_token_list($type = 'all') {
-  $tokens = array();
+function ou_profile_token_info() {
 
-  if ($type == 'node' || $type == 'all') {
-      $tokens['node']['ou_profile-oucu'] = t("The OUCU as understood by the profile module");
+  $info['tokens']['node']['oucu'] = array(
+      'name' => t('Profile oucu'),
+      'description' => t("The OUCU of the OU profile."),
+  );
+
+  return $info;
+}
+
+function ou_profile_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  $sanitize = !empty($options['sanitize']);
+
+  if ($type == 'node' && !empty($data['node'])) {
+      $node = $data['node'];
+      foreach ($tokens as $name => $original) {
+           print("$name $original");
+           switch ($name) {
+             case 'oucu':
+               // TODO: Replace this value with a real function that gets the OUCU
+               $replacements[$original] = $node->field_oup_oucu['und'][0]['value'];
+           }
+      }
   }
 
-  return $tokens;
+  return $replacements;
 }
 
-function ou_profile_token_values($type, $object = NULL, $options = array()) {
-    $values = array();
+// // Provide a way to automate the URL generation, rather than forcing the path
+// function ou_profile_token_list($type = 'all') {
+//   $tokens = array();
 
-    if ($type == 'node' && !empty($object)) {
-        $node = node_load($object->nid);
-        $values['ou_profile-oucu'] = $node->field_oup_oucu[0]['value'];
-        unset($node);
-    }
+//   if ($type == 'node' || $type == 'all') {
+//       $tokens['node']['ou_profile-oucu'] = t("The OUCU as understood by the profile module");
+//   }
 
-    return $values;
-}
+//   return $tokens;
+// }
+
+// function ou_profile_token_values($type, $object = NULL, $options = array()) {
+//     $values = array();
+
+//     if ($type == 'node' && !empty($object)) {
+//         $node = node_load($object->nid);
+//         $values['ou_profile-oucu'] = $node->field_oup_oucu[0]['value'];
+//         unset($node);
+//     }
+
+//     return $values;
+// }
 
 
 
