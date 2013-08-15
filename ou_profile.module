@@ -1728,13 +1728,13 @@ function ou_profile_menu() {
 
  $items = array();
 
-  $items['xml/%'] = array(
-   'title' => 'xml',
-   'page callback' => 'ou_profile_render_xml',
-   'page arguments' => array(1),
-   'access arguments' => array('access content'),
-   'type' => MENU_CALLBACK,
-   );
+//   $items['xml/%'] = array(
+//    'title' => 'xml',
+//    'page callback' => 'ou_profile_render_xml',
+//    'page arguments' => array(1),
+//    'access arguments' => array('access content'),
+//    'type' => MENU_CALLBACK,
+//    );
 
   // This is the behind the scenes config (which directories to use, debug levels, etc)
   $items['admin/config/system/ou_profile'] = array(
@@ -1749,82 +1749,82 @@ function ou_profile_menu() {
 }
 
 
-function ou_profile_render_xml($oucu) {
+// function ou_profile_render_xml($oucu) {
 
-  $nid = db_result(db_query("SELECT SUBSTRING(src,6,9) AS nid FROM {url_alias} WHERE dst = '%s'", $oucu));
-  $node = node_load(array('nid' => $nid));
-    node_invoke_nodeapi($node, 'rdf');
+//   $nid = db_query("SELECT source AS nid FROM {url_alias} WHERE alias = :alias", array(':alias' => $oucu ))->fetchField();
+//   $node = node_load(array('nid' => $nid));
+//     node_invoke_nodeapi($node, 'rdf');
 
-    ou_profile_log("nid = " . $nid);
+//     ou_profile_log("nid = " . $nid);
 
-  $fields=array();
-  $fields["fullname"] = $node->{"fullname"}[0]['value'];
-  $result=db_query("SELECT field_name FROM {content_node_field}  ");
-  while ($row = db_fetch_array($result)) {
-    ou_profile_log("found field = " . $row['field_name']);
-    if ((substr($row['field_name'], 0, 10) != 'field_prv_') && (substr($row['field_name'], 0, 11) != 'field_pprv_')) {
+//   $fields=array();
+//   $fields["fullname"] = $node->{"fullname"}[0]['value'];
+//   $result=db_query("SELECT field_name FROM {content_node_field}  ");
+//   while ($row = db_fetch_array($result)) {
+//     ou_profile_log("found field = " . $row['field_name']);
+//     if ((substr($row['field_name'], 0, 10) != 'field_prv_') && (substr($row['field_name'], 0, 11) != 'field_pprv_')) {
 
-      if (!empty($node->{$row['field_name']})) {
+//       if (!empty($node->{$row['field_name']})) {
 
-        foreach ($node->{$row['field_name']} as $key => $value) {
-          ou_profile_log("adding field = " . $row['field_name']);
-          $fields[$row['field_name']] = $node->{$row['field_name']};
-        }
-      }
-    } // end of prv test
+//         foreach ($node->{$row['field_name']} as $key => $value) {
+//           ou_profile_log("adding field = " . $row['field_name']);
+//           $fields[$row['field_name']] = $node->{$row['field_name']};
+//         }
+//       }
+//     } // end of prv test
 
-  } // end of fields loop
+//   } // end of fields loop
 
-  ou_profile_log("launching renderer");
-  return theme('ou_profile_render_xml',
-      $node->title, $node->content, $node->picture, $node->date,
-      $node->links, $node->name, $node->path, $node->field_oup_oucu[0]['value'],
-      $node->submitted, $node, $node->type, $node->nid, $fields);
-}
+//   ou_profile_log("launching renderer");
+//   return theme('ou_profile_render_xml',
+//       $node->title, $node->content, $node->picture, $node->date,
+//       $node->links, $node->name, $node->path, $node->field_oup_oucu[0]['value'],
+//       $node->submitted, $node, $node->type, $node->nid, $fields);
+// }
 
 
 
-function ou_profile_render_content_as_xml($in_key, $in_value) {
+// function ou_profile_render_content_as_xml($in_key, $in_value) {
 
-  // Set up the variables that we'll use to return data
-  $node_start = "";
-  $node_content = "";
-  $node_end = "";
+//   // Set up the variables that we'll use to return data
+//   $node_start = "";
+//   $node_content = "";
+//   $node_end = "";
 
-  ou_profile_log("XML key = " . $in_key);
+//   ou_profile_log("XML key = " . $in_key);
 
-  // If the key was set to empty, make sure we dont render a tag for it.
-  if ($in_key != "") {
-    $node_start = "<" . $in_key . ">\n";
-    $node_end = "</" . $in_key . ">\n";
-  }
+//   // If the key was set to empty, make sure we dont render a tag for it.
+//   if ($in_key != "") {
+//     $node_start = "<" . $in_key . ">\n";
+//     $node_end = "</" . $in_key . ">\n";
+//   }
 
-  // If we are an array, recurse to create more xml nodes
-  if (is_array($in_value)) {
+//   // If we are an array, recurse to create more xml nodes
+//   if (is_array($in_value)) {
 
-    foreach ($in_value as $key => $value) {
+//     foreach ($in_value as $key => $value) {
 
-      // The next bit is to hide the arrays that only have one element,
-      // the data will just sit under the parent node
+//       // The next bit is to hide the arrays that only have one element,
+//       // the data will just sit under the parent node
 
-      // Default to whatever the array key name is
-      $node_name = $key;
-      if (is_int($key)) {
-        if (count($in_value) > 1) // If theres lots of stuff in this array, add _data to the end
-          $node_name = $in_key . "_data";
-        elseif (count($in_value) == 1) // If theres only one item in the array, dont add the key as a node element
-          $node_name = "";
-      }
+//       // Default to whatever the array key name is
+//       $node_name = $key;
+//       if (is_int($key)) {
+//         if (count($in_value) > 1) // If theres lots of stuff in this array, add _data to the end
+//           $node_name = $in_key . "_data";
+//         elseif (count($in_value) == 1) // If theres only one item in the array, dont add the key as a node element
+//           $node_name = "";
+//       }
 
-      // Because we are an array, repeat this function for all children.
-      $node_content .= ou_profile_render_content_as_xml($node_name, $value);
-    }
-  }
-  else
-    $node_content = $in_value;
+//       // Because we are an array, repeat this function for all children.
+//       $node_content .= ou_profile_render_content_as_xml($node_name, $value);
+//     }
+//   }
+//   else
+//     $node_content = $in_value;
 
-  return $node_start . $node_content . $node_end;
-}
+//   return $node_start . $node_content . $node_end;
+// }
 
 function ou_profile_block_info() {
   $blocks['_unit_list'] = array(
@@ -2066,22 +2066,39 @@ $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
  */
 function ou_profile_services_resources() {
   return array(
-    'ou_profile_test' => array(
+    'ou_site_profile' => array(
       'retrieve' => array(
-        'callback' => '_ou_profile_resource_retrieve',
+        'callback' => '_ou_profile_staff_record_retrieve',
         'args' => array(
           array(
-            'name' => 'arg1',
+            'name' => 'staff_id',
             'optional' => FALSE,
             'source' => array('path' => 0),
             'type' => 'int',
-            'description' => 'ou_profile Test argument 1.',
+            'description' => 'Staff ID.',
           ),
         ),
-        'access callback' => '_ou_profile_resource_access',
+        'access callback' => '_ou_profile_staff_record_retrieve_access',
         'access arguments' => array('view'),
         'access arguments append' => TRUE,
       ),
+    ),
+    'ou_public_profile' => array(
+        'retrieve' => array(
+            'callback' => '_ou_profile_staff_record_retrieve',
+            'args' => array(
+                array(
+                    'name' => 'oucu',
+                    'optional' => FALSE,
+                    'source' => array('path' => 0),
+                    'type' => 'varchar',
+                    'description' => 'OUCU',
+                ),
+            ),
+            'access callback' => '_ou_profile_staff_record_retrieve_access',
+            'access arguments' => array('view'),
+            'access arguments append' => TRUE,
+        ),
     ),
   );
 }
@@ -2089,10 +2106,10 @@ function ou_profile_services_resources() {
 /**
  * CRUD retrieve callback.
  */
-function _ou_profile_resource_retrieve($arg1) {
+function _ou_profile_staff_record_retrieve($staff_id) {
   //return 'CRUD Retrieve ' . $arg1;
 
-  $query = 'SELECT entity_id FROM {field_data_field_oup_staff_id} WHERE field_oup_staff_id_value=\'' . $arg1 . '\'';
+  $query = 'SELECT entity_id FROM {field_data_field_oup_staff_id} WHERE field_oup_staff_id_value=\'' . $staff_id . '\'';
   $nid = db_query($query)->fetchField();
 
   // Load the node
@@ -2106,6 +2123,7 @@ function _ou_profile_resource_retrieve($arg1) {
 /**
  * Access callback.
  */
-function _ou_profile_resource_access($op) {
+function _ou_profile_staff_record_retrieve_access($op) {
+  // TODO: Set this up to check the requesting site is allowed to retrieve this record
   return TRUE;
 }

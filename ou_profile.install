@@ -263,6 +263,13 @@ function _profile_installed_fields() {
               'max_length' => 60,
           )
       ),
+      'field_oup_staff_id' => array(
+          'field_name' => 'field_oup_staff_id',
+          'type' => 'text',
+          'settings' => array(
+              'max_length' => 60,
+          )
+      ),
   );
 }
 
@@ -280,6 +287,13 @@ function _profile_installed_instances() {
       'field_oup_oucu' => array(
           'field_name' => 'field_oup_oucu',
           'label' => 'OUCU',
+          'widget' => array(
+              'type' => 'text_textfield',
+          ),
+      ),
+      'field_oup_staff_id' => array(
+          'field_name' => 'field_oup_staff_id',
+          'label' => 'Staff ID',
           'widget' => array(
               'type' => 'text_textfield',
           ),
