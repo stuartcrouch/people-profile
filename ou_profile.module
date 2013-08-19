@@ -1952,7 +1952,6 @@ function ou_profile_tokens($type, $tokens, array $data = array(), array $options
   if ($type == 'node' && !empty($data['node'])) {
       $node = $data['node'];
       foreach ($tokens as $name => $original) {
-           print("$name $original");
            switch ($name) {
              case 'oucu':
                // TODO: Replace this value with a real function that gets the OUCU
@@ -2085,7 +2084,7 @@ function ou_profile_services_resources() {
     ),
     'ou_public_profile' => array(
         'retrieve' => array(
-            'callback' => '_ou_profile_staff_record_retrieve',
+            'callback' => '_ou_profile_public_record_retrieve',
             'args' => array(
                 array(
                     'name' => 'oucu',
@@ -2095,7 +2094,7 @@ function ou_profile_services_resources() {
                     'description' => 'OUCU',
                 ),
             ),
-            'access callback' => '_ou_profile_staff_record_retrieve_access',
+            'access callback' => '_ou_profile_public_record_retrieve_access',
             'access arguments' => array('view'),
             'access arguments append' => TRUE,
         ),
@@ -2124,6 +2123,38 @@ function _ou_profile_staff_record_retrieve($staff_id) {
  * Access callback.
  */
 function _ou_profile_staff_record_retrieve_access($op) {
+  $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
+  require_once "$INCLUDES/local_functions.inc";
+  if(isset($_SERVER['HTTP_REFERER'])) {
+    ou_profile_log( "staff record retrieve from referrer = (" . $_SERVER[HTTP_REFERER] . ")" );
+  }
+
+
+  // TODO: Set this up to check the requesting site is allowed to retrieve this record
+  return FALSE;
+}
+
+/**
+ * CRUD retrieve callback.
+ */
+function _ou_profile_public_record_retrieve($oucu) {
+  //return 'CRUD Retrieve ' . $arg1;
+
+  $query = 'SELECT entity_id FROM {field_data_field_oup_oucu} WHERE field_oup_oucu_value=\'' . $oucu . '\'';
+  $nid = db_query($query)->fetchField();
+
+  // Load the node
+  $node = node_load($nid, NULL, FALSE);
+  // Run it in view mode (to remove any private fields)
+  ou_profile_node_view($node, "full", "en");
+
+  return $node->ou_profile;
+}
+
+/**
+ * Access callback.
+ */
+function _ou_profile_public_record_retrieve_access($op) {
   // TODO: Set this up to check the requesting site is allowed to retrieve this record
   return TRUE;
 }

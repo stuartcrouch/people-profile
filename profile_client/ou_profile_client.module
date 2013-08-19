@@ -155,12 +155,13 @@ function ou_profile_client_rest_call($param) {
   $options = array(
       'headers' => array(
           'Accept' => 'application/json',
+          'Referer' => "http://stuart.test/test",
       ),
       'method' => 'GET',
       'data' => $data
   );
 
-  $response = drupal_http_request($request_url . 'services/oucu/' . $param, $options);
+  $response = drupal_http_request($request_url . 'services/ou_site_profile/' . $param, $options);
   $data = json_decode($response->data,true);
 
   return $data;
