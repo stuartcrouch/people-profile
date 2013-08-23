@@ -370,11 +370,17 @@ define ('SITE_PUBLIC', 3);
 
 
 /* Get information about the site querying the profiles system */
-function ou_profile_lget_site_info() {
+function ou_profile_lget_site_info($http_referer = NULL) {
 
-  $site_path = ou_profile_lget_site_path();
+  $site_path = NULL;
+  if (!isset($http_referer)) {
+    $site_path = ou_profile_lget_site_path();
+  }
+  else {
+    $site_path = $http_referer;
+  }
+
   $a_site_info = array();
-
   db_set_active('profiles');
 
   $query = db_select('field_data_field_site_visibility', 'sv');
@@ -412,8 +418,8 @@ function ou_profile_lget_site_info() {
 
 
 /* Is the site allowed to access the profiles system? */
-function ou_profile_lsite_allowed() {
-  $a_site_info = ou_profile_lget_site_info();
+function ou_profile_lsite_allowed($http_referer = NULL) {
+  $a_site_info = ou_profile_lget_site_info($http_referer);
 
   if ($a_site_info['unit_code'])
     return TRUE;

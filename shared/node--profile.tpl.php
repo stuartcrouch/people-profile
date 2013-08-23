@@ -30,7 +30,7 @@ global $user;
           * TODO: Add a role so that IT/Comms etc can test and access all profile edit options.
           */
           if ((node_access('update', $node, $user) == TRUE) || ($account->uid == 1)) {
-            print '<a class="profile-button" href="node/' . $node->nid . '/edit">Edit profile</a>';
+            print '<a class="profile-button" href="' . $node->nid . '/edit">Edit profile</a>';
           }
           // node_access('update', $node, $user) - function to check if user had access to view/edit/delete page
         //}
