@@ -90,7 +90,7 @@
   watchdog("ou_profile", "Fetched %count rows", array('%count' => $count)); // do this even if count is zero
   
   // Set database back to original
-  db_set_active('default');
+  db_set_active();
   
   foreach ($a_profiles as $data) {
   
@@ -152,7 +152,7 @@
 
 
   // Set database back to original
-  db_set_active('default');
+  db_set_active();
   
   // Unpublish any profiles which no longer exist on the profiles server
   foreach ($a_local_profile as $oup_nid => $unique_id) {

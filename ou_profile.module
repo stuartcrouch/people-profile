@@ -7,57 +7,7 @@
  */
 
  global $_ou_profile_server_site_path; $_ou_profile_server_site_path = "/people/";
- 
- // Set up the database connection so that Drupal can switch to it.
- // New D7 functionality means it cant go in settings.php as Database:: context doesnt exist.
- 
-  $env = strtolower(getenv('OUENV'));
-  if (!$env) $env = 'dev';
-  switch ($env) {
-    case 'live':
-      $profile_database = array( 
-       'database' => 'people',
-       'username' => 'people_db',
-       'password' => 'people_pwd_a34H',
-       'host' => 'dollarbird', 
-       'driver' => 'mysql', 
-      );
-    break;
-    case 'acct':
-    $profile_database = array( 
-      'database' => 'people_acct',
-      'username' => 'people_acct_db',
-      'password' => 'people_acct_pwd',
-      'host' => 'lovebird', 
-      'driver' => 'mysql', 
-    );
-    break;
-    case 'dev':
-    $profile_database = array( 
-      'database' => 'testprofile_dev',
-      'username' => 'testprof_dev_db',
-      'password' => 'testprof_dev_pwd',
-      'host' => 'lovebird', 
-      'driver' => 'mysql', 
-    );
-    break;
-    case 'test':
-    default:
-     $profile_database = array( 
-       'database' => 'people_test',
-       'username' => 'people_test_db',
-       'password' => 'people_test_pwd',
-       'host' => 'lovebird', 
-       'driver' => 'mysql', 
-      );
-      break;
-  }
- 
- // replace 'YourDatabaseKey' with something that's unique to your module
- Database::addConnectionInfo('profiles', 'default', $profile_database);
- 
- db_set_active('default'); // stops web pages from timing out due to maximum execution time being exceeded (miw addition)
- 
+  
 /**
  * 22-8-11 Author: Lee Austin
  * 
@@ -107,10 +57,10 @@ function ou_profile_cron() {
     watchdog("ou_profile", "Running server cron");
     include "cron/server_cron.inc";
   }
-  if ($CLIENT) {   // site is allowed to access the profiles system
-    watchdog("ou_profile", "Running client cron");
-    include "cron/client_cron.inc"; // run cron for client including OUBS reporting
-  }
+  //if ($CLIENT) {   // site is allowed to access the profiles system
+  //  watchdog("ou_profile", "Running client cron");
+  //  include "cron/client_cron.inc"; // run cron for client including OUBS reporting
+  //}
 }
 
 ///////////////////////////////////
@@ -208,7 +158,7 @@ function ou_profile_node_load($nodes, $types) {
          $profile['privacy_values'] = $a_privacy_values;
          
          // Set database back to original
-         db_set_active('default');
+         db_set_active();
        
          // Put some variables into $node
          $node->ou_profile = array();
@@ -618,7 +568,7 @@ function ou_profile_nodeapi(&$node, $op, $a3=NULL, $a4=NULL) {
       }
 
       // Set database back to original
-      db_set_active('default');
+      db_set_active();
 
       // Put some variables into $node
       $node->ou_profile = array();
@@ -1994,7 +1944,7 @@ function ou_profile_get_profile_nodes($query = NULL, $type = NULL) {
   }
   
   // Set database back to original and query client website to get local, matching profiles
-  db_set_active('default');
+  db_set_active();
   
   $client_profiles = array();
 
@@ -2137,7 +2087,7 @@ function theme_get_expertise_tags() {
     $tags[] = $row->field_oup_expertise_value;
   }
   
-  db_set_active('default');
+  db_set_active();
   
   return $tags;
 }
@@ -2383,30 +2333,33 @@ function ou_profile_block($op='list', $delta = 0) {
   }
 }
 
-// Provide a way to automate the URL generation, rather than forcing the path
-function ou_profile_token_list($type = 'all') {
-  $tokens = array();
-  
-  if ($type == 'node' || $type == 'all') {
-      $tokens['node']['ou_profile-oucu'] = t("The OUCU as understood by the profile module");
+function ou_profile_token_info() {
+
+  $info['tokens']['node']['oucu'] = array(
+      'name' => t('Profile oucu'),
+      'description' => t("The OUCU of the OU profile."),
+  );
+
+  return $info;
+}
+
+function ou_profile_tokens($type, $tokens, array $data = array(), array $options = array()) {
+  $replacements = array();
+  $sanitize = !empty($options['sanitize']);
+
+  if ($type == 'node' && !empty($data['node'])) {
+      $node = $data['node'];
+      foreach ($tokens as $name => $original) {
+           switch ($name) {
+             case 'oucu':
+               // TODO: Replace this value with a real function that gets the OUCU
+               $replacements[$original] = $node->field_oup_oucu['und'][0]['value'];
+           }
+      }
   }
-  
-  return $tokens;
+
+  return $replacements;
 }
-
-function ou_profile_token_values($type, $object = NULL, $options = array()) {
-    $values = array();
-    
-    if ($type == 'node' && !empty($object)) {
-        $node = node_load($object->nid);
-        $values['ou_profile-oucu'] = $node->field_oup_oucu[0]['value'];
-        unset($node);
-    }
-    
-    return $values;
-}
-
-
 
 
 function ou_profile_config() {
