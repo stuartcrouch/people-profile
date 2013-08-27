@@ -27,7 +27,7 @@ function ou_profile_lget_unit_code() {
     $unit_code = db_result(db_query($query));
   }  
   // Set database back to original
-  db_set_active('default');
+  db_set_active();
   return $unit_code;
 }
 
@@ -70,7 +70,7 @@ function ou_profile_lget_pims_data($unit_code, $staff_id) {
   //$data = db_query_range(query, 0, 1);
  
   // Set database back to original
-  db_set_active('default');
+  db_set_active();
   return $data;
 }
 
@@ -104,7 +104,7 @@ function ou_profile_lget_profile_data($staff_id) {
   //}
 
   // Set database back to original
-  db_set_active('default');
+  db_set_active();
   //oupdb($data);
   return $data;
 }
@@ -156,7 +156,7 @@ function ou_profile_lget_oup_fields($unit_code) {
       $a_oup_fields[$data->field_name]['weight'] = $data->weight;
     }
   }
-  db_set_active('default');
+  db_set_active();
   return $a_oup_fields;
   
 }
@@ -192,7 +192,7 @@ function ou_profile_lget_pims_fields() {
     $a_pims_fields[$data->field_name]['group_name'] = (!empty($data->group_name) ? $data->group_name : 'generic');
     $a_pims_fields[$data->field_name]['weight'] = $data->weight;
   }
-  db_set_active('default');
+  db_set_active();
   return $a_pims_fields;
 }
 
@@ -231,7 +231,7 @@ function ou_profile_lget_multi_field_data($table_name, $NID) {
     }
   }
   
-  db_set_active('default');
+  db_set_active();
   return $a_field_data;
 }
 
@@ -349,7 +349,7 @@ function ou_profile_lget_site_info() {
   //$data = db_fetch_object(db_query($query));
   $data = db_query($query, array(':site_path' => $site_path))->fetchObject();
   
-  db_set_active('default');
+  db_set_active();
   
   if (!empty($data)) {
     $a_site_info['unit_code'] = $data->field_unit_code_value;
@@ -411,7 +411,7 @@ function ou_profile_lget_file_info($fid) {
     $query = "SELECT filepath FROM {files} WHERE fid = :fid";
     db_set_active('profiles');
     $file_info = db_query($query, array(':fid' => $fid))->fetchObject();
-    db_set_active('default');
+    db_set_active();
     return $file_info;
   }
 }
@@ -455,7 +455,7 @@ function ou_profile_lget_privacy_values() {
   }
 
   if ($site_path != $_ou_profile_server_site_path) {
-    db_set_active('default');
+    db_set_active();
   }
 
   return $a_privacy_values;
