@@ -27,7 +27,7 @@ function ou_profile_lget_unit_code() {
     $unit_code = db_result(db_query($query));
   }
   // Set database back to original
-  db_set_active('default');
+  db_set_active();
   return $unit_code;
 }
 
@@ -46,31 +46,6 @@ function ou_profile_lget_pims_data($unit_code, $staff_id) {
   // Set database to profiles
   db_set_active('profiles');
 
-//  if ($unit_code) {
-   // $query = 'SELECT * FROM {content_type_pims} WHERE field_pims_l1_estab_unit_code_value="' . $unit_code . '"';
-   // $query .= ' AND field_pims_staff_id_value="' . $staff_id . '"';
-
-
-
-//     $data = db_select ('content_type_pims', 'c')
-//     ->fields('c')
-//     ->condition('field_pims_l1_estab_unit_code_value', $unit_code)
-//     ->condition('field_pims_staff_id_value', $staff_id)
-//     ->range(0,1)
-//     ->execute()
-//     ->fetchAssoc();
-//   }
-//   else {
-//     //$query = 'SELECT * FROM {content_type_pims} WHERE field_pims_staff_id_value="' . $staff_id . '"';
-//     $data = db_select ('content_type_pims', 'c')
-//     ->fields('c')
-//     ->condition('field_pims_staff_id_value', $staff_id)
-//     ->range(0,1)
-//     ->execute()
-//     ->fetchAssoc();
-//   }
-  //$data = db_query_range(query, 0, 1);
-
   $query = db_select('field_data_field_pims_staff_id', 'staff_id');
   $query->addField('staff_id', 'entity_id', 'field_site_visibility_value');
   $query->condition('staff_id.field_pims_staff_id_value', $staff_id, '=');
@@ -81,7 +56,7 @@ function ou_profile_lget_pims_data($unit_code, $staff_id) {
   $data = node_load($nid, NULL, TRUE);
 
   // Set database back to original
-  db_set_active('default');
+  db_set_active();
   return $data;
 }
 
@@ -100,19 +75,6 @@ function ou_profile_lget_profile_data($staff_id) {
   // Set database to profiles
   db_set_active('profiles');
 
-//  $query = 'SELECT * FROM {content_type_profile} WHERE field_oup_staff_id_value="' . $staff_id . '"';
-  //$data = db_fetch_array(db_query($query));
-
-  //$data = db_query("SELECT * FROM {content_type_profile} WHERE field_oup_staff_id_value= :staff_id",
-  //    array(":staff_id" => $staff_id))->fetchAssoc();
-
-  // Only if this is an active profile
-  //if ($data['field_oup_active_value']) {
-  //  // Get the profile body
-  //  $node = node_load($data['nid'], NULL, TRUE);
-  //  $data['about_me'] = $node->body;
-  //  unset($node);
-  //}
 
   $query = new EntityFieldQuery();
 
@@ -129,63 +91,10 @@ function ou_profile_lget_profile_data($staff_id) {
   }
 
   // Set database back to original
-  db_set_active('default');
+  db_set_active();
   //oupdb($data);
   return $data;
 }
-
-
-/*============================================================================================*/
-
-// /**
-//  * Get list of "oup" fields, along with field type, single/multiple instance and label
-//  *
-//  * 22-8-11 l.austin: Added group-name and weight. Null group-names are given the name of 'Generic' and both are used to organise and weight fields
-// **/
-// function ou_profile_lget_oup_fields($unit_code) {
-//   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
-
-//   $a_oup_fields = array();
-//   $a_other_fields = array();
-
-//   // Set database to profiles
-//   db_set_active('profiles');
-
-//   // Build a list of fields that belong to other units
-// //   $query = "SELECT field_name FROM {content_group_fields} WHERE group_name NOT LIKE '%_" . $unit_code . "' AND group_name LIKE 'group_oup%'";
-// //   $result = db_query($query);
-// //   foreach ($result as $data) {
-// //     //while ($data = db_fetch_object($result)) {
-// //     array_push($a_other_fields, $data->field_name);
-// //   }
-
-//   // Build a list of fields which excludes fields from other units
-//   // /$query = 'SELECT f.field_name, f.type, f.multiple, fi.label, fi.widget_type FROM content_node_field AS f, content_node_field_instance AS fi WHERE (f.field_name LIKE "field_oup_%" OR f.field_name LIKE "field_pdat_%") AND f.field_name=fi.field_name';
-
-//   $query = "SELECT f.field_name, f.type, f.multiple, fi.label, fi.widget_type, fi.weight, g.group_name FROM " .
-//     "(content_node_field f, content_node_field_instance fi) " .
-//     "LEFT JOIN content_group_fields g on (f.field_name = g.field_name) " .
-//     "WHERE (f.field_name LIKE 'field_oup_%' OR f.field_name LIKE 'field_pdat_%') ".
-//     "AND f.field_name=fi.field_name ORDER BY fi.weight";
-//   $result = db_query($query);
-//   //print_r(db_fetch_object($result));
-//   //while ($data = db_fetch_object($result)) {
-//   foreach ($result as $data) {
-//     // If the field_name is not in $a_other_fields, then add to the list
-//     //if (!in_array($data->field_name, $a_other_fields)) {
-//       $a_oup_fields[$data->field_name]['multiple'] = $data->multiple;
-//       $a_oup_fields[$data->field_name]['type'] = $data->type;
-//       $a_oup_fields[$data->field_name]['label'] = $data->label;
-//       $a_oup_fields[$data->field_name]['widget_type'] = $data->widget_type;
-//       $a_oup_fields[$data->field_name]['group_name'] = (!empty($data->group_name) ? $data->group_name : 'generic');
-//       $a_oup_fields[$data->field_name]['weight'] = $data->weight;
-//     //}
-//   }
-//   db_set_active('default');
-//   return $a_oup_fields;
-
-// }
-
 
 /*============================================================================================*/
 
@@ -212,7 +121,7 @@ function ou_profile_lget_field_info($content_type) {
     $a_fields_info[$field_info['field_name']] = (array)$field_group;
   }
 
-  db_set_active('default');
+  db_set_active();
   return $a_fields_info;
 }
 
@@ -260,7 +169,7 @@ function ou_profile_lget_multi_field_data($table_name, $NID) {
     }
   }
 
-  db_set_active('default');
+  db_set_active();
   return $a_field_data;
 }
 
@@ -401,7 +310,7 @@ function ou_profile_lget_site_info($http_referer = NULL) {
   //$data = db_fetch_object(db_query($query));
   //$data = db_query($query, array(':site_path' => $site_path))->fetchObject();
 
-  db_set_active('default');
+  db_set_active();
 
   if (!empty($data)) {
     $a_site_info['unit_code'] = $data->field_unit_code_value;
@@ -465,7 +374,7 @@ function ou_profile_lget_file_info($fid) {
     $query = "SELECT filepath FROM {files} WHERE fid = :fid";
     db_set_active('profiles');
     $file_info = db_query($query, array(':fid' => $fid))->fetchObject();
-    db_set_active('default');
+    db_set_active();
     return $file_info;
   }
 }
@@ -514,7 +423,7 @@ function ou_profile_lget_privacy_values() {
   }
 
   if ($site_path != $_ou_profile_server_site_path) {
-    db_set_active('default');
+    db_set_active();
   }
 
   return $a_privacy_values;

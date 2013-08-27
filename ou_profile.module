@@ -8,72 +8,6 @@
 
  global $_ou_profile_server_site_path; $_ou_profile_server_site_path = "/people/";
 
- // Set up the database connection so that Drupal can switch to it.
- // New D7 functionality means it cant go in settings.php as Database:: context doesnt exist.
-/*
-  $env = strtolower(getenv('OUENV'));
-  if (!$env) $env = 'dev';
-  switch ($env) {
-    case 'live':
-      $profile_database = array(
-       'database' => 'people',
-       'username' => 'people_db',
-       'password' => 'people_pwd_a34H',
-       'host' => 'dollarbird',
-       'driver' => 'mysql',
-      );
-    break;
-    case 'acct':
-    $profile_database = array(
-      'database' => 'people_acct',
-      'username' => 'people_acct_db',
-      'password' => 'people_acct_pwd',
-      'host' => 'lovebird',
-      'driver' => 'mysql',
-    );
-    break;
-    case 'dev':
-    $profile_database = array(
-      'database' => 'localhost.people',
-      'username' => 'root',
-      'password' => 'password',
-      'host' => 'localhost',
-      'driver' => 'mysql',
-     );
-//    $profile_database = array(
-//      'database' => 'testprofile_dev',
-//      'username' => 'testprof_dev_db',
-//      'password' => 'testprof_dev_pwd',
-//      'host' => 'lovebird',
-//      'driver' => 'mysql',
-//    );
-    break;
-    case 'test':
-    default:
-     $profile_database = array(
-       'database' => 'people_test',
-       'username' => 'people_test_db',
-       'password' => 'people_test_pwd',
-       'host' => 'lovebird',
-       'driver' => 'mysql',
-      );
-      break;
-  }
-
- // replace 'YourDatabaseKey' with something that's unique to your module
- Database::addConnectionInfo('profiles', 'default', $profile_database);
-
- db_set_active('default'); // stops web pages from timing out due to maximum execution time being exceeded (miw addition)
-case 'dev':
-    $profile_database = array(
-      'database' => 'localhost.people',
-      'username' => 'root',
-      'password' => 'password',
-      'host' => 'localhost',
-      'driver' => 'mysql',
-     );
-*
-*/
 /**
  * 22-8-11 Author: Lee Austin
  *
@@ -205,7 +139,7 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
   $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {field_data_field_pims_l1_estab_unit_code} WHERE entity_id = ' . $pims_entity_id;
   $unit_code = db_query($query)->fetchField();
 
-  db_set_active('default');
+  db_set_active();
 
   // Add in any PIMS data exposed by privacy values to the related PIMS data placeholder "field_pdat_*" in the profile content
   // Don't do this if the profile is being edited.
@@ -229,7 +163,7 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
   //  $query .= 'field_pims_staff_id_value=' . $staff_id ;
   $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {field_data_field_pims_l1_estab_unit_code} WHERE entity_id = ' . $pims_entity_id;
   $unit_code = db_query($query)->fetchField();
-  db_set_active('default');
+  db_set_active();
 
   $node->do_not_show = FALSE;
 
@@ -264,7 +198,7 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
     $profile['privacy_values'] = $a_privacy_values;
 
     // Set database back to original
-    db_set_active('default');
+    db_set_active();
 
     // Put some variables into $node
     $node->ou_profile = array();
@@ -1209,7 +1143,7 @@ function ou_profile_get_profile_nodes($query = NULL, $type = NULL) {
   }
 
   // Set database back to original and query client website to get local, matching profiles
-  db_set_active('default');
+  db_set_active();
 
   $client_profiles = array();
 
@@ -1352,7 +1286,7 @@ function theme_get_expertise_tags() {
     $tags[] = $row->field_oup_expertise_value;
   }
 
-  db_set_active('default');
+  db_set_active();
 
   return $tags;
 }
@@ -1402,7 +1336,7 @@ function ou_profile_oucu_action($node, $context = array()) {
   $oucu = NULL;
 
   if ($node->type == 'profile') {  // oucu is unset so we need to go and get it from the content type data set.
-    db_set_active('default');
+    db_set_active();
     $sql = "SELECT field_oup_oucu_value FROM field_data_field_oup_oucu where entity_id = :nid";
     $oucu = db_query($sql, array(':nid' => $node->nid ))->fetchField();
     //$oucu = db_result(db_query("SELECT field_oup_oucu_value FROM {content_type_profile} WHERE nid = %d", $node->nid));

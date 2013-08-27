@@ -8,29 +8,6 @@
 
  global $_ou_profile_server_site_path; $_ou_profile_server_site_path = "/people/";
 
- // Set up the database connection so that Drupal can switch to it.
- // New D7 functionality means it cant go in settings.php as Database:: context doesnt exist.
-
- // TODO: Make this change based on environment
- $profile_database = array(
-     //'database' => 'people_dev', // The db name
-     //'username' => 'people_dev_db',
-     //'password' => 'people_dev_pwd',
-
-     //'database' => 'testprofile_dev',
-     //'username' => 'testprof_dev_db',
-     //'password' => 'testprof_dev_pwd',
-     //'host' => 'lovebird',
-
-     'database' => 'localhost.people',
-     'username' => 'root',
-     'password' => 'password',
-     'host' => 'localhost',
-     'driver' => 'mysql', // replace with your database driver
- );
- // replace 'YourDatabaseKey' with something that's unique to your module
- Database::addConnectionInfo('profiles', 'default', $profile_database);
-
 /**
  * 22-8-11 Author: Lee Austin
  *
@@ -120,22 +97,6 @@ function ou_profile_client_node_load($nodes, $types) {
               $staff_id = substr($unique_id, 0,  8);
 
               $node->ou_profile = ou_profile_client_rest_call($staff_id);
-
-              //print_r($node->profile); die();
-
-              // TODO: This should be a rest request that retrieves the data and stores the array into the node
-//               db_set_active('profiles');
-
-//               // Reset the entity structure incase it loaded from the server instead of us
-//               _field_info_collate_fields(TRUE);
-
-//               $query = 'SELECT entity_id FROM {field_data_field_oup_staff_id} WHERE field_oup_staff_id_value=\'' . $staff_id . '\'';
-//               $nid = db_query($query)->fetchField();
-
-//               $node = node_load($nid, NULL, FALSE);
-
-//               db_set_active('default');
-
             }
            break;
        }
@@ -240,7 +201,7 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
   $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {field_data_field_pims_l1_estab_unit_code} WHERE entity_id = ' . $pims_entity_id;
   $unit_code = db_query($query)->fetchField();
 
-  db_set_active('default');
+  db_set_active();
 
   // Add in any PIMS data exposed by privacy values to the related PIMS data placeholder "field_pdat_*" in the profile content
   // Don't do this if the profile is being edited.
@@ -264,7 +225,7 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
   //  $query .= 'field_pims_staff_id_value=' . $staff_id ;
   $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {field_data_field_pims_l1_estab_unit_code} WHERE entity_id = ' . $pims_entity_id;
   $unit_code = db_query($query)->fetchField();
-  db_set_active('default');
+  db_set_active();
 
   $node->do_not_show = FALSE;
 
@@ -303,7 +264,7 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
     $profile['privacy_values'] = $a_privacy_values;
 
     // Set database back to original
-    db_set_active('default');
+    db_set_active();
 
     // Put some variables into $node
     $node->ou_profile = array();
@@ -864,7 +825,7 @@ function ou_profile_get_profile_nodes($query = NULL, $type = NULL) {
   }
 
   // Set database back to original and query client website to get local, matching profiles
-  db_set_active('default');
+  db_set_active();
 
   $client_profiles = array();
 
@@ -1007,7 +968,7 @@ function theme_get_expertise_tags() {
     $tags[] = $row->field_oup_expertise_value;
   }
 
-  db_set_active('default');
+  db_set_active();
 
   return $tags;
 }

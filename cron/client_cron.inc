@@ -73,7 +73,7 @@
     watchdog("ou_profile", "Fetched %count rows", array('%count' => count($a_profiles))); // do this even if count is zero
 
   // Set database back to original
-  db_set_active('default');
+  db_set_active();
 
 
   foreach ($a_profiles as $item) {
@@ -82,7 +82,7 @@
     db_set_active('profiles');
     $pims_data = node_load($item->pims_entity_id, NULL, TRUE);
     $profile_data = node_load($item->profile_entity_id, NULL, TRUE);
-    db_set_active('default');
+    db_set_active();
 
     // Reset the entity structure incase it loaded from the server instead of us
     _field_info_collate_fields(TRUE);
@@ -139,7 +139,7 @@
     $oup_node->status = 1;
     $node_change = TRUE;
 
-    db_set_active('default');
+    db_set_active();
     node_save($oup_node);
     unset($oup_node);
     unset($pims_data);
@@ -149,7 +149,7 @@
 
 
   // Set database back to original
-  db_set_active('default');
+  db_set_active();
 
   // Unpublish any profiles which no longer exist on the profiles server
   foreach ($a_local_profile as $oup_nid => $unique_id) {
