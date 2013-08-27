@@ -155,7 +155,7 @@ function ou_profile_client_rest_call($param) {
   $options = array(
       'headers' => array(
           'Accept' => 'application/json',
-          'Referer' => "http://stuart.test/test",
+          'Referer' => $GLOBALS['base_url'],
       ),
       'method' => 'GET',
       'data' => $data
@@ -732,6 +732,12 @@ function ou_profile_client_preprocess_node(&$vars) {
 }
 
 function ou_profile_client_preprocess_page(&$vars) {
+
+  // Dont do these suggestions if we are on the edit page.
+  // Cant find a better way to tell if thats where we are...
+  $params = explode('/', $_GET['q']);
+  if (isset($params[2]) && $params[2] == 'edit')
+    return $vars;
 
   // Here is the way to switch to a different page-<something> template based on node properties.
   // We use this so that profile and ou_profile can share the same template file.

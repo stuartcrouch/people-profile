@@ -12,7 +12,6 @@ global $user;
 ?>
 <!-- start ouprofile node-profile.tpl.php v2.0.1 -->
 <div id="node-<?php print $node->nid; ?>" class="node <?php print $classes; ?> clearfix"<?php print $attributes; ?>>
-  <?php print $picture ?>
   <div class="profile-title">
     <h1>
   	  <?php print $title;
