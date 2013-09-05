@@ -169,6 +169,9 @@ function ou_profile_client_node_client_profile_manage() {
   // Save the content type to the database
   $res = node_type_save($content_type);
 
+  // Turn off comments
+  variable_set('comment_' . $node_obj['type'] , '1');
+
   node_types_rebuild();
   menu_rebuild();
 

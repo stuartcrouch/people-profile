@@ -1,7 +1,7 @@
-name = OU Profile
+name = OU Profile Server
 description = Manages OU profiles
 package = The Open University
-version = "7.x-1.0"
+version = "7.x-1.2"
 core = 7.x
 
 files[] = ou_profile.module
@@ -18,7 +18,5 @@ files[] = install/ou_profile_content_type.inc
 dependencies[] = services
 dependencies[] = trigger
 dependencies[] = pathauto
-
-// dependencies[] = content 
-// dependencies[] = jquery_ui
-// dependencies[] = content_copy
+dependencies[] = email
+dependencies[] = field_group

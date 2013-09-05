@@ -127,11 +127,14 @@ function ou_profile_lget_field_info($content_type) {
 
 function ou_profile_lfield_get_field_group($field) {
   $group_info = field_group_read_groups(array('entity_type' => $field['entity_type'], 'bundle' => $field['bundle']));
-  foreach ($group_info[$field['entity_type']][$field['bundle']]['form'] as $group) {
-    if (in_array($field['field_name'], $group->children)) {
-      return $group;
+  if (isset($group_info[$field['entity_type']])) {
+    foreach ($group_info[$field['entity_type']][$field['bundle']]['form'] as $group) {
+      if (in_array($field['field_name'], $group->children)) {
+        return $group;
+      }
     }
   }
+  
   return FALSE;
 }
 
@@ -268,8 +271,10 @@ function ou_profile_lget_admin_role_id($unit_code) {
 // OR! we could just ask drupal what the path is...
 // The orginal function will only work for top level sites like OUBS, eg faculties/science/main just wont work.
 function ou_profile_lget_site_path() {
-  global $base_path;
-  return $base_path;
+//  global $base_path;
+//  return $base_path;
+  // TODO: Fix this for new URL format
+  return $GLOBALS['base_url'];
 }
 
 define ('SITE_NOT_ALLOWED', 0);
@@ -288,6 +293,8 @@ function ou_profile_lget_site_info($http_referer = NULL) {
   else {
     $site_path = $http_referer;
   }
+  
+  ou_profile_log("site path = ($site_path)");
 
   $a_site_info = array();
   db_set_active('profiles');
@@ -446,12 +453,11 @@ function ou_profile_lget_profile_visibility($nid) {
         0 => 'invisible',
     );
 
-  $query = "SELECT * FROM {content_type_profile} AS pr WHERE pr.nid=:nid";
+  //$query = "SELECT * FROM {content_type_profile} AS pr WHERE pr.nid=:nid";
+  $query = "SELECT field_oup_visibility_value FROM {field_data_field_oup_visibility} AS pr WHERE pr.entity_id = :nid";
 
-  $data = db_query($query, array(':nid' => $nid))->fetchAssoc();
-  //$data = db_fetch_object($result);
-
-  // print ($data->field_pdat_staff_surname_value . " - ". $data->field_oup_visibility_value . "<br />");
+  $data = db_query($query, array(':nid' => $nid))->fetchObject();
+  
   $visibility = 0;
   if (isset($data->field_oup_visibility_value))
     $visibility = $data->field_oup_visibility_value;
@@ -465,7 +471,7 @@ function ou_profile_lget_profile_visibility($nid) {
          break;
      case 0:
      default:
-         return "invisible";
+         return "invisible" ;
          break;
   }
 
@@ -518,6 +524,48 @@ function ou_profile_node_get_field_value($node, $value) {
   }
 
   return '';
+}
+
+
+function ou_profile_get_request_url() {
+  $env = strtolower(getenv('OUENV'));
+  $request_url = "";
+  switch ($env) {
+    case 'live':
+      $request_url = 'http://www.open.ac.uk/people';
+      break;
+  
+    default:
+      $request_url = 'http://www-' . $env . '.open.ac.uk/people';
+  }
+  
+  return $request_url;
+}
+
+function ou_propfile_edit_profile_link() {
+  $request_url = ou_profile_get_request_url();
+  
+  if ($GLOBALS['base_url'] == $request_url) {
+    if ((node_access('update', $node, $user) == TRUE) || ($account->uid == 1)) {
+      return '<a class="profile-button" href="node/' . $node->nid . '/edit">Edit profile</a>';
+    }
+  }
+  
+  return '';
+}
+
+function ou_profile_request_image($style_name, $image_name) {
+
+  $request_url = ou_profile_get_request_url();
+  $request_path = 'www.open.ac.uk.people';
+  
+  if ($GLOBALS['base_url'] == $request_url) {
+    return theme_image_style(array('style_name' => $style_name, 'path' => $image_name));
+  }
+  else {
+    $image_name = str_replace("public://", "", $image_name);
+    return '<img src="' . $request_url . '/sites/' . $request_path . '/files/styles/' . $style_name . '/public/' . $image_name . '" />';
+  }
 }
 
 /////////////////////

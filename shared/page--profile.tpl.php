@@ -1,157 +1,61 @@
 <?php
-/* A page.tpl.php - from bartik. Override in your theme. */
+// $Id: page.tpl.php,v 1.0.1 2013/02/28 09:00:00 laustin $
+/**
+* @file
+* page.tpl.php default page layout
+* Drupal 7 theme linking OU web standards and OUICE
+* written by Lee Austin - +44 (0)7779 146104
+*/
 ?>
-<!-- page--profile.tpl.php -->
-<div id="page-wrapper"><div id="page">
 
-  <div id="header" class="<?php print $secondary_menu ? 'with-secondary-menu': 'without-secondary-menu'; ?>"><div class="section clearfix">
-
-    <?php if ($logo): ?>
-      <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home" id="logo">
-        <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
-      </a>
-    <?php endif; ?>
-
-    <?php if ($site_name || $site_slogan): ?>
-      <div id="name-and-slogan"<?php if ($hide_site_name && $hide_site_slogan) { print ' class="element-invisible"'; } ?>>
-
-        <?php if ($site_name): ?>
-          <?php if ($title): ?>
-            <div id="site-name"<?php if ($hide_site_name) { print ' class="element-invisible"'; } ?>>
-              <strong>
-                <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home"><span><?php print $site_name; ?></span></a>
-              </strong>
-            </div>
-          <?php else: /* Use h1 when the content title is empty */ ?>
-            <h1 id="site-name"<?php if ($hide_site_name) { print ' class="element-invisible"'; } ?>>
-              <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home"><span><?php print $site_name; ?></span></a>
-            </h1>
-          <?php endif; ?>
-        <?php endif; ?>
-
-        <?php if ($site_slogan): ?>
-          <div id="site-slogan"<?php if ($hide_site_slogan) { print ' class="element-invisible"'; } ?>>
-            <?php print $site_slogan; ?>
-          </div>
-        <?php endif; ?>
-
-      </div> <!-- /#name-and-slogan -->
-    <?php endif; ?>
-
-    <?php print render($page['header']); ?>
-
-    <?php if ($main_menu): ?>
-      <div id="main-menu" class="navigation">
-        <?php print theme('links__system_main_menu', array(
-          'links' => $main_menu,
-          'attributes' => array(
-            'id' => 'main-menu-links',
-            'class' => array('links', 'clearfix'),
-          ),
-          'heading' => array(
-            'text' => t('Main menu'),
-            'level' => 'h2',
-            'class' => array('element-invisible'),
-          ),
-        )); ?>
-      </div> <!-- /#main-menu -->
-    <?php endif; ?>
-
-    <?php if ($secondary_menu): ?>
-      <div id="secondary-menu" class="navigation">
-        <?php print theme('links__system_secondary_menu', array(
-          'links' => $secondary_menu,
-          'attributes' => array(
-            'id' => 'secondary-menu-links',
-            'class' => array('links', 'inline', 'clearfix'),
-          ),
-          'heading' => array(
-            'text' => t('Secondary menu'),
-            'level' => 'h2',
-            'class' => array('element-invisible'),
-          ),
-        )); ?>
-      </div> <!-- /#secondary-menu -->
-    <?php endif; ?>
-
-  </div></div> <!-- /.section, /#header -->
-
-  <?php if ($messages): ?>
-    <div id="messages"><div class="section clearfix">
-      <?php print $messages; ?>
-    </div></div> <!-- /.section, /#messages -->
-  <?php endif; ?>
-
-  <?php if ($page['featured']): ?>
-    <div id="featured"><div class="section clearfix">
-      <?php print render($page['featured']); ?>
-    </div></div> <!-- /.section, /#featured -->
-  <?php endif; ?>
-
-  <div id="main-wrapper" class="clearfix"><div id="main" class="clearfix">
-
-    <?php if ($breadcrumb): ?>
-      <div id="breadcrumb"><?php print $breadcrumb; ?></div>
-    <?php endif; ?>
-
-    <?php if ($page['sidebar_first']): ?>
-      <div id="sidebar-first" class="column sidebar"><div class="section">
-        <?php print render($page['sidebar_first']); ?>
-      </div></div> <!-- /.section, /#sidebar-first -->
-    <?php endif; ?>
-
-    <div id="content" class="column"><div class="section">
-      <?php if ($page['highlighted']): ?><div id="highlighted"><?php print render($page['highlighted']); ?></div><?php endif; ?>
-      <a id="main-content"></a>
-      <?php if ($tabs): ?>
-        <div class="tabs">
-          <?php print render($tabs); ?>
+  <div id="ou-site-header">
+    <?php if ($site_name || $site_slogan || $logo){
+      print '<div id="ou-site-ident">';
+      print ($logo ? '<img class="go2" src="'. check_url($logo) .'" alt="'. $site_name .'" id="logo" />' : "");
+      print ($site_name ? '<p id="ou-site-title">' . $site_name . '</p>' : '');
+      print ($site_slogan ? '<p id="ou-site-description">'. $site_slogan .'</p>' : '');
+      print '</div>';
+    }; ?>
+    <!-- Start of site-header -->
+      <?php print ($page['region100'] ? render($page['region100']) : ''); ?>
+    <!-- End of site-header -->
+    <?php if ($main_menu || $secondary_menu) {
+      print theme('links__system_main_menu', array('links' => $main_menu, 'attributes' => array('id' => 'main-menu', 'class' => array('ou-sections'))));
+    }	
+    ?>
+  </div>
+  <div id="ou-site-body">
+    <div id="ou-page">
+      <!-- Start of region 0 -->
+        <?php print ($page['region0'] ? '<div id="ou-region0">'.render($page['region0']).'</div>' : ''); ?>
+      <!-- End of region 0 -->
+      <!-- Start of region 1 -->
+        <div id="ou-region1">
+        <?php 
+          if ($page['help']){
+            print render($page['help']);
+          }
+        ?>
+        <div class="ou-content" id="ou-content">
+          <?php if ($tabs): ?><div id="tabs-wrapper" class="clearfix"><?php endif; ?>
+          <?php print $feed_icons ?>
+          <?php if ($tabs): ?><?php print render($tabs); ?></div><?php endif; ?>
+          <?php print render($tabs2); ?>
+          <?php print $messages; ?>
+          <?php print render($page['help']); ?>
+          <?php if ($action_links): ?><ul class="action-links"><?php print render($action_links); ?></ul><?php endif; ?>
+          <?php print render($page['content']); ?>
         </div>
-      <?php endif; ?>
-      <?php print render($page['help']); ?>
-      <?php if ($action_links): ?>
-        <ul class="action-links">
-          <?php print render($action_links); ?>
-        </ul>
-      <?php endif; ?>
-      <?php print render($page['content']); ?>
-      <?php print $feed_icons; ?>
-
-    </div></div> <!-- /.section, /#content -->
-
-    <?php if ($page['sidebar_second']): ?>
-      <div id="sidebar-second" class="column sidebar"><div class="section">
-        <?php print render($page['sidebar_second']); ?>
-      </div></div> <!-- /.section, /#sidebar-second -->
-    <?php endif; ?>
-
-  </div></div> <!-- /#main, /#main-wrapper -->
-
-  <?php if ($page['triptych_first'] || $page['triptych_middle'] || $page['triptych_last']): ?>
-    <div id="triptych-wrapper"><div id="triptych" class="clearfix">
-      <?php print render($page['triptych_first']); ?>
-      <?php print render($page['triptych_middle']); ?>
-      <?php print render($page['triptych_last']); ?>
-    </div></div> <!-- /#triptych, /#triptych-wrapper -->
-  <?php endif; ?>
-
-  <div id="footer-wrapper"><div class="section">
-
-    <?php if ($page['footer_firstcolumn'] || $page['footer_secondcolumn'] || $page['footer_thirdcolumn'] || $page['footer_fourthcolumn']): ?>
-      <div id="footer-columns" class="clearfix">
-        <?php print render($page['footer_firstcolumn']); ?>
-        <?php print render($page['footer_secondcolumn']); ?>
-        <?php print render($page['footer_thirdcolumn']); ?>
-        <?php print render($page['footer_fourthcolumn']); ?>
-      </div> <!-- /#footer-columns -->
-    <?php endif; ?>
-
-    <?php if ($page['footer']): ?>
-      <div id="footer" class="clearfix">
-        <?php print render($page['footer']); ?>
-      </div> <!-- /#footer -->
-    <?php endif; ?>
-
-  </div></div> <!-- /.section, /#footer-wrapper -->
-
-</div></div> <!-- /#page, /#page-wrapper -->
+      </div>
+      <!-- End of region 1 -->
+      <!-- Start of region 2 -->
+        <?php print ($page['region2'] ? '<div id="ou-region2">'.render($page['region2']).'</div>' : ''); ?>
+      <!-- End of region 2 -->
+      <!-- Start of region 3 -->
+        <?php print ($page['region3'] ? '<div id="ou-region3">'.render($page['region3']).'</div>' : ''); ?>
+      <!-- End of region 3 -->
+    </div>
+  </div>
+  <div id="ou-site-footer">
+    <a href="#ou-content" class="ou-to-top">Back to top</a>
+  </div>

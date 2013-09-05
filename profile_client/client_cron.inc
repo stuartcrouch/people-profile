@@ -4,7 +4,6 @@
  * Cron functions for drupal installations running as a client
  *
  */
-
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
 
   require_once "$INCLUDES/local_functions.inc";
@@ -23,6 +22,7 @@
   $site_visibility = null;
 
   $a_site_info = ou_profile_lget_site_info();
+  
   if (!empty($a_site_info)) {
     $unit_code = $a_site_info['unit_code'];
     $site_visibility = $a_site_info['visibility'];
@@ -74,7 +74,7 @@
 
   // Set database back to original
   db_set_active('default');
-
+  
 
   foreach ($a_profiles as $item) {
 
@@ -88,22 +88,25 @@
     _field_info_collate_fields(TRUE);
 
     // Don't create local profiles when the profile is marked hidden.
-    if (!(int) $profile_data->field_oup_visibility[$profile_data->language][0]['value']) {
-      ou_profile_log("$data->field_pims_unique_id_value is not visible");
+    if (!isset($profile_data->field_oup_visibility['und'][0]['value']) || !(int) $profile_data->field_oup_visibility['und'][0]['value']) {
+      ou_profile_log($pims_data->title . " is not visible");
       continue;
     }
 
-    $unique_id = $pims_data->field_pims_unique_id[$profile_data->language][0]['value'];
+   
 
-    $profile_title = ou_profile_lcreate_name($pims_data->field_pims_staff_title[$pims_data->language][0]['value'],
-                        $pims_data->field_pims_staff_forenames[$pims_data->language][0]['value'],
-                        $pims_data->field_pims_staff_surname[$pims_data->language][0]['value'],
-                        $pims_data->field_pims_pref_forenames[$pims_data->language][0]['value'],
-                        $pims_data->field_pims_pref_surname[$pims_data->language][0]['value']);
+    $unique_id = $pims_data->field_pims_unique_id['und'][0]['value'];
+
+    $profile_title = ou_profile_lcreate_name(
+      isset($pims_data->field_pims_staff_title['und'][0]['value']) ? $pims_data->field_pims_staff_title['und'][0]['value'] : '',
+      isset($pims_data->field_pims_staff_forenames['und'][0]['value']) ? $pims_data->field_pims_staff_forenames['und'][0]['value'] : '',
+      isset($pims_data->field_pims_staff_surname['und'][0]['value']) ? $pims_data->field_pims_staff_surname['und'][0]['value'] : '',
+      isset($pims_data->field_pims_pref_forenames['und'][0]['value']) ? $pims_data->field_pims_pref_forenames['und'][0]['value'] : '',
+      isset($pims_data->field_data_field_pims_pref_surname['und'][0]['value']) ? $pims_data->field_data_field_pims_pref_surname['und'][0]['value'] : ''
+    );
 
     ou_profile_log("name = $profile_title");
-
-
+    
     // If a local profile does not exist for this unique_id, create one and remove the unique_id from the list.
     $query = 'SELECT entity_id FROM {field_data_field_pims_unique_id} WHERE field_pims_unique_id_value=\'' . $unique_id . '\'';
     // field_data_field_pims_unique_id?
@@ -132,7 +135,7 @@
     if (!isset($oup_node->title) ||
         ($oup_node->title != $profile_title)) {
       $oup_node->title = $profile_title;
-      $oup_node->field_pims_unique_id[$oup_node->language][0]['value'] = $unique_id;
+      $oup_node->field_pims_unique_id['und'][0]['value'] = $unique_id;
       $oup_node->changed = time();
     }
 
@@ -162,4 +165,4 @@
     }
     unset($oup_node);
     node_load_multiple(FALSE, NULL, TRUE); // keep the cache empty as node_delete performs a node_load first
-}
+  }

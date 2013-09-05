@@ -12,5 +12,7 @@ files[] = ../includes/local_functions.inc
 files[] = ../includes/people_functions.inc
 
 dependencies[] = pathauto
+dependencies[] = email
+dependencies[] = field_group
 
 
