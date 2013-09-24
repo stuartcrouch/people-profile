@@ -17,7 +17,7 @@ function ou_profile_enable() {
   ->condition('name', 'fieldgroup', '=')
   ->execute()
   ->fetchField();
-  
+
   db_update('system')
   ->fields(array('weight' => $weight +1))
   ->condition('name', 'ou_profile', '=')
@@ -46,13 +46,13 @@ function ou_profile_install() {
     */
   }
 
-  ou_profile_node_profile_manage();
+  ou_profile_node_client_profile_manage();
 
- 
+
   // See if we already have some people pages, and if not then create them
   $node_check = drupal_lookup_path('source', 'people');
   if (empty($node_check)) {
-     
+
     // First create our people page
     // Construct the new node object.
     $node = new stdClass();
@@ -60,7 +60,7 @@ function ou_profile_install() {
     $node->title = "People";
     $node->body = "Enter your information about people here";
     $node->type = 'page';   // Your specified content type
-    $node->created = time();  
+    $node->created = time();
     //print_r(_profile_installed_fields());
     //print_r(_profile_installed_instances());
     //die();
@@ -112,7 +112,7 @@ function ou_profile_install() {
         'alias' => 'people/people-search',
     );
     path_save($path);
-    
+
     // Sit it where it needs to appear in the menu
     $link = array();
     $link['menu_name'] = 'primary-links'; // Fill out your menu name or just use navigation
@@ -122,15 +122,17 @@ function ou_profile_install() {
     menu_link_save($link);
 
   }
-  
+
   // Now default both profile types to use the /people path for any created content
 
-  //    ou_profile: used only on the client, contains only the staff id
-  variable_set('pathauto_node_ou_profile_pattern', 'people/[title-raw]');
   //    profile: used only on the server - this is the full profile
-  variable_set('pathauto_node_profile_pattern', '[field_oup_oucu-raw]');
+  variable_set('pathauto_node_ou_profile_pattern', '[node:oucu]');
 
 }
+
+/*
+Uninstall cant be run during the switch from a single module to a client & server module set up
+Removal of the server module causes deletion of tables that the client depends on.
 
 function ou_profile_uninstall() {
   if (!variable_get('ou_profile_server', 0)) {
@@ -139,7 +141,7 @@ function ou_profile_uninstall() {
     //fwrite($fh, "$date: ou_profile_uninstall called\n");
     //node_type_delete('ou_profile');
     //fclose($fh);
-    
+
     // Gather all the example content that might have been created while this
     // module was enabled.  Simple selects still use db_query().
     // http://api.drupal.org/api/function/db_query/7
@@ -149,18 +151,18 @@ function ou_profile_uninstall() {
     foreach ($result as $row) {
       $nids[] = $row->nid;
     }
-    
+
     // Delete all the nodes at once
     // http://api.drupal.org/api/function/node_delete_multiple/7
     node_delete_multiple($nids);
-    
+
     // Loop over each of the fields defined by this module and delete
     // all instances of the field, their data, and the field itself.
     // http://api.drupal.org/api/function/field_delete_field/7
     foreach (array_keys(_profile_installed_fields()) as $field) {
       field_delete_field($field);
     }
-    
+
     // Loop over any remaining field instances attached to the node_example
     // content type (such as the body field) and delete them individually.
     // http://api.drupal.org/api/function/field_delete_field/7
@@ -168,25 +170,26 @@ function ou_profile_uninstall() {
     foreach ($instances as $instance_name => $instance) {
       field_delete_instance($instance);
     }
-    
+
     // Delete our content type
     // http://api.drupal.org/api/function/node_type_delete/7
     node_type_delete('ou_profile');
-    
+
     // Purge all field infromation
     // http://api.drupal.org/api/function/field_purge_batch/7
     field_purge_batch(1000);
   }
 }
+*/
 
-function ou_profile_node_profile_manage() {
+function ou_profile_node_client_profile_manage() {
   $t = get_t();
 
   // Create the object filling out as little info as possible
   $node_obj = array(
       'name' => 'OU Profile',
       'type' => 'ou_profile',
-      'description' => $t('Reference node that identifies a person\'s OU profile.'),
+      'description' => $t('Reference node for client sites that identifies a person\'s OU profile.'),
       'title_label' => $t('Title'),
       'base' => 'node_content',
       'body_label' => 'About me',
@@ -203,8 +206,8 @@ function ou_profile_node_profile_manage() {
       ),
       'old_type' => 'ou_profile',
       'orig_type' => '',
-      
-      
+
+
       'modified' => '1',
       'locked' => '0',
       'comment' => '2',
@@ -227,13 +230,13 @@ function ou_profile_node_profile_manage() {
 
   // Save the content type to the database
   $res = node_type_save($content_type);
-  
+
   node_types_rebuild();
   menu_rebuild();
-  
+
   // Create all the fields we need for our content type
   foreach (_profile_installed_fields() as $field) {
-    
+
     field_create_field($field);
   }
 
@@ -258,6 +261,20 @@ function _profile_installed_fields() {
               'max_length' => 60,
           )
       ),
+      'field_oup_oucu' => array(
+          'field_name' => 'field_oup_oucu',
+          'type' => 'text',
+          'settings' => array(
+              'max_length' => 60,
+          )
+      ),
+      'field_oup_staff_id' => array(
+          'field_name' => 'field_oup_staff_id',
+          'type' => 'text',
+          'settings' => array(
+              'max_length' => 60,
+          )
+      ),
   );
 }
 
@@ -268,6 +285,20 @@ function _profile_installed_instances() {
       'field_pims_unique_id' => array(
           'field_name' => 'field_pims_unique_id',
           'label' => 'PIMS unique ID',
+          'widget' => array(
+              'type' => 'text_textfield',
+          ),
+      ),
+      'field_oup_oucu' => array(
+          'field_name' => 'field_oup_oucu',
+          'label' => 'OUCU',
+          'widget' => array(
+              'type' => 'text_textfield',
+          ),
+      ),
+      'field_oup_staff_id' => array(
+          'field_name' => 'field_oup_staff_id',
+          'label' => 'Staff ID',
           'widget' => array(
               'type' => 'text_textfield',
           ),

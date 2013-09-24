@@ -12,7 +12,16 @@ function ou_profile_get_unit_list_block() {
   
   global $user;
   
-  if (count($user->roles) > 1) { 
+  if (count($user->roles) > 1) {
+
+    // Check to see if a unit has been requested via GET
+    $unit_id = "";
+    if ($_GET['unit']) {
+      if (is_numeric($_GET['unit'])) {
+        $unit_id = $_GET['unit'];
+      }
+    }
+    
     // our block content
     $unit_list = "";
     # Get a list of units
@@ -32,10 +41,11 @@ function ou_profile_get_unit_list_block() {
     }
     $query .= "ORDER by n.title";
     
-    $result = db_query($query);
+    $results = db_query($query);
     $unit_title = "";
     
-    while ($data = db_fetch_object($result)) {
+    //while ($data = db_fetch_object($result)) {
+    foreach ($results as $data) {
       
       if ($data->field_unit_code_value == $unit_id) {
         $title = "<strong>[$data->title]</strong>";
@@ -75,8 +85,10 @@ function ou_profile_get_people_list_block() {
     if (is_array($people_results)) {
       
       foreach ($people_results as $key => $value) {
-          $staff_list .= '<h3 name="' . $key . '" id="' . $key . '">' . $key . '</h3><ul class="ou_profile_names">' . $value . '</ul>';
-          $staff_list .= '<a class="to-top" href="#org">Back to top</a>';
+          $staff_list .= '<h3 name="' . $key . '" id="' . $key . '">' . $key . '</h3>';
+          $staff_list .= '<a class="to-top" href="#list-top">Back to top</a>';
+          $staff_list .= '<ul class="ou_profile_names">' . $value . '</ul>';
+          
           $staff_initials[$key] = TRUE;
       }
     }
@@ -96,8 +108,8 @@ function ou_profile_get_people_list_block() {
       $reset_text = '<span class="reset-text">(reset form to see all staff profiles)</span>';
   
     //$wrapper = '<p class="AtoZ">Find staff members by name: '.$reset_text.'</p>';
-    $wrapper = '<ul class="AtoZ">' . $abc . '</ul>';
-    $wrapper .= $staff_list;
+    $wrapper = '<div class="item-list" id="list-top"><ul class="AtoZ">' . $abc . '</ul></div>';
+    $wrapper .= '<div class="list-items">' . $staff_list . '</div>';
       
     $block['subject'] = t("Find Staff Members by name");
     $block['content']['#markup'] = $wrapper;//ou_profile_get_people_and_job_titles(staff_node_ids, $search_query, TRUE);
