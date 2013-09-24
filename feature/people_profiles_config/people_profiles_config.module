@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the People Profiles feature.
+ */
+
+include_once 'people_profiles_config.features.inc';

@@ -26,24 +26,22 @@ require_once "$INCLUDES/local_functions.inc";
 
 
 // PIMS data file
-if ($_GET["data"] == "subset") { // i.e. url contains ?data=subset
-  $pims_file = drupal_get_path('module', 'ou_profile') . "/cron/pims_test_data.txt";
+if (isset($_GET["data"]) && $_GET["data"] == "subset") { // i.e. url contains ?data=subset
+  $pims_file = drupal_get_path('module', 'ou_profile') . "/cron/data/pims_test_data.txt";
 }
 else {
   // Look in the database for the location of the data file. If it doesn't exist, check the module directory.
-  $pims_file = variable_get('pims_data_file', drupal_get_path('module', 'ou_profile') . "/cron/pims_test_data_full.txt");
+  // $pims_file = variable_get('pims_data_file', drupal_get_path('module', 'ou_profile') . "/cron/data/pims_test_data_full.txt");
+  $pims_file = variable_get('pims_data_file', drupal_get_path('module', 'ou_profile') . "/cron/data/pims_test_data_sample.txt");
+
 }
 
 //watchdog("ou_profile", "PIMS data file = %pims_file", array('%pims_file' => $pims_file));
 ou_profile_log("PIMS data file = %pims_file", array('%pims_file' => $pims_file));
 
-// Are we running on OUBS-Reporting server?
-//
-$oubs_reporting = variable_get('oubs_reporting', 0);
-
 // open the PIMS data file for reading
 if ($fh_pims_file = fopen($pims_file, 'r')) {
-  node_load(FALSE, NULL, TRUE); // keep the cache empty - any deleted nodes will be cleared from memory
+  node_load(NULL, NULL, TRUE); // keep the cache empty - any deleted nodes will be cleared from memory
 
   // Keep track of unique IDs (computed) PIMS data file.
   $a_pims_file_unique_ids = array();
@@ -56,12 +54,6 @@ if ($fh_pims_file = fopen($pims_file, 'r')) {
 
   // Create array to store OU unit codes / descriptions.
   $a_ou_units = array();
-
-  // If this is run on OUBS Reporting, build a list of unique OUBS IDs from the drupal database
-  if ($oubs_reporting) {
-    $a_pims_oubs_db_unique_ids = array();
-  }
-
 
   // First load all the IDs that we need to compare against
   ou_profile_retrieve_existing_pims_data($a_pims_db_unique_ids, $a_pims_oubs_db_unique_ids);
@@ -77,70 +69,64 @@ if ($fh_pims_file = fopen($pims_file, 'r')) {
   ou_profile_update_ou_units($a_ou_units);
 
   // Build a list of default privacy fields - we can use these later to pre-set these in a profile.
-  $a_profile = content_fields(NULL, 'profile');
-  $a_privacy_fields = array();
-  foreach ($a_profile as $key => $value) {
-    if (preg_match("/^field_prv_/", $key) || preg_match("/^field_pprv_/", $key)) {
-      $a_privacy_fields[$key] = $value['widget']['default_value'][0]['nid'];
-    }
-  }
-} 
+//   $a_profile = field_info_instances('node', 'profile');
+//   $a_privacy_fields = array();
+//   foreach ($a_profile as $key => $value) {
+//     if (preg_match("/^field_prv_/", $key) || preg_match("/^field_pprv_/", $key)) {
+//       $a_privacy_fields[$key] = $value['default_value'][0]['nid'];
+//     }
+//   }
+}
 else {
   if ($DEBUG) {
-    print "<p>ou_profiles::Error: couldn't open $pims_file</p>\n";
+    print ("<p>ou_profiles::Error: couldn't open $pims_file</p>\n");
   }
-  watchdog("ou_profile", "Could not open PIMS data file %pims_file", array('%pims_file' => $pims_file), "WATCHDOG_ERROR");
+  watchdog("ou_profile", "Could not open PIMS data file %pims_file", array('%pims_file' => $pims_file), WATCHDOG_ERROR);
+  drupal_set_message(t("Could not open PIMS data file $pims_file"), 'error');
 }
 // close the PIMS data file
-fclose($fh_pims_file);
+if (!empty($fh_pims_file))
+  fclose($fh_pims_file);
 
 if ($DEBUG) {
   fclose($debug_log);
 }
 
 function ou_profile_update_ou_units($a_ou_units) {
-  if (!$oubs_reporting) { // Update OU unit codes
-    foreach ($a_ou_units as $ucode => $udesc) {
-      $query = 'SELECT nid FROM {content_type_ou_unit} WHERE field_unit_code_value=' . $ucode;
-      $unit_nid = db_result(db_query($query));
-      if ($unit_nid) {
-        // Update unit code
-        $unit_node = node_load($unit_nid, NULL, TRUE);
-      } 
-      else {
-        // Insert unit code
-        $unit_node = new stdClass();
-        $unit_node->type = 'ou_unit';
-        $node->created = time();
-      }
-      
-      $unit_node->title = $udesc;
-      $unit_node->field_unit_code[0]['value'] = $ucode;
-      $unit_node->changed = time();
-      node_save($unit_node);
-      unset($unit_node);
-      
+  foreach ($a_ou_units as $ucode => $udesc) {
+
+    $unit_nid = db_query('SELECT entity_id FROM {field_data_field_unit_code} WHERE field_unit_code_value = :ucode',
+        array( ':ucode' => $ucode)
+    )->fetchField();
+
+    if ($unit_nid) {
+      // Update unit code
+      $node = node_load($unit_nid, NULL, TRUE);
     }
+    else {
+      // Insert unit code
+      $node = new stdClass();
+      $node->type = 'ou_unit';
+      $node->created = time();
+      $node->language = LANGUAGE_NONE;
+      node_object_prepare($node);
+    }
+
+    $node->title = $udesc;
+    $node->field_unit_code[$node->language][0]['value'] = $ucode;
+    $node->changed = time();
+    node_save($node);
+    unset($node);
+
   }
 }
 
 function ou_profile_retrieve_existing_pims_data(&$a_pims_db_unique_ids, &$a_pims_oubs_db_unique_ids) {
-  if ($oubs_reporting) { // field_pims_unique_id_value is used in two Drupal content types so has its own table
-    $query = 'SELECT content_type_pims.nid, field_pims_unique_id_value, field_pims_l1_estab_unit_code_value ';
-    $query .= 'FROM content_field_pims_unique_id, content_type_pims ';
-    $query .= 'WHERE content_field_pims_unique_id.nid=content_type_pims.nid';
-  } 
-  else {
-    $query = 'SELECT nid,field_pims_unique_id_value, field_pims_l1_estab_unit_code_value FROM {content_type_pims}';
-  }
-  
-  $result = db_query($query);
-  while ($data = db_fetch_object($result)) {
-    $a_pims_db_unique_ids[$data->nid] =  trim($data->field_pims_unique_id_value);
 
-    if ($oubs_reporting && $data->field_pims_l1_estab_unit_code_value == "0153") {
-      $a_pims_oubs_db_unique_ids[$data->nid] =  trim($data->field_pims_unique_id_value);
-    }
+  $result = db_query('SELECT entity_id, field_pims_unique_id_value FROM {field_data_field_pims_unique_id}');
+
+  foreach ($result as $data) {
+    $a_pims_db_unique_ids[$data->entity_id] =  trim($data->field_pims_unique_id_value);
   }
 }
 
@@ -167,7 +153,18 @@ function ou_profile_retrieve_all_pims_file_data($fh_pims_file, &$a_pims_file_uni
       $a_pims_file_data[$unique_id] = $a_pims_row;
     }
 
-    if ($a_pims_row['l1_estab_unit_code']) {
+    if ($a_pims_row['l1_estab_unit_code']) {//   $node->field_pims_staff_id[$node->language][0]['value'] = $a_pims_row['staff_id'];
+//   $node->field_pims_ou_email_address[$node->language][0]['value'] = $a_pims_row['ou_email_address'];
+
+//   $node->field_pims_l1_estab_unit_code[$node->language][0]['value'] = $a_pims_row['l1_estab_unit_code'];
+//   $node->field_pims_l1_estab_unit_desc[$node->language][0]['value'] = $a_pims_row['l1_estab_unit_desc'];
+//   $node->field_pims_l2_estab_unit_name[$node->language][0]['value'] = $a_pims_row['l2_estab_unit_name'];
+//   $node->field_pims_l3_estab_unit_name[$node->language][0]['value'] = $a_pims_row['l3_estab_unit_name'];
+//   $node->field_pims_l4_estab_unit_name[$node->language][0]['value'] = $a_pims_row['l4_estab_unit_name'];
+
+//   $node->field_pims_personal_website[$node->language][0]['value'] = $a_pims_row['personal_website'];
+//   $node->field_pims_appt_job_title[$node->language][0]['value'] = $a_pims_row['appt_job_title'];
+//   $node->field_pims_appt_role_desc[$node->language][0]['value'] = $a_pims_row['appt_role_desc'];
       $a_ou_units[$a_pims_row['l1_estab_unit_code']] = $a_pims_row['l1_estab_unit_desc'];
     }
   }
@@ -188,45 +185,47 @@ function ou_profile_delete_expired_pims_records($a_pims_db_unique_ids, $a_pims_f
   // If there are entries left in $a_pims_db_unique_ids, they need to be removed from
   // the drupal database as they are no longer in the PIMS file.
   foreach (array_keys($expired) as $nid) {
-     
-    $staff_id = substr($a_pims_db_unique_ids[$nid], 0, 8);
-     
-    watchdog("ou_profile", "checking whether to remove %id", array('%id' => $staff_id));
 
-    // For OUBS Reporting, unpublish the PIMS entry
-    // For People Profiles, delete the PIMS entry
-    if ($oubs_reporting && $a_pims_oubs_db_unique_ids[$nid]) {
-      watchdog("ou_profile", "unsetting %id", array('%id' => $staff_id));
-      $pnode = node_load($nid, NULL, TRUE);
-      $pnode->status = 0;
-      node_save($pnode);
-      unset($pnode);
-    } 
-    else {
-      watchdog("ou_profile", "deleting %id", array('%id' => $staff_id));
-      // Delete the PIMS entry for this staff_id
-      node_delete($nid);
-      node_load(FALSE, NULL, TRUE); // keep the cache empty as node_delete performs a node_load first
-      $query = 'SELECT nid FROM {content_type_profile} WHERE field_oup_staff_id_value=' . $staff_id;
-      $profile_nid = db_result(db_query($query));
-      // and unpublish the profile node so that it can be reactivated later; and keep its node title
-      if ($profile_nid) {
-        
-        $query = 'SELECT title FROM {node} WHERE nid=' . $profile_nid;
-        $node_title = db_result(db_query($query));
-        
-        // Get the NID for the profile and set the status to inactive
-        $profile_node = node_load($profile_nid, NULL, TRUE);
-        $profile_node->title = $node_title; // restore title
-        $profile_node->status=0; // unpublish profile node
-        $profile_node->field_oup_active[0]['value'] = 0;
-        
-        node_save($profile_node);
-        unset($profile_node);
-      }
+    $staff_id = substr($a_pims_db_unique_ids[$nid], 0, 8);
+
+    watchdog("ou_profile", "deleting %id", array('%id' => $staff_id));
+    // Delete the PIMS entry for this staff_id
+    node_delete($nid);
+    node_load(NULL, NULL, TRUE); // keep the cache empty as node_delete performs a node_load first
+
+
+    $profile_nid = db_query('SELECT entity_id FROM {field_data_field_oup_staff_id} where field_oup_staff_id_value = :uid',
+          array( ':uid' => $staff_id)
+        )->fetchField();
+
+    // and unpublish the profile node so that it can be reactivated later; and keep its node title
+    if ($profile_nid) {
+
+      $query = 'SELECT title FROM {node} WHERE nid=' . $profile_nid;
+      $node_title = db_query($query)->fetchField();
+
+      // Get the NID for the profile and set the status to inactive
+      $profile_node = node_load($profile_nid, NULL, TRUE);
+      $profile_node->title = $node_title; // restore title
+      $profile_node->status=0; // unpublish profile node
+      $profile_node->field_oup_active[0]['value'] = 0;
+
+      node_save($profile_node);
+      unset($profile_node);
     }
-     
-    $processed++;
+
+    $processed++;//   $node->field_pims_staff_id[$node->language][0]['value'] = $a_pims_row['staff_id'];
+//   $node->field_pims_ou_email_address[$node->language][0]['value'] = $a_pims_row['ou_email_address'];
+
+//   $node->field_pims_l1_estab_unit_code[$node->language][0]['value'] = $a_pims_row['l1_estab_unit_code'];
+//   $node->field_pims_l1_estab_unit_desc[$node->language][0]['value'] = $a_pims_row['l1_estab_unit_desc'];
+//   $node->field_pims_l2_estab_unit_name[$node->language][0]['value'] = $a_pims_row['l2_estab_unit_name'];
+//   $node->field_pims_l3_estab_unit_name[$node->language][0]['value'] = $a_pims_row['l3_estab_unit_name'];
+//   $node->field_pims_l4_estab_unit_name[$node->language][0]['value'] = $a_pims_row['l4_estab_unit_name'];
+
+//   $node->field_pims_personal_website[$node->language][0]['value'] = $a_pims_row['personal_website'];
+//   $node->field_pims_appt_job_title[$node->language][0]['value'] = $a_pims_row['appt_job_title'];
+//   $node->field_pims_appt_role_desc[$node->language][0]['value'] = $a_pims_row['appt_role_desc'];
   }
 
   watchdog("ou_profile", "deleted %count records", array('%count' => $processed));
@@ -262,7 +261,7 @@ function ou_profile_create_pims_records($records, $a_pims_file_data) {
   foreach ($records as $record) {
     if (memory_get_usage() > $max_mem)
       break;
-     
+
     if (array_key_exists($record, $a_pims_file_data)) {
       // Grab the row of data from the pims file
       $a_pims_row = $a_pims_file_data[$record];
@@ -270,9 +269,12 @@ function ou_profile_create_pims_records($records, $a_pims_file_data) {
       $node = new stdClass();
       $node->type = 'pims';
       $node->created = time();
+      $node->language = LANGUAGE_NONE;
+      node_object_prepare($node);
+
       ou_profile_process_pims_record($node, $a_pims_row);
       unset($node);
-      node_load(FALSE, NULL, TRUE); // keep the cache empty - any deleted nodes will be cleared from memory
+      node_load(NULL, NULL, TRUE); // keep the cache empty - any deleted nodes will be cleared from memory
 
       ou_profile_log("creating %s", array("%s" => $record));
       ou_profile_process_profile_record($a_pims_row);
@@ -301,7 +303,7 @@ function ou_profile_update_pims_records($records, $a_pims_file_data, $a_pims_db_
     // we find the last one we worked on. It then moves to the next record
     if (($record == $last_pims_record  || $last_pims_record == 0) && $processing == FALSE)
       $processing = TRUE;
-     
+
     // If we haven't been told to start processing then continue
     if ($processing == FALSE) {
       $skipped++;
@@ -312,8 +314,8 @@ function ou_profile_update_pims_records($records, $a_pims_file_data, $a_pims_db_
     if (memory_get_usage() > $max_mem)
       break;
 
-    // If we get up this high the script is in danger of timing ouit.
-    if ($processed > 500)
+    // If we get up this high the script is in danger of timing out.
+    if ($processed > 100)
       break;
 
     ou_profile_log("updating %d %s", array("%d" => $processed, "%s" => $record));
@@ -342,7 +344,7 @@ function ou_profile_update_pims_records($records, $a_pims_file_data, $a_pims_db_
         unset($node);
         unset($a_pims_row);
         unset($nid);
-        node_load(FALSE, NULL, TRUE); // keep the cache empty - any deleted nodes will be cleared from memory
+        node_load(NULL, NULL, TRUE); // keep the cache empty - any deleted nodes will be cleared from memory
 
 
       }
@@ -387,61 +389,50 @@ function ou_profile_generate_pims_title($a_pims_row) {
 }
 
 function ou_profile_process_pims_record(&$node, $a_pims_row) {
+
+
+ // $test = node_load('40052', NULL, TRUE);
+
   $node->title = ou_profile_generate_pims_title($a_pims_row);
-   
-  $node->field_pims_staff_title[0]['value'] = $a_pims_row['staff_title'];
-  $node->field_pims_staff_initials[0]['value'] = $a_pims_row['staff_initials'];
 
-  $node->field_pims_staff_forenames[0]['value'] = $a_pims_row['staff_forenames'];
-  $node->field_pims_pref_forenames[0]['value'] = $a_pims_row['pref_forenames'];
-  $node->field_pims_staff_surname[0]['value'] = $a_pims_row['staff_surname'];
-  $node->field_pims_pref_surname[0]['value'] = $a_pims_row['pref_surname'];
+  $node->field_pims_staff_title[$node->language][0]['value'] = $a_pims_row['staff_title'];
+  $node->field_pims_staff_initials[$node->language][0]['value'] = $a_pims_row['staff_initials'];
 
-  $node->field_pims_oucu[0]['value'] = $a_pims_row['oucu'];
-  $node->field_pims_unique_id[0]['value'] = $a_pims_row['unique_id'];
-  $node->field_pims_staff_id[0]['value'] = $a_pims_row['staff_id'];
-  $node->field_pims_ou_email_address[0]['value'] = $a_pims_row['ou_email_address'];
+  $node->field_pims_staff_forenames[$node->language][0]['value'] = $a_pims_row['staff_forenames'];
+  $node->field_pims_pref_forenames[$node->language][0]['value'] = $a_pims_row['pref_forenames'];
+  $node->field_pims_staff_surname[$node->language][0]['value'] = $a_pims_row['staff_surname'];
+  $node->field_pims_pref_surname[$node->language][0]['value'] = $a_pims_row['pref_surname'];
 
-  $node->field_pims_l1_estab_unit_code[0]['value'] = $a_pims_row['l1_estab_unit_code'];
-  $node->field_pims_l1_estab_unit_desc[0]['value'] = $a_pims_row['l1_estab_unit_desc'];
-  $node->field_pims_l2_estab_unit_name[0]['value'] = $a_pims_row['l2_estab_unit_name'];
-  $node->field_pims_l3_estab_unit_name[0]['value'] = $a_pims_row['l3_estab_unit_name'];
-  $node->field_pims_l4_estab_unit_name[0]['value'] = $a_pims_row['l4_estab_unit_name'];
+  $node->field_pims_oucu[$node->language][0]['value'] = $a_pims_row['oucu'];
+  $node->field_pims_unique_id[$node->language][0]['value'] = $a_pims_row['unique_id'];
+  $node->field_pims_staff_id[$node->language][0]['value'] = $a_pims_row['staff_id'];
+  $node->field_pims_ou_email_address[$node->language][0]['value'] = $a_pims_row['ou_email_address'];
 
-  $node->field_pims_personal_website[0]['value'] = $a_pims_row['personal_website'];
-  $node->field_pims_appt_job_title[0]['value'] = $a_pims_row['appt_job_title'];
-  $node->field_pims_appt_role_desc[0]['value'] = $a_pims_row['appt_role_desc'];
+  $node->field_pims_l1_estab_unit_code[$node->language][0]['value'] = $a_pims_row['l1_estab_unit_code'];
+  $node->field_pims_l1_estab_unit_desc[$node->language][0]['value'] = $a_pims_row['l1_estab_unit_desc'];
+  $node->field_pims_l2_estab_unit_name[$node->language][0]['value'] = $a_pims_row['l2_estab_unit_name'];
+  $node->field_pims_l3_estab_unit_name[$node->language][0]['value'] = $a_pims_row['l3_estab_unit_name'];
+  $node->field_pims_l4_estab_unit_name[$node->language][0]['value'] = $a_pims_row['l4_estab_unit_name'];
 
-  // For OUBS Reporting
-  if ($a_pims_row['l1_estab_unit_code'] == "0153" && $oubs_reporting) {
-    // Add additional PIMS data for OUBS
-    $node->field_pims_sal_con_emp_strt_date[0]['value'] = $a_pims_row['sal_con_emp_strt_date'];
-    $node->field_pims_appt_start_date[0]['value'] = $a_pims_row['appt_start_date'];
-    $node->field_pims_unit_job_code_desc[0]['value'] = $a_pims_row['unit_job_code_desc'];
-    $node->field_pims_appt_term_date[0]['value'] = $a_pims_row['appt_term_date'];
-    $node->field_pims_full_or_part_time[0]['value'] = $a_pims_row['full_or_part_time'];
-    $node->field_pims_fte[0]['value'] = $a_pims_row['fte'];
-    $node->field_pims_hrs_worked_per_week[0]['value'] = $a_pims_row['hrs_worked_per_week'];
-    $node->field_pims_gender[0]['value'] = $a_pims_row['gender'];
-    $node->field_pims_perm_staff_flag[0]['value'] = $a_pims_row['perm_staff_flag'];
-    $node->field_pims_appt_role_code[0]['value'] = $a_pims_row['appt_role_code'];
-    $node->field_pims_unit_job_code_desc[0]['value'] = $a_pims_row['unit_job_code_desc'];
-  }
+  $node->field_pims_personal_website[$node->language][0]['value'] = $a_pims_row['personal_website'];
+  $node->field_pims_appt_job_title[$node->language][0]['value'] = $a_pims_row['appt_job_title'];
+  $node->field_pims_appt_role_desc[$node->language][0]['value'] = $a_pims_row['appt_role_desc'];
 
   $node->changed = time();
-  $node->language = 'en';
   $node->uid = 1;
   $node->status = 1;
 
-
-  if ($a_pims_row['l1_estab_unit_code'] ) {
-    ou_profile_log("[pims] unit code = " . $a_pims_row['l1_estab_unit_code']);
-    ou_profile_lset_content_access($node, $a_pims_row['l1_estab_unit_code']);
-  }
-
-  node_load(FALSE, NULL, TRUE); // keep the cache empty - any deleted nodes will be cleared from memory
+  node_load(NULL, NULL, TRUE); // keep the cache empty - any deleted nodes will be cleared from memory
   node_save($node);
-  node_load(FALSE, NULL, TRUE); // keep the cache empty - any deleted nodes will be cleared from memory
+
+//  if ($a_pims_row['l1_estab_unit_code'] ) {
+//    ou_profile_log("[pims] unit code = " . $a_pims_row['l1_estab_unit_code']);
+//    ou_profile_lset_content_access($node, $a_pims_row['l1_estab_unit_code']);
+//  }
+
+  node_load(NULL, NULL, TRUE); // keep the cache empty - any deleted nodes will be cleared from memory
+
+
 }
 
 function ou_profile_process_profile_record($a_pims_row) {
@@ -452,45 +443,55 @@ function ou_profile_process_profile_record($a_pims_row) {
   }
 
   // Get a list of Profiles with the same Staff ID as the current PIMS record
-  $query = 'SELECT nid FROM {content_type_profile} WHERE field_oup_staff_id_value = ' . $a_pims_row['staff_id'];
-  $profile_nid = db_result(db_query($query));
-  if ($profile_nid) { // Load the existing profile
+//  $query = 'SELECT nid FROM {content_type_profile} WHERE field_oup_staff_id_value = ' . $a_pims_row['staff_id'];
+//  $profile_nid = db_result(db_query($query));
+
+  $profile_nid = db_query('SELECT entity_id FROM {field_data_field_oup_staff_id} where field_oup_staff_id_value = :uid',
+      array( ':uid' =>  $a_pims_row['staff_id'])
+  )->fetchField();
+
+
+  if (!empty($profile_nid)) { // Load the existing profile
     // Get the NID for the profile and set the status to Active
-    $profile_node = node_load($profile_nid, NULL, TRUE);
-  } 
+    $node = node_load($profile_nid, NULL, TRUE);
+  }
   else {
     // Create a new record.
-    $profile_node = new stdClass();
-    $profile_node->type = 'profile';
-    $profile_node->created = time();
-    $profile_node->language = 'en';
+    $node = new stdClass();
+    $node->type = 'profile';
+    $node->created = time();
+    $node->language = LANGUAGE_NONE;
     // Default visibility setting = invisible
-    $profile_node->field_oup_visibility[0]['value'] = 0;
+    $node->field_oup_visibility[$node->language][0]['value'] = 0;
     // Set profile owner to admin
-    $profile_node->uid = 1; // Owner is now set when user logs in to keep in sync with SAMS. See hook ou_profile_user()
+    $node->uid = 1; // Owner is now set when user logs in to keep in sync with SAMS. See hook ou_profile_user()
   }
 
-  ou_profile_log("profile oucu = %poucu | pims oucu = %pimsoucu", array("%poucu" => $profile_node->field_oup_oucu[0]['value'], "%pimsoucu" => $a_pims_row['oucu']));
+  if (isset($node->field_oup_oucu[$node->language][0]['value']))
+    ou_profile_log("profile oucu = %poucu | pims oucu = %pimsoucu", array("%poucu" => $node->field_oup_oucu[$node->language][0]['value'], "%pimsoucu" => $a_pims_row['oucu']));
 
   // Set the default values
-  $profile_node->field_oup_staff_id[0]['value'] = $a_pims_row['staff_id'];
-  $profile_node->title = ou_profile_generate_pims_title($a_pims_row);
-  $profile_node->field_oup_active[0]['value'] = 1;
-  $profile_node->changed = time();
-  $profile_node->field_oup_oucu[0]['value'] = $a_pims_row['oucu'];
-  $profile_node->status=1; // make sure profile node is published
+  $node->field_oup_staff_id[$node->language][0]['value'] = $a_pims_row['staff_id'];
+  $node->title = ou_profile_generate_pims_title($a_pims_row);
+  $node->field_oup_active[$node->language][0]['value'] = 1;
+  $node->changed = time();
+  $node->field_oup_oucu[$node->language][0]['value'] = $a_pims_row['oucu'];
+  $node->status=1; // make sure profile node is published
 
+
+  node_save($node);
 
   if ($a_pims_row['l1_estab_unit_code']) {
     ou_profile_log("[profile] unit code = " . $a_pims_row['l1_estab_unit_code']);
-    ou_profile_lset_content_access($profile_node, $a_pims_row['l1_estab_unit_code']);
+    ou_profile_lset_content_access($node, $a_pims_row['l1_estab_unit_code']);
   }
 
-  node_save($profile_node);
+
 
   unset($query);
+  unset($result);
   unset($profile_nid);
-  unset($profile_node);
+  unset($node);
 }
 
 function bt() {

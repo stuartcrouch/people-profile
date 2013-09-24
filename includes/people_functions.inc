@@ -338,3 +338,126 @@ function ou_profile_get_title($node_title, $nid) {
   }
   return $title;
 }
+
+
+/**
+*
+* Author: Mark Williams
+*
+* Return local nodes on client website based on query of full profile and PIMS nodes on profile server
+* Do this by getting all unique ids for selected PIMS nodes on the profile server and then
+* using these unique ids to get local nodes
+*
+*/
+function ou_profile_get_profile_nodes($query = NULL, $type = NULL) {
+  global $_ou_profile_server_site_path;
+  
+  if (preg_match("/;/", $query)) {
+    return;
+  }
+  $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
+  require_once "$INCLUDES/local_functions.inc";
+
+  $a_site_info = ou_profile_lget_site_info();
+  $site_path = ou_profile_lget_site_path();
+  $unit_code = $a_site_info['unit_code'];
+
+  ou_profile_log("Unit code = " . $unit_code);
+  ou_profile_log("query = " . $query);
+  ou_profile_log("type = " . $type);
+
+  // Set database to profiles
+  db_set_active('profiles');
+
+  // This needs to stay as an old-school select for parameters to be passed to it
+  $server_query = "SELECT field_pims_unique_id_value, field_pims_pref_surname_value, field_pims_staff_surname_value ";
+  $server_query .= ", CONCAT_WS(',',field_pims_pref_surname_value, field_pims_staff_surname_value) AS ordername ";
+  $server_query .= "FROM content_type_pims ";
+  $server_query .= "WHERE ";
+  if ($query) {
+    $server_query .= $query . " ";
+  }
+  else { // no query specified so all results will be returned
+    $server_query .= " 1 ";
+  }
+
+  if ($unit_code)
+    $server_query .= "AND field_pims_l1_estab_unit_code_value=" . $unit_code . " "; // only return results for unit
+ 
+  $server_query .= "AND field_pims_staff_id_value IN " .
+    "(SELECT field_oup_staff_id_value FROM content_type_profile " . 
+    "WHERE field_oup_visibility_value= " .
+    (((int)$a_site_info['visibility'])-1) . ")" . // only return visible profiles!
+    " ORDER BY ordername ASC"; // order by preferred surname or surname if preferred surname is not set
+  ou_profile_log("server_query = " . $server_query);
+  
+  $server_result = db_query($server_query);
+  $staff_ids = array();
+  //while ($pims_data = db_fetch_object($server_result)) {
+  foreach ($server_result as $pims_data) {
+    $staff_ids[$pims_data->field_pims_unique_id_value]['surname'] = $pims_data->field_pims_staff_surname_value;
+    $staff_ids[$pims_data->field_pims_unique_id_value]['pref_surname'] = $pims_data->field_pims_pref_surname_value;
+  }
+
+  // Set database back to original and query client website to get local, matching profiles
+  db_set_active();
+  
+  $client_profiles = array();
+  $INLIST = "";
+  // loop over staff ids and get local nodes on client website
+  foreach ($staff_ids as $staff_id => $staff_data) { 
+     $INLIST .= "'" . $staff_id . "',";
+  }
+
+  $unordered_client_profiles = array();
+  if ($INLIST) {
+     $INLIST = rtrim($INLIST, ",");
+     if ($site_path != $_ou_profile_server_site_path) {
+      $client_query = "SELECT node.nid, node.title, field_data_field_pims_unique_id.field_pims_unique_id_value as staff_id " .
+          "FROM {node}, {field_data_field_pims_unique_id} " .
+          "WHERE " .
+          "node.type in ('ou_profile') " .
+          "AND node.status = 1 " .
+          "AND node.nid = field_data_field_pims_unique_id.entity_id " .
+          "AND field_data_field_pims_unique_id.field_pims_unique_id_value IN (" . $INLIST . ")";
+          // N.B. 'ORDER BY find_in_set(staff_id, $INLIST)' cannot be used here as all profiles may not be on client server
+    }
+    else {
+      $client_query = "SELECT node.nid, node.title, content_type_pims.field_pims_unique_id_value as staff_id FROM {node}, {content_type_pims} ";
+      $client_query .= "WHERE ";
+      $client_query .= "node.type in ('pims') AND node.status='1' ";
+      $client_query .= "AND node.nid=content_type_pims.nid ";
+      $client_query .= "AND content_type_pims.field_pims_unique_id_value IN (" . $INLIST . ") "; 
+      // N.B. 'ORDER BY find_in_set(staff_id, $INLIST)' cannot be used here as all profiles may not be on client server
+    }
+
+    ou_profile_log("client query = " . $client_query);
+    $client_result = db_query($client_query);
+    //while ($profile = db_fetch_array($client_result)) {
+    foreach ($client_result as $profile) {
+      if ($type == "list") {
+      ou_profile_log("creating list item for - " . $profile['title']);
+              $unordered_client_profiles[$profile['staff_id']] = l($profile['title'], "node/" . $profile['nid']); // Drupal function to return well-formed link to node
+      }
+      else {
+       $unordered_client_profiles[$profile->staff_id] = $profile->nid;
+      }
+    }
+  }
+  else
+     return;
+
+  ou_profile_log("re-ordering data");
+  foreach ($staff_ids as $staff_id => $staff_data) { // reorder the unordered client profiles to restore surname order
+    if (isset($unordered_client_profiles[$staff_id])) {
+      // If we were asked for an array, we pass back the staff_data array
+      if ($type == "array")
+        $client_profiles[$unordered_client_profiles[$staff_id]] = $staff_data;
+      else // Otherwise we just pass back the nid so they can do thier own processing
+        $client_profiles[] = $unordered_client_profiles[$staff_id];
+    }
+  }
+
+  ou_profile_log("returning profiles");
+  return $client_profiles;
+}
