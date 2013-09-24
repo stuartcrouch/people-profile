@@ -291,4 +291,4 @@ features_exclude[field][node-profile-field_prv_slideshare] = node-profile-field_
 features_exclude[field][node-profile-field_prv_teaching_interests] = node-profile-field_prv_teaching_interests
 features_exclude[field][node-profile-field_prv_twitter] = node-profile-field_prv_twitter
 features_exclude[field][node-profile-field_prv_web_links] = node-profile-field_prv_web_links
-project path = sites/www.open.ac.uk.people/modules/custom_features
+project path = sites/www.open.ac.uk.people/modules/ou_profile/feature

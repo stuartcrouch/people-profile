@@ -54,25 +54,9 @@ function ou_profile_cron() {
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/local_functions.inc";
 
-  watchdog("ou_profile", "Starting cron");
+  watchdog("ou_profile", "Running server cron");
+  include "cron/server_cron.inc";
 
-  $SERVER = 0;
-
-  global $user, $user_is_admin, $staff_id, $_ou_profile_server_site_path;
-
-  // Prepare the required values
-  $p = ou_profile_node_api_params();
-  if ($p['site_path'] == $_ou_profile_server_site_path)
-    $SERVER = TRUE;
-
-  if ($SERVER) { // run cron for server and OUBS reporting
-    watchdog("ou_profile", "Running server cron");
-    include "cron/server_cron.inc";
-  }
-  else {   // site is allowed to access the profiles system
-    watchdog("ou_profile", "Running client cron");
-    include "cron/client_cron.inc"; // run cron for client including OUBS reporting
-  }
 }
 
 ///////////////////////////////////

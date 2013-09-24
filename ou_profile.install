@@ -130,6 +130,10 @@ function ou_profile_install() {
 
 }
 
+/*
+Uninstall cant be run during the switch from a single module to a client & server module set up
+Removal of the server module causes deletion of tables that the client depends on.
+
 function ou_profile_uninstall() {
   if (!variable_get('ou_profile_server', 0)) {
     //$date = date(DATE_RFC822);  $log = "/tmp/ou_profile.log";
@@ -176,6 +180,7 @@ function ou_profile_uninstall() {
     field_purge_batch(1000);
   }
 }
+*/
 
 function ou_profile_node_client_profile_manage() {
   $t = get_t();

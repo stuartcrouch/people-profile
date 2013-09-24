@@ -78,11 +78,15 @@
 
   foreach ($a_profiles as $item) {
 
+    watchdog("ou_profile", "loading pims and profile data");
+
     // Set database to people and fully load this node
     db_set_active('profiles');
     $pims_data = node_load($item->pims_entity_id, NULL, TRUE);
     $profile_data = node_load($item->profile_entity_id, NULL, TRUE);
     db_set_active('default');
+
+    watchdog("ou_profile", "loaded");
 
     // Reset the entity structure incase it loaded from the server instead of us
     _field_info_collate_fields(TRUE);

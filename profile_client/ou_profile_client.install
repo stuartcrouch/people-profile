@@ -124,7 +124,7 @@ function ou_profile_client_uninstall() {
   // Loop over each of the fields defined by this module and delete
   // all instances of the field, their data, and the field itself.
   // http://api.drupal.org/api/function/field_delete_field/7
-  foreach (array_keys(_profile_installed_fields()) as $field) {
+  foreach (array_keys(_profile_client_installed_fields()) as $field) {
     field_delete_field($field);
   }
 
@@ -176,13 +176,13 @@ function ou_profile_client_node_client_profile_manage() {
   menu_rebuild();
 
   // Create all the fields we need for our content type
-  foreach (_profile_installed_fields() as $field) {
+  foreach (_profile_client_installed_fields() as $field) {
 
     field_create_field($field);
   }
 
   // Add instances of all the fields to the content type
-  foreach (_profile_installed_instances() as $instance) {
+  foreach (_profile_client_installed_instances() as $instance) {
     $instance['entity_type'] = 'node';
     $instance['bundle'] = $node_obj['type'];
     field_create_instance($instance);
@@ -190,7 +190,7 @@ function ou_profile_client_node_client_profile_manage() {
 }
 
 // Create the fields required for the profile content type
-function _profile_installed_fields() {
+function _profile_client_installed_fields() {
 
   $t = get_t();
 
@@ -213,7 +213,7 @@ function _profile_installed_fields() {
 }
 
 // Set how the fields should look on the profile content type
-function _profile_installed_instances() {
+function _profile_client_installed_instances() {
   $t = get_t();
   return array(
       'field_pims_unique_id' => array(

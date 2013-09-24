@@ -542,7 +542,7 @@ function ou_profile_get_request_url() {
   return $request_url;
 }
 
-function ou_propfile_edit_profile_link() {
+function ou_profile_edit_profile_link($node, $user, $account) {
   $request_url = ou_profile_get_request_url();
   
   if ($GLOBALS['base_url'] == $request_url) {

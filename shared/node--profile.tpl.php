@@ -85,7 +85,7 @@ if (!isset($node->ou_profile))
     * Currently works for content owner and admin.
     * TODO: Add a role so that IT/Comms etc can test and access all profile edit options.
     */
-    print (ou_propfile_edit_profile_link());
+    print (ou_profile_edit_profile_link($node, $user, $account));
   ?>
 
   <div class="content clearfix"<?php print $content_attributes; ?>>
