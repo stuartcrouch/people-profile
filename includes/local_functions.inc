@@ -410,9 +410,8 @@ function ou_profile_lset_profile_owner($oucu, $uid) {
 function ou_profile_lget_privacy_values() {
 
   $site_path = ou_profile_lget_site_path();
-  global $_ou_profile_server_site_path;
 
-  if ($site_path != $_ou_profile_server_site_path) {
+  if ($site_path != ou_profile_server_site_path()) {
     // Not called from the profiles server, so need to change the database to connect to the
     // profiles server database.
     db_set_active('profiles');
@@ -429,7 +428,7 @@ function ou_profile_lget_privacy_values() {
     $a_privacy_values[$data->entity_id] = $data->field_privacy_value_value;
   }
 
-  if ($site_path != $_ou_profile_server_site_path) {
+  if ($site_path != ou_profile_server_site_path()) {
     db_set_active();
   }
 
@@ -526,6 +525,9 @@ function ou_profile_node_get_field_value($node, $value) {
   return '';
 }
 
+function ou_profile_server_site_path() {
+  return ou_profile_get_request_url();
+}
 
 function ou_profile_get_request_url() {
   $env = strtolower(getenv('OUENV'));
