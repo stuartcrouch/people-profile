@@ -217,6 +217,7 @@ features[image][] = profile_photo
 features[node][] = profile
 features[services_endpoint][] = profile_export
 features[views_view][] = ordered_privacy_settings
+features[views_view][] = profile_search
 features_exclude[dependencies][ctools] = ctools
 features_exclude[dependencies][options] = options
 features_exclude[field_group][group_header|node|profile|form] = group_header|node|profile|form

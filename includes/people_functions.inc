@@ -350,7 +350,6 @@ function ou_profile_get_title($node_title, $nid) {
 *
 */
 function ou_profile_get_profile_nodes($query = NULL, $type = NULL) {
-  global $_ou_profile_server_site_path;
   
   if (preg_match("/;/", $query)) {
     return;
@@ -412,7 +411,7 @@ function ou_profile_get_profile_nodes($query = NULL, $type = NULL) {
   $unordered_client_profiles = array();
   if ($INLIST) {
      $INLIST = rtrim($INLIST, ",");
-     if ($site_path != $_ou_profile_server_site_path) {
+     if ($site_path != ou_profile_server_site_path()) {
       $client_query = "SELECT node.nid, node.title, field_data_field_pims_unique_id.field_pims_unique_id_value as staff_id " .
           "FROM {node}, {field_data_field_pims_unique_id} " .
           "WHERE " .
