@@ -1492,6 +1492,10 @@ function _ou_profile_staff_record_retrieve($staff_id) {
 
   // Load the node
   $node = node_load($nid, NULL, FALSE);
+  
+  //Get the oucu here as it's removed on the next line
+  $oucu = $node->field_oup_oucu['und'][0]['value'];
+  
   // Run it in view mode (to remove any private fields)
   ou_profile_node_view($node, "full", "en");
 
@@ -1518,7 +1522,9 @@ function _ou_profile_staff_record_retrieve($staff_id) {
       $new_image_url  = file_create_url($derivative_uri);
     }
   }
-
+  
+  //Set the oucu. Used in client site to retrieve ORO data.
+  $node->ou_profile["oucu"] = $oucu;
   return $node->ou_profile;
 }
 
@@ -1538,7 +1544,10 @@ function _ou_profile_staff_record_retrieve_access($op) {
   }
 
   // TODO: Set this up to check the requesting site is allowed to retrieve this record
-  return FALSE;
+  
+  //SSK-DEV Swapped out
+  //return FALSE;
+  return TRUE;
 }
 
 /**

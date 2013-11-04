@@ -359,7 +359,14 @@ function ou_profile_update_pims_records($records, $a_pims_file_data, $a_pims_db_
   // Store the last record we worked on
   variable_set("ou_profile_last_pims_record", $record);
 
-  watchdog("ou_profile", "updated %skipped - %count of %remaining", array('%skipped' => $skipped, '%count' => $skipped + $processed,  '%remaining' => count($records) ));
+  //watchdog("ou_profile", "updated %skipped - %count of %remaining", array('%skipped' => $skipped, '%count' => $skipped + $processed,  '%remaining' => count($records) ));
+  watchdog("ou_profile", "PP+ CRON (Update): Skipped : %skipped, Updated : %Processed, of %remaining", array(
+      '%skipped' => $skipped,
+      '%remaining' => count($records),
+      '%processed' => $processed
+    )
+  );
+
 }
 
 function ou_profile_generate_pims_title($a_pims_row) {

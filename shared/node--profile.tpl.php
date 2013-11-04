@@ -324,10 +324,18 @@ if (!isset($node->ou_profile))
        print '<div class="profile-sidebar"><div class="wrap">'.$profile_sidebar.'</div></div>';
      }
      if ($profile_content) {
-       print '<div class="profile-content"><div class="wrap">'.$profile_content.'</div></div>';
+       print '<div class="profile-content"><div class="wrap">'.$profile_content.'<div id="oro"><div class="oro_title"></div><div class="article"><ul></ul></div><div class="book"><ul></ul></div><div class="book_section"><ul></ul></div><div class="conference_item"><ul></ul></div><div class="bookedit"><ul></ul></div><div class="other"><ul></ul></div></div></div></div>';
      }
     print '</div></div>';
   }
+  
+  if( isset( $node->oucu ) )
+  {
+    //http://oro.open.ac.uk/cgi/exportview/person/ma3776/HTML/ma3776.html
+    $oro_url = "http://oro.open.ac.uk/cgi/exportview/person/".$node->oucu."/JSON/".$node->oucu.".js";
+    print "<script> var oro_link = '".$oro_url."';</script>";
+  }
+  
   ?>
   </div>
 

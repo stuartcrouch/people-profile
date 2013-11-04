@@ -61,8 +61,9 @@ function ou_profile_client_node_load($nodes, $types) {
             if (isset($node->field_pims_unique_id[$node->language][0]['value'])) {
               $unique_id = $node->field_pims_unique_id[$node->language][0]['value'];
               $staff_id = substr($unique_id, 0,  8);
-
               $node->ou_profile = ou_profile_client_rest_call($staff_id);
+              $node->oucu = $node->ou_profile["oucu"];
+              unset( $node->ou_profile["oucu"] );
             }
             break;
           }
@@ -75,6 +76,8 @@ function ou_profile_client_node_load($nodes, $types) {
 }
 
 function ou_profile_client_rest_call($param) {
+
+
   $env = strtolower(getenv('OUENV'));
   switch ($env) {
     case 'live':
@@ -90,6 +93,9 @@ function ou_profile_client_rest_call($param) {
     default:
       $request_url = 'http://www-' . $env . '.open.ac.uk/people/';
   }
+  
+  //SSK-DEVTEST
+  $request_url = 'http://localhost/pp_server/';
   
   $headers = array();
   $options = array(
@@ -116,8 +122,8 @@ function ou_profile_client_node_view($node, $view_mode, $langcode) {
   ou_profile_log("ou_profile_node_view");
 
   drupal_add_css(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_styles.css');
-
-
+  drupal_add_js( drupal_get_path('module', 'ou_profile') .'/shared/oro_data.js');
+  
   switch ($node->type) {
     case "profile":
       ou_profile_node_view_profile($node, $view_mode, $langcode);
