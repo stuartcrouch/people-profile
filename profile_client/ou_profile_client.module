@@ -1,4 +1,9 @@
 <?php
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL ^ E_NOTICE);
+
+
 /**
  * Author: Stuart Crouch
  *
@@ -39,7 +44,7 @@ $oucu = NULL;
 function ou_profile_client_node_load($nodes, $types) {
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/local_functions.inc";
-  ou_profile_log("in ou_profile_node_load");
+  //ou_profile_log("in ou_profile_node_load");
 
   if (count(array_intersect(array("profile", "ou_profile"), $types))) {
 
@@ -49,7 +54,7 @@ function ou_profile_client_node_load($nodes, $types) {
        //    ou_profile: used only on the client, contains only the staff id
        //    profile: used only on the server - this is the full profile
 
-       ou_profile_log("ou_profile_node_load $node->type");
+       //ou_profile_log("ou_profile_node_load $node->type");
 
        switch ($node->type) {
          case "ou_profile":
@@ -62,6 +67,7 @@ function ou_profile_client_node_load($nodes, $types) {
               $unique_id = $node->field_pims_unique_id[$node->language][0]['value'];
               $staff_id = substr($unique_id, 0,  8);
               $node->ou_profile = ou_profile_client_rest_call($staff_id);
+			  
               $node->oucu = $node->ou_profile["oucu"];
               unset( $node->ou_profile["oucu"] );
             }
@@ -76,7 +82,6 @@ function ou_profile_client_node_load($nodes, $types) {
 }
 
 function ou_profile_client_rest_call($param) {
-
 
   $env = strtolower(getenv('OUENV'));
   switch ($env) {
@@ -107,7 +112,9 @@ function ou_profile_client_rest_call($param) {
       //'data' => $data
   );
 
+
   $response = drupal_http_request($request_url . 'services/ou_site_profile/' . $param, $options);
+
   $data = json_decode($response->data,true);
 
   return $data;

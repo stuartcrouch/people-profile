@@ -1,14 +1,26 @@
 <?php
 
+ini_set('display_errors', 1);
+error_reporting(E_ALL ^ E_NOTICE);
+
+
 /**
  * Authors Paul Dixon and Mark Williams
  * Updated by Stuart Crouch
+ * Updated by Sirnjeet Kalwan, Nov 2013
  *
  */
 
+$module_path = drupal_get_path('module', 'ou_profile');
+
 // Include the local functions so that we can call the log command
-$INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
-require_once "$INCLUDES/local_functions.inc";
+require_once $module_path.'/includes/local_functions.inc';
+
+//pims import functions
+require_once $module_path.'/ou_profile.import.pims.inc';
+
+//Admin form & processing
+require_once $module_path.'/ou_profile.admin.inc';
 
 /**
  * 22-8-11 Author: Lee Austin
@@ -49,7 +61,7 @@ function ou_profile_make_group_relations(&$inArray, &$outArray) {
  * 2, OUBS reporting keeps its own copies of PIMS data so needs to run client and server crons
  * 3, Run the server cron before the client cron on OUBS reporting
  *
- */
+ 
 function ou_profile_cron() {
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/local_functions.inc";
@@ -58,6 +70,7 @@ function ou_profile_cron() {
   include "cron/server_cron.inc";
 
 }
+ */
 
 ///////////////////////////////////
 // NEW NODE API FUNCTIONS
@@ -68,6 +81,7 @@ $oucu = NULL;
 
 function ou_profile_load_node_info($unit_code, $node) {
 
+watchdog( "ou_profile", "ou_profile_load_node_info" );
   global $user, $user_is_admin, $staff_id;
   // Is the user an admin for this node?
   if ($user->uid) {
@@ -98,6 +112,8 @@ function ou_profile_node_api_params() {
 
 
 function ou_profile_node_view($node, $view_mode, $langcode) {
+watchdog( "ou_profile", "ou_profile_node_view" );
+
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/local_functions.inc";
   ou_profile_log("ou_profile_node_view");
@@ -122,7 +138,7 @@ function ou_profile_node_view($node, $view_mode, $langcode) {
 
 
 function ou_profile_node_view_profile($node, $view_mode, $langcode) {
-  
+  watchdog( "ou_profile", "ou_profile_node_view_profile");
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/local_functions.inc";
   
@@ -663,165 +679,178 @@ function _ou_profile_strip_private_fields(&$node, $field_name, $a_field_meta, &$
 */
 function ou_profile_form_alter(&$form, $form_state, $form_id) {
 
-  // We only want to alter the edit page.
-  if ($form_id != 'profile_node_form')
-    return;
+	drupal_add_css(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_styles.css');
+	drupal_add_js(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_scripts.js');
 
-  drupal_add_css(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_styles.css');
-  drupal_add_js(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_scripts.js');
+	switch ($form_id)
+	{
+		case 'allowed_sites_node_form':
+/*			
+		
+			$form['field_ou_unit_ref']['und']['#ajax'] = array(
+					'event' => 'change',
+					'callback' => 'ou_profile_ou_unit_callback',
+					'wrapper' => 'edit-field-test',
+			);
 
-  if ($form_id == "profile_node_form") {
-    $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
-    $site_name = variable_get('site_name', 0);
-    require_once "$INCLUDES/local_functions.inc";
-
-
-    // Add some helper text about PIMS
-    //<a href="https://msds.open.ac.uk/sss/index.aspx?">EDIT YOUR PIMS DATA</a></div>';
-    $elem = t('<a href="@url">Edit your PIMS data</a>', array('@url' => url('https://msds.open.ac.uk/sss/index.aspx')));
-
-
-    // Refer to the form validation function below
-    $form['#validate'] = array('ou_profile_form_validate');
-
-    // Refer to the form submission function below
-    $form['#submit'] = array('ou_profile_form_submit');
-
-    $staff_id = ou_profile_node_get_field_value($form['#node'], 'field_oup_staff_id');
-    if (!$staff_id)
-      return;
-
-    // Add PIMS data to the related PIMS data placeholder (field_pdat_*) in the profile content
-    $a_pims_data = (array)ou_profile_lget_pims_data(0, $staff_id);
-    foreach ($form['#node'] as $key => $val) {
-      if (preg_match("/^field_pdat_/", $key)) {
-        $pims_field_name = preg_replace("/^field_pdat_/", "field_pims_", $key);
-        $form[$key][0]['#default_value']['value'] = $a_pims_data[$pims_field_name];
-      }
-    }
-
-    // Add call back to allow making some fields read-only
-    if (isset($form['type']) && isset($form['#node'])) {
-      $form['#after_build'][] = '_ou_profile_after_build';
-    }
+			$selected = isset($form_state['values']['field_ou_unit_ref']) ? $form_state['values']['field_ou_unit_ref'] : "_none";
+			if( $selected == "_none" )
+			{
+				$form['field_test']['und']['#options'] = array(
+					'_none' => '-- Select Unit Ref first --',
+				);
+			}
+*/
+			return $form;
+		break;
+			
+		case 'profile_node_form':
+			$INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
+			$site_name = variable_get('site_name', 0);
+			require_once "$INCLUDES/local_functions.inc";
 
 
+			// Add some helper text about PIMS
+			//<a href="https://msds.open.ac.uk/sss/index.aspx?">EDIT YOUR PIMS DATA</a></div>';
+			$elem = t('<a href="@url">Edit your PIMS data</a>', array('@url' => url('https://msds.open.ac.uk/sss/index.aspx')));
 
-    $query = db_select('field_data_field_pims_l1_estab_unit_code', 'l1_units');
-    $query->addField('l1_units', 'field_pims_l1_estab_unit_code_value', 'pims_l1_estab_unit_code');
-    $query->condition('l1_units.entity_id', $form['#node']->nid, '=');
 
-    $unit_code = $query->execute()->fetchField();
+			// Refer to the form validation function below
+			$form['#validate'] = array('ou_profile_form_validate');
 
-    // Prevent the field group group_oubs from being displayed.
-    $a_field_groups = array();
+			// Refer to the form submission function below
+			$form['#submit'] = array('ou_profile_form_submit');
 
-    // get a list of field groups in the form - the last 4 digits of the
-    // field group name is the Level 1 establishing unit of the person.
-    // Thus we get a list of field groups and determine whether to show
-    // the fields in that field group.
-    // But allow for general groups which don't have unit codes in them
-    foreach ($form as $key => $val) {
-      if (preg_match("/^group_oup_/", $key)) {
-        $fg_unit_code = substr($key, -4);
-        if ($fg_unit_code != $unit_code && is_numeric($fg_unit_code)) {
-          // Hide the field group if the person is not in the unit / department
-          // the field group belongs to.
-          unset($form[$key]);
-        }
-      }
-    }
+			$staff_id = ou_profile_node_get_field_value($form['#node'], 'field_oup_staff_id');
+			if (!$staff_id)
+			  return;
 
-    // Prevent the field "Staff ID", OUCU and "Title" from being displayed.
-    unset($form['field_oup_staff_id']);
-    unset($form['field_oup_surname']);
-    unset($form['field_oup_staff_category']);
-    unset($form['field_oup_academic_centre']);
-    unset($form['field_oup_oucu']);
-    unset($form['title']);
+			// Add PIMS data to the related PIMS data placeholder (field_pdat_*) in the profile content
+			$a_pims_data = (array)ou_profile_lget_pims_data(0, $staff_id);
+			foreach ($form['#node'] as $key => $val) {
+			  if (preg_match("/^field_pdat_/", $key)) {
+				$pims_field_name = preg_replace("/^field_pdat_/", "field_pims_", $key);
+				$form[$key][0]['#default_value']['value'] = $a_pims_data[$pims_field_name];
+			  }
+			}
 
-    // Remove any PIMS data placeholders from the form - these are filled automatically by the module when viewing
-    // TODO: This bit throws out errors
-    foreach ($form as $key => $val) {
-      if (preg_match("/^field_pdat_/", $key)) {
-        unset($form[$key]);
-      }
-      if (preg_match("/^group_/", $key)) {
-          foreach ($val as $field2 => $val2) {
-          if (preg_match("/^field_pdat_/", $field2)) {
-            unset($form[$key][$field2]);
-          }
-        }
-      }
-    }
+			// Add call back to allow making some fields read-only
+			if (isset($form['type']) && isset($form['#node'])) {
+			  $form['#after_build'][] = '_ou_profile_after_build';
+			}
 
-    // Insert PIMS values next to privacy field settings
-    $pims_data = (array)ou_profile_lget_pims_data(0, $staff_id);
-    foreach ($form as $key => $val) {
 
-      if (preg_match("/^group_/", $key)) {
-          foreach ($val as $field2 => $val2) {
-          if (preg_match("/^field_pprv_/", $field2)) {
-            $current_value = $pims_data[preg_replace("/pprv/", "pims", $field2) . '_value'];
-            $style = ' class="pims"';
-            if ($current_value) {
-               $form[$key][$field2]['#title'] .= "<span $style> - CURRENT VALUE IN PIMS = '" . $current_value . "'</span>";
-            }
-        else {
-               $form[$key][$field2]['#title'] .= "<span $style> - NO CURRENT VALUE IN PIMS</span>";
-            }
-          }
-          }
-      }
 
-      if (preg_match("/^field_pprv_/", $key)) {
-         $current_value = $pims_data[preg_replace("/pprv/", "pims", $key)];
-         $style = ' class="pims"';
-         if ($current_value) {
-              $form[$key]['und']['#title'] .= "<span $style> - CURRENT VALUE IN PIMS = '" . $current_value['und'][0]['value'] . "'</span>";
-         }
-        else {
-            $form[$key]['und']['#title'] .= "<span $style> - NO CURRENT VALUE IN PIMS</span>";
-         }
-      }
-    }
+			$query = db_select('field_data_field_pims_l1_estab_unit_code', 'l1_units');
+			$query->addField('l1_units', 'field_pims_l1_estab_unit_code_value', 'pims_l1_estab_unit_code');
+			$query->condition('l1_units.entity_id', $form['#node']->nid, '=');
 
-    // Remove the "name" information as PIMS should determine what a persons name is
-    $forced_fields = array(
-      "field_pprv_staff_title",
-      "field_pprv_staff_forenames",
-      "field_pprv_pref_forenames",
-      "field_pprv_pref_surname",
-      "field_pprv_staff_surname",
-      "field_pprv_staff_initials",
-    );
-    foreach ($form as $key => $val) {
-      if (preg_match("/^group_/", $key)) {
-        foreach ($val as $field2 => $val2) {
-          if (in_array($field2, $forced_fields)) {
-            unset($form[$key][$field2]);
-          }
-        }
-      }
+			$unit_code = $query->execute()->fetchField();
 
-      if (in_array($key, $forced_fields)) {
-        unset($form[$key]);
-      }
-    }
+			// Prevent the field group group_oubs from being displayed.
+			$a_field_groups = array();
 
-  }
-  elseif ($form_id == "ou_profile_node_form") {
-    $form['field_pims_unique_id']['#access'] = FALSE;
-    if (!preg_match("/\-0153/", $form['field_pims_unique_id'][0]['#default_value']['value'])) { // Allow OUBS to repair overwritten titles caused by bug
-        $form['title']['#type'] = 'hidden';
-    }
-  }
+			// get a list of field groups in the form - the last 4 digits of the
+			// field group name is the Level 1 establishing unit of the person.
+			// Thus we get a list of field groups and determine whether to show
+			// the fields in that field group.
+			// But allow for general groups which don't have unit codes in them
+			foreach ($form as $key => $val) {
+			  if (preg_match("/^group_oup_/", $key)) {
+				$fg_unit_code = substr($key, -4);
+				if ($fg_unit_code != $unit_code && is_numeric($fg_unit_code)) {
+				  // Hide the field group if the person is not in the unit / department
+				  // the field group belongs to.
+				  unset($form[$key]);
+				}
+			  }
+			}
 
-  $form['actions']['submit']['#attributes']['class'][] = 'profile-submit';
-  unset($form['actions']['preview']);
-  unset($form['actions']['delete']);
+			// Prevent the field "Staff ID", OUCU and "Title" from being displayed.
+			unset($form['field_oup_staff_id']);
+			unset($form['field_oup_surname']);
+			unset($form['field_oup_staff_category']);
+			unset($form['field_oup_academic_centre']);
+			unset($form['field_oup_oucu']);
+			unset($form['title']);
 
-  return;
+			// Remove any PIMS data placeholders from the form - these are filled automatically by the module when viewing
+			// TODO: This bit throws out errors
+			foreach ($form as $key => $val) {
+			  if (preg_match("/^field_pdat_/", $key)) {
+				unset($form[$key]);
+			  }
+			  if (preg_match("/^group_/", $key)) {
+				  foreach ($val as $field2 => $val2) {
+				  if (preg_match("/^field_pdat_/", $field2)) {
+					unset($form[$key][$field2]);
+				  }
+				}
+			  }
+			}
+
+			// Insert PIMS values next to privacy field settings
+			$pims_data = (array)ou_profile_lget_pims_data(0, $staff_id);
+			foreach ($form as $key => $val) {
+
+			  if (preg_match("/^group_/", $key)) {
+				  foreach ($val as $field2 => $val2) {
+				  if (preg_match("/^field_pprv_/", $field2)) {
+					$current_value = $pims_data[preg_replace("/pprv/", "pims", $field2) . '_value'];
+					$style = ' class="pims"';
+					if ($current_value) {
+					   $form[$key][$field2]['#title'] .= "<span $style> - CURRENT VALUE IN PIMS = '" . $current_value . "'</span>";
+					}
+				else {
+					   $form[$key][$field2]['#title'] .= "<span $style> - NO CURRENT VALUE IN PIMS</span>";
+					}
+				  }
+				  }
+			  }
+
+			  if (preg_match("/^field_pprv_/", $key)) {
+				 $current_value = $pims_data[preg_replace("/pprv/", "pims", $key)];
+				 $style = ' class="pims"';
+				 if ($current_value) {
+					  $form[$key]['und']['#title'] .= "<span $style> - CURRENT VALUE IN PIMS = '" . $current_value['und'][0]['value'] . "'</span>";
+				 }
+				else {
+					$form[$key]['und']['#title'] .= "<span $style> - NO CURRENT VALUE IN PIMS</span>";
+				 }
+			  }
+			}
+
+			// Remove the "name" information as PIMS should determine what a persons name is
+			$forced_fields = array(
+			  "field_pprv_staff_title",
+			  "field_pprv_staff_forenames",
+			  "field_pprv_pref_forenames",
+			  "field_pprv_pref_surname",
+			  "field_pprv_staff_surname",
+			  "field_pprv_staff_initials",
+			);
+			foreach ($form as $key => $val) {
+			  if (preg_match("/^group_/", $key)) {
+				foreach ($val as $field2 => $val2) {
+				  if (in_array($field2, $forced_fields)) {
+					unset($form[$key][$field2]);
+				  }
+				}
+			  }
+
+			  if (in_array($key, $forced_fields)) {
+				unset($form[$key]);
+			  }
+			}
+
+			$form['actions']['submit']['#attributes']['class'][] = 'profile-submit';
+			unset($form['actions']['preview']);
+			unset($form['actions']['delete']);
+			return;
+			break;
+	}
+
+
 }
 
 
@@ -1213,25 +1242,6 @@ function ou_profile_permission() {
   );
 } 
 
-/**
-* Implementation of hook_menu().
-*/
-
-function ou_profile_menu() {
-  $items = array();
-
-  // This is the behind the scenes config (which directories to use, debug levels, etc)
-  $items['admin/config/system/ou_profile'] = array(
-      'title' => 'OU Profile Settings',
-      'description' => 'Import OU Profile content now.',
-      'page callback' => 'ou_profile_config',
-      'access arguments' => array('administer data load'),
-      //'type' => MENU_DEFAULT_LOCAL_TASK,
-  );
-
-  return $items;
-}
-
 function ou_profile_block_info() {
   $blocks['_unit_list'] = array(
       'info' => t("People PIMS Units List"),
@@ -1369,32 +1379,23 @@ function ou_profile_tokens($type, $tokens, array $data = array(), array $options
   return $replacements;
 }
 
-function ou_profile_config() {
-  $form = drupal_get_form('ou_profile_config_form');
-  return t('OU Profile Import') . drupal_render($form);
-}
+
+
+
+
 
 /**
- * Builds the form to allow users to configure where the EDRM module should look for content
- * @param unknown_type $form_state
+ * Immediate import as requested by config form.
  */
-function ou_profile_config_form($form_state) {
+function _immediate_import()
+{
+  $module_path = drupal_get_path('module', 'ou_profile');
+  require_once $module_path.'/pp_plus_pims_import.inc';
 
-  $form['submit']=array('#type' => 'submit',
-      '#value' => t('Refresh now'));
+	_pims_import_initialise( 'user_import' );
+/*** REMOVE THIS. THIS IS SERVER MODULE, SO NO NEED TO RUN CHECKS 
 
-  return $form;
-}
-
-/**
- * Implements hook_form_submit().
- *
- * @param unknown_type $form
- * @param unknown_type $form_state
- */
-function ou_profile_config_form_submit($form, &$form_state) {
-
-$INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
+  $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/local_functions.inc";
 
   watchdog("ou_profile", "Starting cron");
@@ -1414,6 +1415,7 @@ $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
 
   // Prepare the required values
   $p = ou_profile_node_api_params();
+  
   if ($p['site_path'] == $ou_profile_server_site_path())
     $SERVER = TRUE;
 
@@ -1425,9 +1427,9 @@ $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
     watchdog("ou_profile", "Running client cron");
     include "cron/client_cron.inc"; // run cron for client including OUBS reporting
   }
+**/
 
-  // Tell the user
-  drupal_set_message(t('Data Reloaded'));
+  //**** ADD FUNCTION TO PROCESS USING DRUPAL BATCH
 
 }
 
@@ -1487,14 +1489,17 @@ function ou_profile_services_resources() {
  */
 function _ou_profile_staff_record_retrieve($staff_id) {
 
+	watchdog( "ou_profile", "REST : ".$staff_id );
   $query = 'SELECT entity_id FROM {field_data_field_oup_staff_id} WHERE field_oup_staff_id_value=\'' . $staff_id . '\'';
   $nid = db_query($query)->fetchField();
+	watchdog( "ou_profile", "REST : ".$staff_id." NID : ".$nid );
 
   // Load the node
   $node = node_load($nid, NULL, FALSE);
   
   //Get the oucu here as it's removed on the next line
   $oucu = $node->field_oup_oucu['und'][0]['value'];
+	watchdog( "ou_profile", "REST : ".$staff_id." OUCU : ".$oucu );
   
   // Run it in view mode (to remove any private fields)
   ou_profile_node_view($node, "full", "en");
@@ -1574,3 +1579,4 @@ function _ou_profile_public_record_retrieve_access($op) {
   // TODO: Set this up to check the requesting site is allowed to retrieve this record
   return TRUE;
 }
+

@@ -5,7 +5,7 @@
  *
  */
 
-$DEBUG=0;
+$DEBUG=false;
 
 if ($DEBUG) {
   // Create a log file for debugging / informational purposes

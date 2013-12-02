@@ -334,6 +334,16 @@ if (!isset($node->ou_profile))
     //http://oro.open.ac.uk/cgi/exportview/person/ma3776/HTML/ma3776.html
     $oro_url = "http://oro.open.ac.uk/cgi/exportview/person/".$node->oucu."/JSON/".$node->oucu.".js";
     print "<script> var oro_link = '".$oro_url."';</script>";
+
+	
+    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
+    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
+    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
+    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
+    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
+    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
+    $oro_data_json = file_get_contents( $oro_url );
+    print "<script> var oro_data_json = ".$oro_data_json.";</script>";
   }
   
   ?>

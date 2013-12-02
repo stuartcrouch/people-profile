@@ -117,6 +117,15 @@
       },
       error: function( jqXHR, textStatus, errorThrown ) {
         console.log( "Ajax request fail : " + textStatus + " ERROR: " + errorThrown );
+
+        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
+        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
+        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
+        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
+        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
+        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
+        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
+        process_oro( oro_data_json );
       }
     });
     

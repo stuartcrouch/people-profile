@@ -7,7 +7,113 @@
 /**
  * Get unit code that this site is responsible for.
  * Return unit code if it exists, else return FALSE
+ *
+ * Updated : Sirnjeet Kalwan : 28 Nov 2013
+ * 		ou_profile_lget_site_info() : Added more selection criteria
 **/
+
+define ('SITE_NOT_ALLOWED', 0);
+define ('SITE_UNKNOWN', 1);
+define ('SITE_INTRANET', 2);
+define ('SITE_PUBLIC', 3);
+
+
+/* Get information about the site querying the profiles system */
+function ou_profile_lget_site_info( $http_referer = NULL )
+{
+	//Get URL of client site. Used to find "allowed sites" node on server
+	$site_path = NULL;
+	if ( !isset( $http_referer ) )
+	{
+		$site_path = ou_profile_lget_site_path();
+	} else {
+		$site_path = $http_referer;
+	}
+
+	ou_profile_log("site path = ($site_path)");
+
+	//Setup array to return information
+	$site_info = array();
+    $site_info['visibility'] = '';
+	
+	//==============Switch to profile server
+	db_set_active('profiles');
+	
+	//Get NID for the allowed_sites node for this site from server
+	$query = db_select('field_data_field_site_path', 'sp');
+	$query->fields('sp', array('entity_id') );
+	$query->condition('field_site_path_value', $site_path, '=');
+	$allowed_sites_nid = $query->execute()->fetchField();
+
+	//If NID found...
+	if ( !empty( $allowed_sites_nid ) )
+	{
+		//Load the allowed_sites node for the client site
+		$allowed_sites = node_load( $allowed_sites_nid, NULL, TRUE );
+		if( $allowed_sites )
+		{
+			//Get the site visibility, none, intranet, internet
+			$site_info['visibility'] = $allowed_sites->field_site_visibility['und'][0]['value'];
+			
+			//Get list of profile taxonomy tids
+			if( isset( $allowed_sites->field_profile_taxonomy['und'] ) )
+			{
+				$site_info['taxonomy'] = $allowed_sites->field_profile_taxonomy['und'];
+			}
+
+			//Get list of field_media expertise taxonomy tids
+			if( isset( $allowed_sites->field_media_expertise['und'] ) )
+			{
+				$site_info['media'] = $allowed_sites->field_media_expertise['und'];
+			}
+			
+			//If ou unit selected, get the ou_unit node
+			if( isset( $allowed_sites->field_ou_unit_ref['und'] ) )
+			{
+				//Get the ou_unit node
+				$ou_unit = node_load( $allowed_sites->field_ou_unit_ref['und'][0]['nid'] );
+				if( $ou_unit )
+				{
+					//Get the ou_unit field to use in our select statement.
+					//Since we can select all 4 levels, need to get correct field.
+					$ou_unit_field = "field_pims_l1_estab_unit_code";
+					if( isset( $ou_unit->field_unit_name_lv2['und'] ) )
+					{
+						$ou_unit_field = "field_pims_l2_estab_unit_code";
+					}
+					if( isset( $ou_unit->field_unit_name_lv3['und'] ) )
+					{
+						$ou_unit_field = "field_pims_l3_estab_unit_code";
+					}
+					if( isset( $ou_unit->field_unit_name_lv4['und'] ) )
+					{
+						$ou_unit_field = "field_pims_l4_estab_unit_code";
+					}
+					
+					$site_info['unit_code'] = $ou_unit->field_unit_code['und'][0]['value'];
+					$site_info['unit_code_field'] = $ou_unit_field;
+				}
+				
+			}
+		} else {
+			ou_profile_log("Site setup not found on server.");
+		}
+		
+	} else {
+		ou_profile_log("Site setup not found on server.");
+	}
+	
+	//==============Switch back to client site
+	db_set_active();
+	return $site_info;
+}
+
+
+
+
+
+
+
 function ou_profile_lget_unit_code() {
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   $site_name = variable_get('site_name', 0);
@@ -277,62 +383,6 @@ function ou_profile_lget_site_path() {
   return $GLOBALS['base_url'];
 }
 
-define ('SITE_NOT_ALLOWED', 0);
-define ('SITE_UNKNOWN', 1);
-define ('SITE_INTRANET', 2);
-define ('SITE_PUBLIC', 3);
-
-
-/* Get information about the site querying the profiles system */
-function ou_profile_lget_site_info($http_referer = NULL) {
-
-  $site_path = NULL;
-  if (!isset($http_referer)) {
-    $site_path = ou_profile_lget_site_path();
-  }
-  else {
-    $site_path = $http_referer;
-  }
-  
-  ou_profile_log("site path = ($site_path)");
-
-  $a_site_info = array();
-  db_set_active('profiles');
-
-  $query = db_select('field_data_field_site_visibility', 'sv');
-
-  $query->join('field_data_field_site_path', 'sp', 'sp.entity_id = sv.entity_id');
-  $query->join('field_data_field_ou_unit_ref', 'ur', 'ur.entity_id = sv.entity_id');
-  $query->join('field_data_field_unit_code', 'uc', 'uc.entity_id = ur.field_ou_unit_ref_nid');
-
-  $query->addField('sv', 'field_site_visibility_value', 'field_site_visibility_value');
-  $query->addField('uc', 'field_unit_code_value', 'field_unit_code_value');
-
-  $query->condition('sp.field_site_path_value', $site_path, '=');
-
-  $data = $query->execute()->fetchObject();
-
-  //$query = "SELECT s.field_site_visibility_value,u.field_unit_code_value FROM {content_type_allowed_sites} AS s, {content_type_ou_unit} AS u WHERE s.field_ou_unit_ref_nid=u.nid AND field_site_path_value= :site_path";
-
-  //$data = db_fetch_object(db_query($query));
-  //$data = db_query($query, array(':site_path' => $site_path))->fetchObject();
-
-  db_set_active();
-
-  if (!empty($data)) {
-    $a_site_info['unit_code'] = $data->field_unit_code_value;
-    $a_site_info['visibility'] = $data->field_site_visibility_value;
-  }
-  else {
-    $a_site_info['unit_code'] = '';
-    $a_site_info['visibility'] = '';
-    ou_profile_log("no site data returned");
-  }
-
-  return $a_site_info;
-}
-
-
 /* Is the site allowed to access the profiles system? */
 function ou_profile_lsite_allowed($http_referer = NULL) {
   $a_site_info = ou_profile_lget_site_info($http_referer);
@@ -541,7 +591,11 @@ function ou_profile_get_request_url() {
       $request_url = 'http://www-' . $env . '.open.ac.uk/people';
   }
   
-  return $request_url;
+  //return $request_url;
+  
+  //TEMP
+  watchdog( 'ou_profile', 'Overriding URL to http://localhost/pp_server in local_functions.inc, ou_profile_get_request_url(), line 547');
+  return ( 'http://localhost/pp_server' );
 }
 
 function ou_profile_edit_profile_link($node, $user, $account) {
