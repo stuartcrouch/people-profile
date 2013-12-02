@@ -591,11 +591,11 @@ function ou_profile_get_request_url() {
       $request_url = 'http://www-' . $env . '.open.ac.uk/people';
   }
   
-  //return $request_url;
+  return $request_url;
   
   //TEMP
-  watchdog( 'ou_profile', 'Overriding URL to http://localhost/pp_server in local_functions.inc, ou_profile_get_request_url(), line 547');
-  return ( 'http://localhost/pp_server' );
+  //watchdog( 'ou_profile', 'Overriding URL to http://localhost/pp_server in local_functions.inc, ou_profile_get_request_url(), line 547');
+  //return ( 'http://localhost/pp_server' );
 }
 
 function ou_profile_edit_profile_link($node, $user, $account) {

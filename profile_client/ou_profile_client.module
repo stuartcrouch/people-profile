@@ -100,7 +100,7 @@ function ou_profile_client_rest_call($param) {
   }
   
   //SSK-DEVTEST
-  $request_url = 'http://localhost/pp_server/';
+  //$request_url = 'http://localhost/pp_server/';
   
   $headers = array();
   $options = array(
