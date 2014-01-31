@@ -1,9 +1,5 @@
 <?php
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL ^ E_NOTICE);
-
-
 /**
  * Authors Paul Dixon and Mark Williams
  * Updated by Stuart Crouch
@@ -16,11 +12,15 @@ $module_path = drupal_get_path('module', 'ou_profile');
 // Include the local functions so that we can call the log command
 require_once $module_path.'/includes/local_functions.inc';
 
-//pims import functions
-require_once $module_path.'/ou_profile.import.pims.inc';
 
 //Admin form & processing
 require_once $module_path.'/ou_profile.admin.inc';
+
+//Drush command to run the PIMS import
+require_once $module_path.'/ou_profile.drush.inc';
+
+//PIMs import functions
+require_once $module_path.'/cron/ou_profile.import.pims.inc';
 
 /**
  * 22-8-11 Author: Lee Austin
@@ -66,7 +66,7 @@ function ou_profile_cron() {
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/local_functions.inc";
 
-  watchdog("ou_profile", "Running server cron");
+  ou_profile_log(  "Running server cron");
   include "cron/server_cron.inc";
 
 }
@@ -81,7 +81,7 @@ $oucu = NULL;
 
 function ou_profile_load_node_info($unit_code, $node) {
 
-watchdog( "ou_profile", "ou_profile_load_node_info" );
+ou_profile_log( "ou_profile_load_node_info" );
   global $user, $user_is_admin, $staff_id;
   // Is the user an admin for this node?
   if ($user->uid) {
@@ -99,7 +99,7 @@ function ou_profile_node_api_params() {
   $p = array();
   $p['a_site_info'] = ou_profile_lget_site_info();
   $p['site_name'] = variable_get('site_name', 0);
-  $p['site_allowed'] = ou_profile_lsite_allowed();
+  $p['site_allowed'] = $p['a_site_info']['client_allowed'];
   $p['site_path'] = ou_profile_lget_site_path();
   $p['unit_code'] = $p['a_site_info']['unit_code'];
   $p['site_visibility'] = (int) $p['a_site_info']['visibility'];
@@ -112,17 +112,15 @@ function ou_profile_node_api_params() {
 
 
 function ou_profile_node_view($node, $view_mode, $langcode) {
-watchdog( "ou_profile", "ou_profile_node_view" );
 
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/local_functions.inc";
   ou_profile_log("ou_profile_node_view");
 
-  drupal_add_css(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_styles.css');
-
-
   switch ($node->type) {
     case "profile":
+	  drupal_add_css(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_styles.css');
+	  drupal_add_js( drupal_get_path('module', 'ou_profile') .'/shared/ou_profile_tabs.js');
       ou_profile_node_view_profile($node, $view_mode, $langcode);
       break;
     case "ou_profile":
@@ -133,61 +131,61 @@ watchdog( "ou_profile", "ou_profile_node_view" );
       break;
   }
 
-
 }
 
 
 function ou_profile_node_view_profile($node, $view_mode, $langcode) {
-  watchdog( "ou_profile", "ou_profile_node_view_profile");
+  ou_profile_log( "ou_profile_node_view_profile_DEBUG" );
+  watchdog( 'ou_profile_node_view_profile', print_r( debug_backtrace(), true ) );
+  
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/local_functions.inc";
-  
-
-  $p = ou_profile_node_api_params();
-  $staff_id = ou_profile_node_get_field_value($node, 'field_oup_staff_id');
-
-  db_set_active('profiles');
-
-  $query = 'SELECT entity_id from {field_data_field_pims_staff_id} WHERE field_pims_staff_id_value = ' . $staff_id;
-  $pims_entity_id = db_query($query)->fetchField();
-  $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {field_data_field_pims_l1_estab_unit_code} WHERE entity_id = ' . $pims_entity_id;
-  $unit_code = db_query($query)->fetchField();
-
-  db_set_active();
 
   // Add in any PIMS data exposed by privacy values to the related PIMS data placeholder "field_pdat_*" in the profile content
   // Don't do this if the profile is being edited.
-  //$a_pims_data = ou_profile_lget_pims_data($unit_code, $staff_id);
 
   global $user, $user_is_admin, $staff_id;
-
 
   // Prepare the required values
   $p = ou_profile_node_api_params();
   $staff_id = $node->field_oup_staff_id['und'][0]['value'];
-  //    $staff_id = ou_profile_node_get_field_value($node, 'field_oup_staff_id');
-  $oucu = $node->field_oup_oucu['und'][0]['value']; //ou_profile_node_get_field_value($node, 'field_oup_oucu');
+  $oucu = $node->field_oup_oucu['und'][0]['value'];
+
 
   db_set_active('profiles');
 
   $query = 'SELECT entity_id from {field_data_field_pims_staff_id} WHERE field_pims_staff_id_value = ' . $staff_id;
   $pims_entity_id = db_query($query)->fetchField();
 
-  //  $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {content_type_pims} WHERE ';
-  //  $query .= 'field_pims_staff_id_value=' . $staff_id ;
-  $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {field_data_field_pims_l1_estab_unit_code} WHERE entity_id = ' . $pims_entity_id;
-  $unit_code = db_query($query)->fetchField();
-  db_set_active();
+  //Some profiles do not have an associated PIMS record. System previously deleted PIMs records. We now unpublish
+  if( !$pims_entity_id )
+  {
+     $node->do_not_show = TRUE;
+     db_set_active();
+	 return;
+  }
 
+    $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {field_data_field_pims_l1_estab_unit_code} WHERE entity_id = ' . $pims_entity_id;
+    $unit_code = db_query($query)->fetchField();
+
+  if( !$unit_code )
+  {
+     $node->do_not_show = TRUE;
+     db_set_active();
+	 return;
+  }
+
+  db_set_active();
   $node->do_not_show = FALSE;
 
   $site_visibility = SITE_NOT_ALLOWED;
   if ($p['site_path'] == ou_profile_server_site_path())
     $site_visibility = SITE_PUBLIC;
 
+
   if ($p['unit_code'] || $p['site_path'] == ou_profile_server_site_path()) {
 
-    $profile['ou_profile_data'] = (array)$node;//ou_profile_lget_profile_data($staff_id);
+    $profile['ou_profile_data'] = (array)$node;
     $pims_record = ou_profile_lget_pims_data($unit_code, $staff_id);
 
     $profile['pims_data'] = (array)$pims_record;
@@ -197,7 +195,7 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
     if (!$profile_visibility) {
       // Person does not want profile to be viewed
       $node->do_not_show = TRUE;
-//      return;
+      return;
     }
     $NID = $profile['pims_data']['nid'];
     $VID = $profile['pims_data']['vid'];
@@ -321,271 +319,222 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
   // If a photograph is included and the permissions allow, set the alt tags on the photo
   // And don't set anything if the page is being edited
   if (!preg_match("/edit$/", request_uri())) {
-    if ($node->field_oup_photo['und'][0]['fid']) {
+    if ( isset( $node->field_oup_photo['und'][0]['fid'] )) {
       $node->field_oup_photo['und'][0]['data']['alt'] = $node->title;
     }
   }
 
 }
 
-function ou_profile_node_view_profile_page($node, $view_mode, $langcode) {
-  global $user;
 
-  drupal_add_css(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_styles.css');
-  $your_profile = "";
-  $profile_list = "";
+//This creates the ouput for the "../people/my-profile" URL
+//    It displays a link to the logged-in users profile.
+//    If the user is an administor, after they have selected a PIMS unit, this displays a list of
+//    links to all the profiles in that PIMS unit.
+function ou_profile_node_view_profile_page($node, $view_mode, $langcode)
+{
+	global $user;
 
-  // Traffic light colours - green, amber, red
-  $a_colour = array(
-      'public' => 'green',
-      'intranet' => '#FF6600',
-      'invisible' => 'red',
-  );
-  
-  print ("a");
+	drupal_add_css(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_styles.css');
+	drupal_add_js( drupal_get_path('module', 'ou_profile') .'/shared/ou_profile_tabs.js');
 
+	// Traffic light colours - green, amber, red
+	$a_colour = array(
+		'public' => 'green',
+		'intranet' => '#FF6600',
+		'invisible' => 'red',
+	);
 
-  if ($user->uid > 1) {
-    //$query = "SELECT title,nid FROM {node} WHERE uid='%s'";
-    
-    $query = 
-    "SELECT entity_id as nid " .
-    "FROM field_data_field_oup_oucu " .
-    "WHERE field_oup_oucu_value = :uid";
+	//If user is NOT admin, try to find their profile based on their OUCU & display
+	if ($user->uid > 1)
+	{
+		$query = 
+		"SELECT entity_id as nid " .
+		"FROM field_data_field_oup_oucu " .
+		"WHERE field_oup_oucu_value = :uid";
 
-    $result = db_query($query, array(":uid" => $user->data['oucu']));
-    $profile = $result->fetchObject();
+		$result = db_query($query, array(":uid" => $user->data['oucu']));
+		$profile = $result->fetchObject();
 
+		if( isset( $profile->nid ) )
+		{
+			$user_record = node_load( $profile->nid );
+			$visibility = ou_profile_lget_profile_visibility($profile->nid);
 
-
-    if ($profile->nid) {
-
-      print("loading node");
-      $user_record = node_load($profile->nid);
-      
-//      print("db query");
-//      // Get alias
-//      $query = "SELECT dst FROM {url_alias} WHERE src=:src";
-//      $result =  db_query($query, array(':src' => 'node/' . $profile->nid));
-//      $alias = $result->fetchObject();
-//      
-//      print("alias");
-//
-//      if (!$alias) {
-//        $alias = "node/$profile->nid";
-//      }
-
-      //$your_profile .= "<h2>Your profile</h2>\n";
-      $visibility = ou_profile_lget_profile_visibility($profile->nid);
-      print ($visiblity);
-      if ($visibility) {
-        $visibility = "&nbsp<span class='oup-visibility-$visibility'>[$visibility]</span>";
-      }
-      $title = preg_replace("/^Profile:/", "", $user_record->title);
-      $your_profile .= "<h2>$title $visibility [<a href='/people/".$user->data['oucu']."'>view</a>] [<a href='node/$profile->nid/edit'>edit</a>]</h2>";
-    }
-  }
-
-  // Is the user a member of any group-admin groups? If so, generate a list of profiles they can admin.
-  $query = "SELECT rid FROM {users_roles} WHERE uid = :uid";
-
-  $result = db_query($query, array(":uid" => $user->uid));
-  //while ($data = db_fetch_object($result)) {
-  foreach ($result as $data) {
-    if ($data->rid) {
-
-      $group_query = "SELECT name FROM {role} WHERE rid = :rid AND name LIKE :name";
-
-      $group_result = db_query($group_query, array(":rid" => $data->rid, ":name" => 'PP%'));
-
-      //while ($group_data = db_fetch_object($group_result)) {
-      foreach ($group_result as $group_data) {
-        // We only want People Profile groups / roles. These have the format PP0123, i.e. PP + 4 digits
-        // - the 4 digits being the level 1 estab unit code.
-        if (preg_match("/^PP\d\d\d\d$/", $group_data->name)) {
-          //oupdb("Matched group: $group_data->name");
-          $unit_id = substr($group_data->name, -4);
-          //oupdb("Unit ID: $unit_id");
-          $pims_query = "SELECT field_pims_staff_id_value FROM {content_type_pims} " .
-              "WHERE field_pims_l1_estab_unit_code_value = '%s' " .
-              "ORDER BY field_pims_staff_surname_value";
-
-          //oupdb("PIMS SQL: $pims_query;");
-          $pims_result = db_query($pims_query, $unit_id);
-          $a_pims_staff_ids = array();
-          while ($pims_data = db_fetch_object($pims_result)) {
-            array_push($a_pims_staff_ids, $pims_data->field_pims_staff_id_value);
-          }
-
-          $pims_staff_ids = implode(",", $a_pims_staff_ids);
-          //$profile_query = "SELECT n.title, n.nid, n.uid FROM node AS n, content_type_profile AS p WHERE n.nid=p.nid AND p.field_oup_staff_id_value IN (" . $pims_staff_ids . ")";
-          $profile_query  = "SELECT n.title, n.nid, n.uid, pi.field_pims_staff_surname_value, ";
-          $profile_query .= "pi.field_pims_pref_surname_value, pi.field_pims_staff_forenames_value,";
-          $profile_query .= "pi.field_pims_pref_forenames_value, pi.field_pims_staff_title_value ";
-          $profile_query .= "FROM node AS n, content_type_profile AS pr, content_type_pims AS pi ";
-          $profile_query .= "WHERE n.nid=pr.nid AND pi.field_pims_staff_id_value=pr.field_oup_staff_id_value ";
-          $profile_query .= "AND pr.field_oup_staff_id_value IN (" . $pims_staff_ids . ") ";
-          $profile_query .= "ORDER BY pi.field_pims_staff_surname_value";
-          //oupdb("Profile query: $profile_query;");
-          $profile_result = db_query($profile_query);
-          //while ($profile_data = db_fetch_object($profile_result)) {
-          foreach($profile_result as $profile_data) {
-            if ($user->uid <> $profile_data->uid) { // Exlude own profile
-              //oupdb ("ADDING:: $profile_data->nid - $profile_data->title");
-              $forenames = $profile_data->field_pims_staff_forenames_value;
-              if ($profile_data->field_pims_pref_forenames_value && $profile_data->field_pims_pref_forenames_value <>$profile_data->field_pims_staff_forenames_value) {
-                $forenames .= " [$profile_data->field_pims_pref_forenames_value]";
-              }
-              $surname = $profile_data->field_pims_staff_surname_value;
-              if ($profile_data->field_pims_pref_surname_value && $profile_data->field_pims_pref_surname_value <> $profile_data->field_pims_staff_surname_value) {
-                $surname .= " [$profile_data->field_pims_pref_surname_value]";
-              }
-
-              $visibility = ou_profile_lget_profile_visibility($profile_data->nid);
-              if ($visibility) {
-                $visibility = "&nbsp<span class='oup-visibility-$visibility'>[$visibility]</span>";
-              }
-
-              $profile_list .= "<li>" .
-                  l($surname . ", " . $forenames, "node/" . $profile_data->nid) . $visibility .
-                  "</li>\n";
-            }
-          }
-        }
-      }
-    }
-  }
-
-  if ($your_profile) {
-    $node->content['body'][0]['#markup'] .= $your_profile;
-  }
-
-  // Is the user a member of DRADMIN role?
-  //if (in_array('DRADMIN', array_values($user->roles))) {
-  // Is the user more than just "authenticated"
-  if (count($user->roles) > 1) {
-
-    // Check to see if a unit has been requested via GET
-    $unit_id = "";
-    if ($_GET['unit']) {
-      if (is_numeric($_GET['unit'])) {
-        $unit_id = $_GET['unit'];
-      }
-    }
-
-    // Has a unit been requested to be viewed and do we have permissions?
-    if ($unit_id) {
-
-      // Get a list of units
-      $query = "SELECT n.title, u.field_unit_code_value FROM {node} AS n, content_type_ou_unit AS u WHERE n.nid=u.nid AND u.field_unit_code_value=:unit_code ORDER by n.title";
-      $result = db_query($query, array(":unit_code" => $unit_id));
-
-      //while ($data = db_fetch_object($result)) {
-      foreach ($result as $data) {
-        $title = $data->title;
-      }
-
-      if (in_array("PP" . $unit_id, array_values($user->roles)) ||
-          in_array('DRADMIN', array_values($user->roles))
-      ) {
-
-        // Wrap the unit list in a div and ul (if it exists)
-        $node->content['body'][0]['#markup'] .= "<h2>" . $title . "</h2>";
+			if($visibility)
+			{
+				$visibility = "&nbsp<span class='oup-visibility-$visibility'>[$visibility]</span>";
+			}
+			$title = preg_replace("/^Profile:/", "", $user_record->title);
+			$node->content['body'][0]['#markup'] .= "<h2>$title $visibility [<a href='/people/".$user->data['oucu']."'>view</a>] [<a href='node/$profile->nid/edit'>edit</a>]</h2>";
+		}
+	}
 
 
-        $pims_query = "SELECT field_pims_staff_id_value FROM {content_type_pims} WHERE field_pims_l1_estab_unit_code_value=:unit_id ORDER BY field_pims_staff_surname_value";
-        $pims_result = db_query($pims_query, array(":unit_id" => $unit_id));
-        $a_pims_staff_ids = array();
-        //while ($pims_data = db_fetch_object($pims_result)) {
-        foreach ($pims_result as $pims_data) {
-          array_push($a_pims_staff_ids, $pims_data->field_pims_staff_id_value);
-        }
+	// Is the user more than just "authenticated"
+	if( count($user->roles) > 1 )
+	{
 
-        if (count($a_pims_staff_ids)) {
-          $pims_staff_ids = implode(",", $a_pims_staff_ids);
-          $profile_query  = "SELECT DISTINCT n.title, n.nid, n.uid, pi.field_pims_staff_surname_value, ";
-          $profile_query .= "pi.field_pims_pref_surname_value, pi.field_pims_staff_forenames_value,";
-          $profile_query .= "pi.field_pims_pref_forenames_value, pi.field_pims_staff_title_value ";
-          $profile_query .= "FROM node AS n, content_type_profile AS pr, content_type_pims AS pi ";
-          $profile_query .= "WHERE n.nid=pr.nid AND pi.field_pims_staff_id_value=pr.field_oup_staff_id_value ";
-          $profile_query .= "AND pr.field_oup_staff_id_value IN (" . $pims_staff_ids . ") ";
-          $profile_query .= "ORDER BY pi.field_pims_staff_surname_value";
+		// Check to see if a unit has been requested via GET
+		$unit_id = "";
+		if( isset( $_GET['unit'] ) )
+		{
+			if (is_numeric($_GET['unit']))
+			{
+				$unit_id = $_GET['unit'];
+			}
+		}
 
-          $profile_result = db_query($profile_query);
-          $group_list = "";
+		// Has a unit been requested to be viewed
+		if( $unit_id )
+		{
+			# Get a title of the requested PIMS unit
+			$query = db_select('node', 'n');
+			$query->join('field_data_field_unit_code', 'uc', 'n.nid = uc.entity_id');
+			$query->condition( 'uc.field_unit_code_value', $unit_id, '=' );
+			$query->addField('n', 'title');
+			$result = $query->execute()->fetchCol();
+			
+			$unit_title = reset( $result );
 
-          //while ($profile_data = db_fetch_object($profile_result)) {
-          foreach ($profile_result as $profile_data) {
-            $forenames = $profile_data->field_pims_staff_forenames_value;
-            if ($profile_data->field_pims_pref_forenames_value && $profile_data->field_pims_pref_forenames_value <>$profile_data->field_pims_staff_forenames_value) {
-              $forenames .= " [$profile_data->field_pims_pref_forenames_value]";
-            }
-            $surname = $profile_data->field_pims_staff_surname_value;
-            if ($profile_data->field_pims_pref_surname_value && $profile_data->field_pims_pref_surname_value <> $profile_data->field_pims_staff_surname_value) {
-              $surname .= " [$profile_data->field_pims_pref_surname_value]";
-            }
-            $visibility = ou_profile_lget_profile_visibility($profile_data->nid);
-            if ($visibility) {
-              $visibility = "&nbsp; <span style='color:" . $a_colour[$visibility] . "'>[$visibility]</span>";
-            }
-            $group_list .= "<li>" .
-                l($surname . ", " . $forenames, "node/" . $profile_data->nid)
-                . $visibility .
-                "</li>\n";
+			// ...and do we have permissions?
+			if (in_array( 'PP' . $unit_id, array_values( $user->roles ) ) || in_array( 'DRADMIN', array_values( $user->roles ) ) ) 
+			{
 
-            // Fix for profiles with title set to "This profile has not yet been published"
-            if ($profile_data->title == "This profile has not yet been published") {
-              if ($profile_data->field_pims_pref_forenames_value) {
-                $forenames = $profile_data->field_pims_pref_forenames_value;
-              }
-              else {
-                $forenames = $profile_data->field_pims_staff_forenames_value;
-              }
+			
+				// Wrap the unit list in a div and ul (if it exists)
+				$node->content['body'][0]['#markup'] .= "<h2>" . $unit_title . "</h2>";
 
-              if ($profile_data->field_pims_pref_surname_value) {
-                $surname = $profile_data->field_pims_pref_surname_value;
-              }
-              else {
-                $surname = $profile_data->field_pims_staff_surname_value;
-              }
+				//Get a list of all profiles for the PIMS unit that the user requested
+				$profile_query = db_select( 'field_data_field_pims_l1_estab_unit_code', 'pims_unit' );
+				$profile_query->join('field_data_field_pims_l1_estab_unit_desc', 'pims_unit_name', 'pims_unit.entity_id = pims_unit_name.entity_id');
+				$profile_query->join('field_data_field_pims_staff_forenames', 'fname', 'pims_unit.entity_id = fname.entity_id');
+				$profile_query->join('field_data_field_pims_pref_forenames', 'fname_pref', 'pims_unit.entity_id = fname_pref.entity_id');
+				$profile_query->join('field_data_field_pims_staff_surname', 'sname', 'pims_unit.entity_id = sname.entity_id');
+				$profile_query->join('field_data_field_pims_pref_surname', 'sname_pref', 'pims_unit.entity_id = sname_pref.entity_id');
+				$profile_query->join('field_data_field_pims_staff_id', 'staff_id', 'pims_unit.entity_id = staff_id.entity_id');
+				$profile_query->join('field_data_field_oup_staff_id', 'pr_staff_id', 'pr_staff_id.field_oup_staff_id_value = staff_id.field_pims_staff_id_value');
+				$profile_query->condition( 'pims_unit.field_pims_l1_estab_unit_code_value', $unit_id, '=' );
+				$profile_query->addField( 'pims_unit_name', 'field_pims_l1_estab_unit_desc_value');
+				$profile_query->addField( 'fname', 'field_pims_staff_forenames_value');
+				$profile_query->addField( 'fname_pref', 'field_pims_pref_forenames_value');
+				$profile_query->addField( 'sname', 'field_pims_staff_surname_value');
+				$profile_query->addField( 'sname_pref', 'field_pims_pref_surname_value');
+				$profile_query->addField( 'pr_staff_id', 'entity_id', 'nid' );
+				$profile_query->orderBy( 'sname.field_pims_staff_surname_value' );
+				$profile_result = $profile_query->execute();
 
-              $title = "";
-              if ($profile_data->field_pims_staff_title_value) {
-                $title .= $profile_data->field_pims_staff_title_value . " ";
-              }
-              $title .= "$forenames $surname";
-              $tmp_node = node_load($profile_data->nid, NULL, TRUE);
-              $tmp_node->title = $title;
-              node_save($tmp_node);
-              node_load(NULL, NULL, TRUE); // keep the cache empty - any deleted nodes will be cleared from memory
-              unset($tmp_node);
-            }
-          }
-        }
-        else {
-          $group_list .= "<p>There are no profiles.</p>\n";
-        }
-      }
-      else {
-        $node->content['body'][0]['#markup'] .= "<h2>You dont have permissions to manage " . $title . "</h2>\n";
+				//Process the list and generate the HTML for the output
+				$group_list = "";
+				foreach ($profile_result as $profile_data)
+				{
+					$forenames = $profile_data->field_pims_staff_forenames_value;
+					if ($profile_data->field_pims_pref_forenames_value && $profile_data->field_pims_pref_forenames_value <>$profile_data->field_pims_staff_forenames_value)
+					{
+						$forenames .= " [$profile_data->field_pims_pref_forenames_value]";
+					}
+					
+					$surname = $profile_data->field_pims_staff_surname_value;
+					if ($profile_data->field_pims_pref_surname_value && $profile_data->field_pims_pref_surname_value <> $profile_data->field_pims_staff_surname_value)
+					{
+						$surname .= " [$profile_data->field_pims_pref_surname_value]";
+					}
+					
+					$visibility = ou_profile_lget_profile_visibility($profile_data->nid);
+					if ($visibility)
+					{
+						$visibility = "&nbsp; <span style='color:" . $a_colour[$visibility] . "'>[$visibility]</span>";
+					}
+					$group_list .= "<li>" .
+						l($surname . ", " . $forenames, "node/" . $profile_data->nid) .
+						$visibility .
+						"</li>\n";
+				}
 
-        if ($profile_list) {
-          $node->content['body'][0]['#markup'] .= "<h2>Other profiles you can edit</h2>\n";
-          $node->content['body'][0]['#markup'] .= "<ul>\n" . $profile_list . "</ul>\n";
-        }
-      }
-    }
-  }
+				if( $group_list == "" )
+				{
+					$group_list = "<p>There are no profiles.</p>\n";
+				}
 
+				$node->content['body'][0]['#markup'] .= "<ul>\n";
+				$node->content['body'][0]['#markup'] .= $group_list;
+				$node->content['body'][0]['#markup'] .= "</ul>\n";
 
+			} else {
+				//...a unit has been requested, but we don't have access to it. Display links to profiles we CAN edit
 
-  if ($group_list) {
-    //$node->content['body'][0]['#markup'] .= "<h3>$unit_title\n</h3>";
-    $node->content['body'][0]['#markup'] .= "<ul>\n";
-    $node->content['body'][0]['#markup'] .= $group_list;
-    $node->content['body'][0]['#markup'] .= "</ul>\n";
-  }
+				$node->content['body'][0]['#markup'] .= "<h2>You dont have permissions to manage " . $unit_title . "</h2>\n";
 
+				//Get the roles this user is administrator for
+				$unit_roles = array();
+				foreach( $user->roles as $role )
+				{
+					if( substr( $role, 0, 2 ) == 'PP' )
+					{
+						$unit_roles[] = substr( $role, 2-strlen( $role ) );
+					}
+				}
+
+				//if we detect any admin roles, get a list of all the users this person can edit
+				if( isset( $unit_roles ) )
+				{
+					//Get a list of all profiles that the user is administrator for
+					$profile_query = db_select( 'field_data_field_pims_l1_estab_unit_code', 'pims_unit' );
+					$profile_query->join('field_data_field_pims_l1_estab_unit_desc', 'pims_unit_name', 'pims_unit.entity_id = pims_unit_name.entity_id');
+					$profile_query->join('field_data_field_pims_staff_forenames', 'fname', 'pims_unit.entity_id = fname.entity_id');
+					$profile_query->join('field_data_field_pims_pref_forenames', 'fname_pref', 'pims_unit.entity_id = fname_pref.entity_id');
+					$profile_query->join('field_data_field_pims_staff_surname', 'sname', 'pims_unit.entity_id = sname.entity_id');
+					$profile_query->join('field_data_field_pims_pref_surname', 'sname_pref', 'pims_unit.entity_id = sname_pref.entity_id');
+					$profile_query->join('field_data_field_pims_staff_id', 'staff_id', 'pims_unit.entity_id = staff_id.entity_id');
+					$profile_query->join('field_data_field_oup_staff_id', 'pr_staff_id', 'pr_staff_id.field_oup_staff_id_value = staff_id.field_pims_staff_id_value');
+					$profile_query->condition( 'pims_unit.field_pims_l1_estab_unit_code_value', $unit_roles, 'IN' );
+					$profile_query->addField( 'pims_unit_name', 'field_pims_l1_estab_unit_desc_value');
+					$profile_query->addField( 'fname', 'field_pims_staff_forenames_value');
+					$profile_query->addField( 'fname_pref', 'field_pims_pref_forenames_value');
+					$profile_query->addField( 'sname', 'field_pims_staff_surname_value');
+					$profile_query->addField( 'sname_pref', 'field_pims_pref_surname_value');
+					$profile_query->addField( 'pr_staff_id', 'entity_id', 'nid' );
+					$profile_query->orderBy( 'sname.field_pims_staff_surname_value' );
+					$profile_result = $profile_query->execute();
+
+					$profile_list = '';
+
+					//Build the output list
+					foreach($profile_result as $profile_data)
+					{
+						$forenames = $profile_data->field_pims_staff_forenames_value;
+						if($profile_data->field_pims_pref_forenames_value && $profile_data->field_pims_pref_forenames_value <>$profile_data->field_pims_staff_forenames_value)
+						{
+							$forenames .= " [$profile_data->field_pims_pref_forenames_value]";
+						}
+						$surname = $profile_data->field_pims_staff_surname_value;
+						
+						if ($profile_data->field_pims_pref_surname_value && $profile_data->field_pims_pref_surname_value <> $profile_data->field_pims_staff_surname_value)
+						{
+							$surname .= " [$profile_data->field_pims_pref_surname_value]";
+						}
+
+						$visibility = ou_profile_lget_profile_visibility($profile_data->nid);
+						if ($visibility)
+						{
+							$visibility = "&nbsp;<span style='color:" . $a_colour[$visibility] . "'>[$visibility]</span>";
+						}
+
+						$profile_list .= "<li> ".$profile_data->field_pims_l1_estab_unit_desc_value." : ".
+							l($surname . ", " . $forenames, "node/" . $profile_data->nid) . $visibility .
+							"</li>\n";
+					}
+
+					//Output the list of profiles
+					if( !empty( $profile_list ) )
+					{
+						$node->content['body'][0]['#markup'] .= "<h2>Other profiles you can edit</h2>\n";
+						$node->content['body'][0]['#markup'] .= "<ul>\n" . $profile_list . "</ul>\n";
+					}
+				}
+			}
+		}
+	}
 }
 
 ///////////////////////////// END VIEW NODES /////////////////////////////////////////////
@@ -598,9 +547,23 @@ function _ou_profile_strip_private_fields(&$node, $field_name, $a_field_meta, &$
   $a_pims_data = $profile['pims_data'];
   $value = NULL;
 
+try{
   $NID = $profile['pims_data']['nid'];
   $VID = $profile['pims_data']['vid'];
+} catch (Exception $e) {
+   watchdog( '_ou_profile_strip_private_fields', "Caught exception: " . $e->getMessage() . "n" );
+   watchdog( '_ou_profile_strip_private_fields', '$a_profile_data : '.print_r( $a_profile_data, true ) );
+   watchdog( '_ou_profile_strip_private_fields', '$a_privacy_values : '.print_r( $a_privacy_values, true ) );
+   watchdog( '_ou_profile_strip_private_fields', '$a_pims_data : '.print_r( $a_pims_data, true ) );
+   watchdog( '_ou_profile_strip_private_fields', '$node : '.print_r( $node, true ) );
+   watchdog( '_ou_profile_strip_private_fields', '$field_name : '.print_r( $field_name, true ) );
+   watchdog( '_ou_profile_strip_private_fields', print_r( debug_backtrace( ), true ) );
+}
 
+
+
+  //Work out the name of the privacy field for the field being passed to function
+  //...and the value of the field
   if (preg_match("/^field_oup_/", $field_name)) {
     $privacy_field = preg_replace("/^field_oup_/", "field_prv_", $field_name);
     $value = $profile['ou_profile_data'][$field_name];
@@ -617,15 +580,14 @@ function _ou_profile_strip_private_fields(&$node, $field_name, $a_field_meta, &$
   else // Nothing to do here
     return;
 
+  //Get the privacy value set on the profile
   $field_privacy_value = -1; // Default to Private / not shown if not set
-  
   if (!empty($a_profile_data[$privacy_field]) &&
       isset($a_privacy_values[$a_profile_data[$privacy_field]['und'][0]['nid']])) {
     $field_privacy_value = $a_privacy_values[$a_profile_data[$privacy_field]['und'][0]['nid']];
   }
 
-  // Some fields need to be always public for evaluation purposes
-  // The data is set by PIMS so cant be adjusted
+  // Some fields need to be always public
   $public_fields = array( 
     'field_pdat_pref_forenames',
     'field_pdat_staff_forenames',
@@ -633,11 +595,18 @@ function _ou_profile_strip_private_fields(&$node, $field_name, $a_field_meta, &$
     'field_pdat_staff_surname',
     'field_pdat_staff_title',
     'field_oup_visibility',
+    'field_oup_oucu',
+	'field_oup_media_relations_bio',
+	'field_oup_profile_layout_image',
+	'field_oup_profile_layout',
+	'field_oup_profile_layout_colour',
   );
   
+  //Set value for public field
   if (in_array($field_name, $public_fields))
     $field_privacy_value = 3;
 
+  
   $a_ou_profile[$field_name] = $a_field_meta;
 
   if (!empty($a_field_meta['multiple']) && $a_field_meta['multiple'] == 1) {
@@ -646,6 +615,8 @@ function _ou_profile_strip_private_fields(&$node, $field_name, $a_field_meta, &$
 
     // Add data if privacy settings allow
     if ((int) $field_privacy_value >= (int) $site_visibility) {
+	  //**** This is a D6 table
+	  //Can't find any instance of ['multiple'] == 1, so don't know what to do with it
       $table_name = "content_" . $field_name;
       $a_field_data = ou_profile_lget_multi_field_data($table_name, $NID);
       $a_ou_profile[$field_name]['value'] = $a_field_data;
@@ -653,6 +624,7 @@ function _ou_profile_strip_private_fields(&$node, $field_name, $a_field_meta, &$
     else {
       $a_ou_profile[$field_name]['value'] = "";
     }
+	
   }
   else {
     // Single instance field
@@ -680,7 +652,7 @@ function _ou_profile_strip_private_fields(&$node, $field_name, $a_field_meta, &$
 function ou_profile_form_alter(&$form, $form_state, $form_id) {
 
 	drupal_add_css(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_styles.css');
-	drupal_add_js(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_scripts.js');
+	drupal_add_js(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_scripts.js'); 
 
 	switch ($form_id)
 	{
@@ -843,9 +815,14 @@ function ou_profile_form_alter(&$form, $form_state, $form_id) {
 			  }
 			}
 
+			//Set the size of the select lists
+			$form['field_media_expertise']['und']['#size'] = '10';
+			$form['field_profile_taxonomy']['und']['#size'] = '10';
+
 			$form['actions']['submit']['#attributes']['class'][] = 'profile-submit';
 			unset($form['actions']['preview']);
 			unset($form['actions']['delete']);
+
 			return;
 			break;
 	}
@@ -962,42 +939,56 @@ function _ou_profile_fix_disabled(&$elements) {
 }
 
 
-function ou_profile_user($op, &$edit, &$account, $category = NULL) {
+/**
+* Implement hook_user_login(&$edit, $account)
+*/
+function ou_profile_user_login( &$edit, &$account)
+{
+	// When a user logs in, check if they have any profiles. If they do, set the owner
+	// of the profile to their UID
+	$INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
+	require_once "$INCLUDES/local_functions.inc";
 
-  // When a user logs in, check if they have any profiles. If they do, set the owner
-  // of the profile to their UID
-  if ($op == "login") {
-    $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
-    require_once "$INCLUDES/local_functions.inc";
+	$site_path = ou_profile_lget_site_path();
+	$uid = $account->uid;
+	$oucu = $account->name;
 
-    $site_path = ou_profile_lget_site_path();
-    $uid = $account->uid;
-    $oucu = $account->name;
+	if( $uid>1 && $oucu && ($site_path == ou_profile_server_site_path() ) )
+	{
+		ou_profile_lset_profile_owner($oucu, $uid);
+	}
 
-    if ($uid>1 && $oucu && ($site_path == ou_profile_server_site_path())) {
-      ou_profile_lset_profile_owner($oucu, $uid);
-    }
-
-  }
-
-}
-
-function ou_profile_add_body_classes(&$vars) {
-  // Do an easy check to see if this is a profile page
-  if (in_array('node-type-profile', $vars['classes_array'])) {
-    if (isset($vars['page']['content']['system_main']['nodes'])) {
-      $node = reset($vars['page']['content']['system_main']['nodes']);
-      if (isset($node)) {
-        $vars['classes_array'][] = $node['field_oup_profile_layout'][0]['#markup'];
-        $vars['classes_array'][] = $node['field_oup_profile_layout_colour'][0]['#markup'];
-      }
-    }
-  }
 }
 
 function ou_profile_preprocess_html(&$vars) {
   ou_profile_add_body_classes($vars);
 }
+
+function ou_profile_add_body_classes(&$vars)
+{
+  // Do an easy check to see if this is a profile page
+  if (in_array('node-type-profile', $vars['classes_array'])) {
+    if (isset($vars['page']['content']['system_main']['nodes'])) {
+      $node = reset($vars['page']['content']['system_main']['nodes']);
+      if (isset($node))
+	  {
+	    if( isset( $node['field_oup_profile_layout']['#items'][0]['value'] ) )
+		{
+			$vars['classes_array'][] = $node['field_oup_profile_layout']['#items'][0]['value'];
+		} else {
+			$vars['classes_array'][] = 'p2cl';
+		}
+		if( isset( $node['field_oup_profile_layout_colour'][0]['#markup'] ) )
+		{
+			$vars['classes_array'][] = $node['field_oup_profile_layout_colour'][0]['#markup'];
+		} else {
+			$vars['classes_array'][] = 'light';
+		}
+      }
+    }
+  }
+}
+
 
 /**
 *
@@ -1094,7 +1085,7 @@ function theme_get_profile_node_list($query = NULL, $type = "array") {
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/people_functions.inc";
 
-  $staff_nodes = ou_profile_get_profile_nodes($query, $type);
+  $staff_nodes = ou_profile_get_profile_nodes($type);
   if ($type == "list") {
     $staff_list = "";
     if (is_array($staff_nodes)) {
@@ -1127,6 +1118,9 @@ function theme_get_profile_node_list($query = NULL, $type = "array") {
 * Return an array of expertise keywords for the client website's unit
 *
 */
+/*
+
+MOVED TO PEOPLE.INC
 function theme_get_expertise_tags() {
 
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
@@ -1160,6 +1154,7 @@ function theme_get_expertise_tags() {
 
   return $tags;
 }
+*/
 
 /**
  * Create custom meta-tags using nodewords API
@@ -1220,7 +1215,7 @@ function ou_profile_oucu_action($node, $context = array()) {
 
     //$_curl = 'http://www8-rosella.open.ac.uk/about/main/'.$oucu; // look at \\rosella\log\www8openacuk-access_log to see this
     $_curl = 'http://data.open.ac.uk/page/update/person/' . $oucu;
-    watchdog('ou_profile', "reporting information update to :curl ", array(":curl" => $_curl), WATCHDOG_INFO, NULL);
+    ou_profile_log( "reporting information update to :curl ", array(":curl" => $_curl), WATCHDOG_INFO, NULL);
     drupal_http_request($_curl);
   }
 }
@@ -1371,7 +1366,10 @@ function ou_profile_tokens($type, $tokens, array $data = array(), array $options
            switch ($name) {
              case 'oucu':
                // TODO: Replace this value with a real function that gets the OUCU
-               $replacements[$original] = $node->field_oup_oucu['und'][0]['value'];
+			   if( isset( $node->field_oup_oucu['und'] ) )
+			   {
+			      $replacements[$original] = $node->field_oup_oucu['und'][0]['value'];
+			   }
            }
       }
   }
@@ -1381,62 +1379,13 @@ function ou_profile_tokens($type, $tokens, array $data = array(), array $options
 
 
 
-
-
-
-/**
- * Immediate import as requested by config form.
- */
-function _immediate_import()
-{
-  $module_path = drupal_get_path('module', 'ou_profile');
-  require_once $module_path.'/pp_plus_pims_import.inc';
-
-	_pims_import_initialise( 'user_import' );
-/*** REMOVE THIS. THIS IS SERVER MODULE, SO NO NEED TO RUN CHECKS 
-
-  $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
-  require_once "$INCLUDES/local_functions.inc";
-
-  watchdog("ou_profile", "Starting cron");
-
-  $CLIENT = 0;
-  $SERVER = 0;
-
-  if (node_type_get_type("ou_profile")) {
-    $CLIENT = 1;
-  }
-
-  if (node_type_get_type("profile")) {
-    $SERVER = 1;
-  }
-
-  global $user, $user_is_admin, $staff_id;
-
-  // Prepare the required values
-  $p = ou_profile_node_api_params();
-  
-  if ($p['site_path'] == $ou_profile_server_site_path())
-    $SERVER = TRUE;
-
-  if ($SERVER) { // run cron for server and OUBS reporting
-    watchdog("ou_profile", "Running server cron");
-    include "cron/server_cron.inc";
-  }
-  else {   // site is allowed to access the profiles system
-    watchdog("ou_profile", "Running client cron");
-    include "cron/client_cron.inc"; // run cron for client including OUBS reporting
-  }
-**/
-
-  //**** ADD FUNCTION TO PROCESS USING DRUPAL BATCH
-
-}
-
 // function bt()
 // {
 //    array_walk( debug_backtrace(), create_function( '$a,$b', 'print "<br /><b>" . basename( $a[\'file\'] ). "</b> &nbsp; <font color=\"red\">{$a[\'line\']}</font> &nbsp; <font color=\"green\">{$a[\'function\']} ()</font> &nbsp; -- " . dirname( $a[\'file\'] ). "/";' ) );
 // }
+
+
+
 
 /*
 * SERVICES Implementation
@@ -1489,17 +1438,17 @@ function ou_profile_services_resources() {
  */
 function _ou_profile_staff_record_retrieve($staff_id) {
 
-	watchdog( "ou_profile", "REST : ".$staff_id );
+  ou_profile_log(  "REST : ".$staff_id );
   $query = 'SELECT entity_id FROM {field_data_field_oup_staff_id} WHERE field_oup_staff_id_value=\'' . $staff_id . '\'';
   $nid = db_query($query)->fetchField();
-	watchdog( "ou_profile", "REST : ".$staff_id." NID : ".$nid );
+  ou_profile_log(  "REST : ".$staff_id." NID : ".$nid );
 
   // Load the node
   $node = node_load($nid, NULL, FALSE);
   
   //Get the oucu here as it's removed on the next line
   $oucu = $node->field_oup_oucu['und'][0]['value'];
-	watchdog( "ou_profile", "REST : ".$staff_id." OUCU : ".$oucu );
+	ou_profile_log(  "REST : ".$staff_id." OUCU : ".$oucu );
   
   // Run it in view mode (to remove any private fields)
   ou_profile_node_view($node, "full", "en");

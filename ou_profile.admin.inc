@@ -1,4 +1,10 @@
 <?php
+/**
+ * @file
+ * Functions for OU Profiles Admin form at /admin/config/system/ou_profile
+ *
+ */
+
 
 /**
 * Implementation of hook_menu().
@@ -9,7 +15,7 @@ function ou_profile_menu()
 {
 	$items = array();
 	$items['admin/config/system/ou_profile'] = array(
-		'title' => t('OU Profile Settings'),
+		'title' => t('People Profile Server Settings'),
 		'description' => t('Manage People Profiles server settings and data imports'),
 		'page callback' => 'drupal_get_form',
 		'page arguments'   => array('_config_form'),
@@ -21,7 +27,7 @@ function ou_profile_menu()
 
 /**
  * Builds the administration form to allow users to configure the PIMs import
- * @param unknown_type $form_state
+ * 
  */
 function _config_form( $form_state )
 {
@@ -30,18 +36,47 @@ function _config_form( $form_state )
 		'#type'  => 'fieldset',
 		'#title' => t('PIMs import settings'),
 	);
-	$form['ou_profile_pims_import_settings']['ou_profile_pims_filename'] = array(
+	
+	$form['ou_profile_pims_import_settings']['ou_profile_pims_preproc_path'] = array(
 		'#type'          => 'textfield',
-		'#title'         => t('PIMs filename'),
-		'#default_value' => variable_get('ou_profile_pims_filename', 'sites/all/modules/custom/people-profile/cron/data/pims.txt'),
-		'#description'   => t('The PIMs import file name.'),
-	);  
+		'#title'         => t('PIMs import filepath'),
+		'#default_value' => variable_get('ou_profile_pims_preproc_path', '/drupalshared/interface_files'),
+		'#description'   => t('File path for the all_staff_ids.txt, new_staff_updates.txt, pims_previous.txt & pims_pp_imported.txt.'),
+		'#size'         => '100',
+	); 
 	$form['ou_profile_pims_import_settings']['ou_profile_pims_import'] = array(
 		'#type'          => 'checkbox',
 		'#title'         => t('Force import on submit'),
-		'#default_value' => variable_get('ou_profile_pims_import', 0),
+		'#default_value' =>  0,
 		'#description'   => t('If you submit this form with this checked, the import process will be started. The "Import file date" is ignored.'),
 	);
+	$form['ou_profile_pims_import_settings']['ou_profile_oneoff_pims_import'] = array(
+		'#type'          => 'checkbox',
+		'#title'         => t('ONE-OFF : Force import on submit'),
+		'#default_value' =>  0,
+		'#description'   => t('THIS IS A ONE-OFF PROCESS THAT WILL FORCE A **FULL IMPORT OF PIMS.TXT VIA THE BATCH PROCESS. If you submit this form with this checked, the import process will be started. The "Import file date" is ignored.'),
+	);
+	$form['ou_profile_pims_import_settings']['ou_profile_pims_default_public'] = array(
+		'#type'          => 'textfield',
+		'#title'         => t('Public staff profiles'),
+		'#default_value' => variable_get('ou_profile_pims_default_public', 'PACC,PARG,PARS,PREL,PSEC,PVIS,PLTC,PRTC'),
+		'#description'   => t('Enter a comma separated list of staff role codes that should have a public profile by default.<br /> (E.g. PACC,PARG,PARS,PREL,PSEC,PVIS,PLTC,PRTC)'),
+		'#size'         => '100',
+	);
+	$form['ou_profile_pims_import_settings']['ou_profile_profiles_public'] = array(
+		'#type'          => 'checkbox',
+		'#title'         => t('Force profiles to public on submit.'),
+		'#default_value' => 0,
+		'#description'   => t('If you submit this form with this checked, it will set profiles with above role codes to public.'),
+	);
+	$form['ou_profile_pims_import_settings']['ou_profile_reporting'] = array(
+		'#type'          => 'textfield',
+		'#title'         => t('Module logging level'),
+		'#default_value' => variable_get('ou_profile_reporting', '-1'),
+		'#description'   => t('Sets the level of module logging for debugging. -1 for none, 3 to log all msgs, 4 to output to screen'),
+		'#size'         => '10',
+	);
+	
 		//PIMS IMPORT LOG
 		$form['ou_profile_pims_import_settings']['ou_profile_pims_import_log'] = array(
 			'#type'  => 'fieldset',
@@ -60,16 +95,6 @@ function _config_form( $form_state )
 			'#title'         => t('Last import started : '),
 			'#default_value' => variable_get('ou_profile_pims_import_start', ''),
 			'#description'   => t('When the last import started.'),
-			'#attributes' => array(
-				'readonly'=>'readonly',
-				'style'=>'background: none repeat scroll 0 0 #EAEAEA;'
-			),
-		);
-		$form['ou_profile_pims_import_settings']['ou_profile_pims_import_log']['ou_profile_pims_import_cron_runs'] = array(
-			'#type'          => 'textfield',
-			'#title'         => t('Cron runs : '),
-			'#default_value' => variable_get('ou_profile_pims_import_cron_runs', 0),
-			'#description'   => t('How many times cron had run on this queue.'),
 			'#attributes' => array(
 				'readonly'=>'readonly',
 				'style'=>'background: none repeat scroll 0 0 #EAEAEA;'
@@ -133,6 +158,11 @@ function _config_form( $form_state )
 			),
 		);
 
+/*
+
+SK - Started work on admin form, but found that RPS data would not be avaliable. On back burner until RPS
+Data is available. Fields below were just a guess at what I'd need. These will need to be revised once
+RPS data is made available.
 
 
 	//RPS Research Groups IMPORT FIELDS
@@ -283,7 +313,7 @@ function _config_form( $form_state )
 			),
 		);
 
-
+*/
 
 	//Form submit processing
 	$form['submit'] = array('#type' => 'submit', '#value' => t('Save'));
@@ -291,41 +321,68 @@ function _config_form( $form_state )
 
 }
 
+
+
 /**
  * Processes the administration form "_config_form" when submitted
  *
  * @param unknown_type $form
  * @param unknown_type $form_state
  */
-function _config_form_submit($form, &$form_state) {
+function _config_form_submit($form, &$form_state)
+{
 
-  //Get the administration form fields
-  $form_fields = $form_state['values'];
-  
-  //Save the form values
-  //PIMS
-  variable_set( 'ou_profile_pims_filename', $form_fields['ou_profile_pims_filename'] );
-  variable_set('ou_profile_pims_import_file_mod', $form_fields['ou_profile_pims_import_file_mod'] );
+	//Get the administration form fields
+	$form_fields = $form_state['values'];
 
-  //RPS GROUPS
-  variable_set( 'ou_profile_rps_groups_filename', $form_fields['ou_profile_rps_groups_filename'] );
-  variable_set('ou_profile_rps_groups_import_file_mod', $form_fields['ou_profile_rps_groups_import_file_mod'] );
+	//Save the form values
+	//variable_set( 'ou_profile_pims_filename', $form_fields['ou_profile_pims_filename'] );
+	variable_set( 'ou_profile_pims_preproc_path', $form_fields['ou_profile_pims_preproc_path'] );
+	variable_set( 'ou_profile_pims_import_file_mod', $form_fields['ou_profile_pims_import_file_mod'] );
+	variable_set( 'ou_profile_pims_default_public', strtoupper( $form_fields['ou_profile_pims_default_public'] ) );
+	variable_set( 'ou_profile_reporting', $form_fields['ou_profile_reporting'] );
+	
+	/*
 
-  //RPS PROJECTS
-  variable_set( 'ou_profile_rps_projects_filename', $form_fields['ou_profile_rps_projects_filename'] );
-  variable_set('ou_profile_rps_projects_import_file_mod', $form_fields['ou_profile_rps_projects_import_file_mod'] );
-  
-  //Check if import was requested, 1 = yes
-  if( $form_fields['ou_profile_pims_import'] == 1 )
-  {
-    //Set the import dates
-    _pims_import_initialise( 'user_import' );
+	//*** SEE RPS COMMENTS ABOVE IN THE FORM
 
-    // Set the finish time & tell the user
-    drupal_set_message(t('Configuration settings saved. PIMs data reloaded.'));
+	//RPS GROUPS
+	variable_set( 'ou_profile_rps_groups_filename', $form_fields['ou_profile_rps_groups_filename'] );
+	variable_set('ou_profile_rps_groups_import_file_mod', $form_fields['ou_profile_rps_groups_import_file_mod'] );
 
-  } else {
-    drupal_set_message(t('Configuration settings saved.'));
-  }
+	//RPS PROJECTS
+	variable_set( 'ou_profile_rps_projects_filename', $form_fields['ou_profile_rps_projects_filename'] );
+	variable_set('ou_profile_rps_projects_import_file_mod', $form_fields['ou_profile_rps_projects_import_file_mod'] );
+	*/
+
+	//Check if one-off import of pims.txt was requested
+	if( $form_fields['ou_profile_oneoff_pims_import'] == 1 )
+	{
+		$module_path = drupal_get_path('module', 'ou_profile');
+		
+		//PIMs import functions
+		require_once $module_path.'/cron/ou_profile.import.pims_oneoff.inc';
+		oneoff_pims_import_initialise( 'batch' );
+	}
+
+	//Check if force public was requested, 1 = yes
+	//(This is intended as a one-off process to be run after FELs import.)
+	if( $form_fields['ou_profile_profiles_public'] == 1 )
+	{
+		_ou_profile_profiles_public( strtoupper( $form_fields['ou_profile_pims_default_public'] ) );
+	}
+
+	//Check if import was requested, 1 = yes
+	if( $form_fields['ou_profile_pims_import'] == 1 )
+	{
+		//Set the import dates
+		_pims_import_initialise( 'batch' );
+
+		// Tell the user
+		drupal_set_message(t('PIMs data reloaded.'));
+	}
+
+	drupal_set_message(t('Configuration settings saved.'));
+
 }
 

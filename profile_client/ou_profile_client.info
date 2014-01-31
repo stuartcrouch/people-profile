@@ -11,8 +11,15 @@ files[] = ../includes/block_functions.inc
 files[] = ../includes/local_functions.inc
 files[] = ../includes/people_functions.inc
 
-dependencies[] = pathauto
 dependencies[] = email
+dependencies[] = features
 dependencies[] = field_group
-
-
+dependencies[] = image
+dependencies[] = link
+dependencies[] = list
+dependencies[] = node_reference
+dependencies[] = number
+dependencies[] = references
+dependencies[] = services
+dependencies[] = text
+dependencies[] = views

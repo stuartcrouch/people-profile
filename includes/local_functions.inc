@@ -29,29 +29,38 @@ function ou_profile_lget_site_info( $http_referer = NULL )
 	} else {
 		$site_path = $http_referer;
 	}
-
 	ou_profile_log("site path = ($site_path)");
 
 	//Setup array to return information
 	$site_info = array();
+	$site_info['client_allowed'] = FALSE;
     $site_info['visibility'] = '';
 	
+
+	// Clear the caches. Must be done before switching dbs
+	_ou_profile_cc();
+
 	//==============Switch to profile server
 	db_set_active('profiles');
-	
+
 	//Get NID for the allowed_sites node for this site from server
 	$query = db_select('field_data_field_site_path', 'sp');
-	$query->fields('sp', array('entity_id') );
-	$query->condition('field_site_path_value', $site_path, '=');
-	$allowed_sites_nid = $query->execute()->fetchField();
+	$query->join( 'field_data_field_ou_unit_ref', 'ou_unit', 'sp.entity_id = ou_unit.entity_id' );
+	$query->addfield('sp', 'entity_id', 'allowed_site_nid' );
+	$query->addfield('ou_unit', 'field_ou_unit_ref_nid', 'ou_nid' );
+	$query->condition('sp.field_site_path_value', $site_path, '=');
+	$nids = $query->execute()->fetchAll();
 
 	//If NID found...
-	if ( !empty( $allowed_sites_nid ) )
+	if ( isset( $nids ) )
 	{
 		//Load the allowed_sites node for the client site
-		$allowed_sites = node_load( $allowed_sites_nid, NULL, TRUE );
+		$allowed_sites = node_load( $nids[0]->allowed_site_nid, NULL, TRUE );
 		if( $allowed_sites )
 		{
+			//Set flag for other processes
+			$site_info['client_allowed'] = TRUE;
+			
 			//Get the site visibility, none, intranet, internet
 			$site_info['visibility'] = $allowed_sites->field_site_visibility['und'][0]['value'];
 			
@@ -60,18 +69,16 @@ function ou_profile_lget_site_info( $http_referer = NULL )
 			{
 				$site_info['taxonomy'] = $allowed_sites->field_profile_taxonomy['und'];
 			}
-
 			//Get list of field_media expertise taxonomy tids
 			if( isset( $allowed_sites->field_media_expertise['und'] ) )
 			{
 				$site_info['media'] = $allowed_sites->field_media_expertise['und'];
 			}
-			
 			//If ou unit selected, get the ou_unit node
-			if( isset( $allowed_sites->field_ou_unit_ref['und'] ) )
+			if( isset( $nids[0]->ou_nid ) )
 			{
 				//Get the ou_unit node
-				$ou_unit = node_load( $allowed_sites->field_ou_unit_ref['und'][0]['nid'] );
+				$ou_unit = node_load( $nids[0]->ou_nid );
 				if( $ou_unit )
 				{
 					//Get the ou_unit field to use in our select statement.
@@ -103,6 +110,9 @@ function ou_profile_lget_site_info( $http_referer = NULL )
 		ou_profile_log("Site setup not found on server.");
 	}
 	
+	// Clear the caches. Must be done before switching dbs
+	_ou_profile_cc();
+
 	//==============Switch back to client site
 	db_set_active();
 	return $site_info;
@@ -110,10 +120,8 @@ function ou_profile_lget_site_info( $http_referer = NULL )
 
 
 
-
-
-
-
+// TODO: SAC - Obsolete function? Cant find any calls to it.
+/*
 function ou_profile_lget_unit_code() {
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   $site_name = variable_get('site_name', 0);
@@ -123,19 +131,29 @@ function ou_profile_lget_unit_code() {
 
   // Set database to profiles
   db_set_active('profiles');
-  $query = 'SELECT field_ou_unit_ref_nid FROM {content_type_allowed_sites} WHERE field_site_name_value="' . $site_name . '"';
-  $allowed = db_result(db_query($query)); // $allowed = the nid reference for content_type_ou_unit
+/*
+  //$query = 'SELECT field_ou_unit_ref_nid FROM {content_type_allowed_sites} WHERE field_site_name_value="' . $site_name . '"';
+  //$allowed = db_result(db_query($query)); // $allowed = the nid reference for content_type_ou_unit
 
   $unit_code = FALSE;
   if ($allowed) {
     // Get unit code that this site is responsible for
-    $query = 'SELECT field_unit_code_value FROM {content_type_ou_unit} WHERE nid="' . $allowed . '"';
-    $unit_code = db_result(db_query($query));
-  }
+    //$query = 'SELECT field_unit_code_value FROM {content_type_ou_unit} WHERE nid="' . $allowed . '"';
+    //$unit_code = db_result(db_query($query));
+  }*/
+/*
+  $query = db_select('field_data_field_unit_code', 'unit_code')
+    ->fields('unit_code', array('field_unit_code_value'))
+    ->join('node', 'n', 'n.nid = unit_code.entity_id')
+    ->condition('n.title', $site_name, '=');
+
+   $unit_code = $query->fetchField();
+
   // Set database back to original
   db_set_active();
   return $unit_code;
 }
+*/
 
 /*============================================================================================*/
 
@@ -219,9 +237,9 @@ function ou_profile_lget_field_info($content_type) {
 
   // Get the list of fields in the node
   $fields = field_info_instances('node', $content_type);
-
   foreach ($fields as $field_info) {
     // Get the display info for each field
+	
     $field_group = ou_profile_lfield_get_field_group($field_info);
     // Store the display info
     $a_fields_info[$field_info['field_name']] = (array)$field_group;
@@ -384,14 +402,16 @@ function ou_profile_lget_site_path() {
 }
 
 /* Is the site allowed to access the profiles system? */
-function ou_profile_lsite_allowed($http_referer = NULL) {
-  $a_site_info = ou_profile_lget_site_info($http_referer);
+function ou_profile_lsite_allowed($http_referer = NULL)
+{
+	$a_site_info = ou_profile_lget_site_info($http_referer);
 
-  if ($a_site_info['unit_code'])
-    return TRUE;
-  else
-    return FALSE;
-
+	if ( $a_site_info['client_allowed'] )
+	{
+		return TRUE;
+	} else {
+		return FALSE;
+	}
 }
 
 /* Create URL/path alias for a profile [content type Profile] */
@@ -438,22 +458,35 @@ function ou_profile_lget_file_info($fid) {
 
 /* Given a user oucu + uid, find any profiles containing their oucu and set the uid
   of the node to their uid */
-function ou_profile_lset_profile_owner($oucu, $uid) {
+function ou_profile_lset_profile_owner($oucu, $uid)
+{
 
-  $query = "SELECT nid FROM {content_type_profile} WHERE field_oup_oucu_value=:oucu";
-  db_set_active('profiles');
-  $result = db_query($query, array(':oucu' => $oucu));
+	//Switch to Profiles DB
+	_ou_profile_cc();
+	db_set_active('profiles');
+	
+	//Find profile
+	$query = db_select('field_data_field_oup_oucu', 'oucu');
+	$query->condition( 'oucu.field_oup_oucu_value', $oucu, '=' );
+	$query->condition( 'oucu.bundle', 'profile', '=' );
+	$query->addField( 'oucu', 'entity_id');
+	
+	$result = $query->execute()->fetchAll();
 
-  while ($data = db_fetch_object($result)) {
-    if ($data->nid) {
-      $pnode = node_load($data->nid, NULL, TRUE); // keep the cache clear
-      if ($pnode->uid != $uid) {
-        $pnode->uid = $uid;
-        node_save($pnode);
-      }
-      unset($pnode);
-    }
-  }
+	//For each node found, set the AUTHOR field to the user
+	foreach( $result as $data )
+	{
+		$pnode = node_load($data->entity_id, NULL, TRUE); // keep the cache clear
+		if( $pnode->uid != $uid )
+		{
+			$pnode->uid = $uid;
+			node_save($pnode);
+		}
+	}
+
+	_ou_profile_cc();
+	db_set_active();
+
 }
 
 /* Build and return a list of privacy values */
@@ -593,16 +626,13 @@ function ou_profile_get_request_url() {
   
   return $request_url;
   
-  //TEMP
-  //watchdog( 'ou_profile', 'Overriding URL to http://localhost/pp_server in local_functions.inc, ou_profile_get_request_url(), line 547');
-  //return ( 'http://localhost/pp_server' );
 }
 
-function ou_profile_edit_profile_link($node, $user, $account) {
+function ou_profile_edit_profile_link($node, $user ) {
   $request_url = ou_profile_get_request_url();
   
   if ($GLOBALS['base_url'] == $request_url) {
-    if ((node_access('update', $node, $user) == TRUE) || ($account->uid == 1)) {
+    if ((node_access('update', $node, $user) == TRUE) || ($user->uid == 1)) {
       return '<a class="profile-button" href="node/' . $node->nid . '/edit">Edit profile</a>';
     }
   }
@@ -616,7 +646,8 @@ function ou_profile_request_image($style_name, $image_name) {
   $request_path = 'www.open.ac.uk.people';
   
   if ($GLOBALS['base_url'] == $request_url) {
-    return theme_image_style(array('style_name' => $style_name, 'path' => $image_name));
+	//Have to pass NULL width & height as function is expecting them even though theay are optional
+    return theme_image_style(array('style_name' => $style_name, 'path' => $image_name, 'width' => null, 'height' => null));
   }
   else {
     $image_name = str_replace("public://", "", $image_name);
@@ -664,4 +695,230 @@ function ou_profile_log($message, $params = array(), $level = OU_PROFILE_REPORT_
 
       watchdog('ou_profile', $message, $params, $watchdog_type, NULL);
     }
+}
+
+
+//Clears the caches. Needed when switching between dbs using db_set_active.
+//Must be done BEFORE calling db_set_active, otherwise fields you are expecting won't be retrieved.
+function _ou_profile_cc()
+{
+	$core = array('cache', 'cache_path', 'cache_filter', 'cache_bootstrap', 'cache_page');
+    $cache_tables = array_merge(module_invoke_all('flush_caches'), $core);
+    foreach ($cache_tables as $table)
+	{
+		cache_clear_all('*', $table, TRUE);
+    }
+
+	field_info_cache_clear();
+}
+
+
+/**
+ * ===== ORO Functions ======
+ * Gets data from http://oro.open.ac.uk and presents it in the profile.
+ * Tried AJAX, but that won't work as the data is in a different sub-domain.
+**/
+
+//Main function to get the ORO data and generate the HTML from the JSON data
+function _ou_profile_generate_oro_html( $node )
+{
+
+	//Get the OUCU
+	if( isset( $node->field_oup_oucu['und'][0]['value'] ) )
+	{
+		$oucu = $node->field_oup_oucu['und'][0]['value'];
+	}
+
+	//If we have OUCU, we can retrieve the ORO data
+	if( isset( $oucu ) )
+	{
+		// e.g. http://oro.open.ac.uk/cgi/exportview/person/ma3776/HTML/ma3776.html
+		$oro_url = "http://oro.open.ac.uk/cgi/exportview/person/".$oucu."/JSON/".$oucu.".js";
+		$oro_data_json = _ou_profile_get_web_page( $oro_url );
+		
+		//If the page request was successful, process the JSON data
+		if( $oro_data_json['errno' ] == 0 )
+		{
+			$oro_data = json_decode($oro_data_json['content'], true);
+			//An invalid URL does not always raise an error from the ORO site(?!). It returns a blank array.
+			//If no data, just return a blank string
+			if( empty( $oro_data ) )
+			{
+				return( "" );
+			}
+
+			$oro_html = array();
+			
+			//Loop through the data and generate the HTML
+			foreach( $oro_data as $oro_entry )
+			{
+				$tmp = "<strong><a href='".$oro_entry['uri']."'>".$oro_entry['title']."</a> (".$oro_entry['date'].") </strong><br />";
+				if( isset($oro_entry['creators']) )
+				{
+					$tmp .= _ou_profile_get_creators( $oro_entry['creators'] )."<br />";
+				}
+				switch( $oro_entry[ 'type' ] )
+				{
+					case "article":
+						$tmp .= $oro_entry['publication'];
+						if( isset($oro_entry['pagerange']) )
+						{
+							if( preg_match( '#[0-9]#', $oro_entry['pagerange'] ) )
+							{
+								$tmp .= " (pp. ".$oro_entry['pagerange'].")";
+							} else {
+								$tmp .= " ".$oro_entry['pagerange']; 
+							}
+						}
+						$tmp .= "<hr />";
+						$oro_html["article"][] = $tmp;
+					break;
+					case "book":
+					case "book_section":
+					case "bookedit":
+						$tmp .= _ou_profile_book_details( $oro_entry );
+						$tmp .= "<hr />";
+						$oro_html[$oro_entry[ 'type' ]][] = $tmp;
+					break;					
+					case "conference_item":
+						if( isset( $oro_entry['event_title'] ) )
+						{
+							$tmp .= "In : ".$oro_entry['event_title'];
+							if( isset( $oro_entry['event_dates'] ) )
+							{
+								$tmp .= " (".$oro_entry['event_dates'];
+								if( isset( $oro_entry['event_location'] ) )
+								{
+									$tmp .= ", ".$oro_entry['event_location'];
+								}
+								$tmp .= ")";
+							}
+							$tmp .= "<hr />";
+						}
+						$oro_html["conference_item"][] = $tmp;
+					break;
+					default:
+						$tmp .= "<hr />";
+						$oro_html["other"][] = $tmp;
+					break;
+				}
+			}
+			
+			//Generate the titles if needed for that particular ORO data type (Don't use foreach, output will be in the order that the different types were found)
+			$node_oro_html = null;
+			if( isset( $oro_html["article"] ) )
+			{
+				$tmp = implode( "", $oro_html["article"] );
+				$node_oro_html .= "<h3>Journal articles</h3><ul>".$tmp."</ul>";
+			}
+			if( isset( $oro_html["book"] ) )
+			{
+				$tmp = implode( "", $oro_html["book"] );
+				$node_oro_html .= "<h3>Authored books</h3><ul>".$tmp."</ul>";
+			}
+			if( isset( $oro_html["book_section"] ) )
+			{
+				$tmp = implode( "", $oro_html["book_section"] );
+				$node_oro_html .= "<h3>Book chapters</h3><ul>".$tmp."</ul>";
+			}
+			if( isset( $oro_html["bookedit"] ) )
+			{
+				$tmp = implode( "", $oro_html["bookedit"] );
+				$node_oro_html .= "<h3>Edited book</h3><ul>".$tmp."</ul>";
+			}
+			if( isset( $oro_html["conference_item"] ) )
+			{
+				$tmp = implode( "", $oro_html["conference_item"] );
+				$node_oro_html .= "<h3>Conference items</h3><ul>".$tmp."</ul>";
+			}
+			if( isset( $oro_html["other"] ) )
+			{
+				$tmp = implode( "", $oro_html["other"] );
+				$node_oro_html .= "<h3>Other</h3><ul>".$tmp."</ul>";
+			}
+			
+			//Create the oro tab title
+			if( isset( $node_oro_html ) )
+			{
+				$node_oro_html = "<h2>Publications</h2>".$node_oro_html;
+				//Pass final HTML back. tpl file will just print this.
+				return( $node_oro_html );
+			}
+		}
+	}
+	
+	return( "" );
+}
+
+
+/**
+ * Get a web file (HTML, XHTML, XML, image, etc.) from a URL.  Return an
+ * array containing the HTTP server response header fields and content.
+ * We can't get the ORO data via AJAX, so we grab it here
+ */
+function _ou_profile_get_web_page( $url )
+{
+	$options = array(
+		CURLOPT_RETURNTRANSFER => true,     // return web page
+		CURLOPT_HEADER         => false,    // don't return headers
+		CURLOPT_FOLLOWLOCATION => true,     // follow redirects
+		CURLOPT_ENCODING       => "",       // handle all encodings
+		CURLOPT_USERAGENT      => "spider", // who am i
+		CURLOPT_AUTOREFERER    => true,     // set referer on redirect
+		CURLOPT_CONNECTTIMEOUT => 120,      // timeout on connect
+		CURLOPT_TIMEOUT        => 120,      // timeout on response
+		CURLOPT_MAXREDIRS      => 10,       // stop after 10 redirects
+	);
+
+	$ch      = curl_init( $url );
+	curl_setopt_array( $ch, $options );
+	$content = curl_exec( $ch );
+	$err     = curl_errno( $ch );
+	$errmsg  = curl_error( $ch );
+	$header  = curl_getinfo( $ch );
+	curl_close( $ch );
+
+	$header['errno']   = $err;
+	$header['errmsg']  = $errmsg;
+	$header['content'] = $content;
+	return $header;
+}
+
+// Helper agent for _ou_profile_generate_oro_html
+// Returns a formatted list of authors for a ORO entry
+function _ou_profile_get_creators( $creators )
+{
+	$creatorlist = array();
+	foreach( $creators as $creator)
+	{
+		$creatorlist[] = $creator[ 'name' ]['given'].' '.$creator['name']['family'];
+	}
+
+	return( implode( ", ", $creatorlist ) );
+}
+
+// Helper agent for _ou_profile_generate_oro_html
+// Returns the isbn, pub & place of pub
+function _ou_profile_book_details( $oro_entry )
+{
+	$tmp = array();
+	
+	if( isset( $oro_entry['isbn'] ) )
+	{
+		$tmp[] = "ISBN : ".$oro_entry['isbn'];
+	}
+	
+	if( isset( $oro_entry['publisher'] ) )
+	{
+		$tmp[] = "Publisher : ".$oro_entry['publisher'];
+	}
+
+	if( isset( $oro_entry['place_of_pub'] ) )
+	{
+		$tmp[] = "Published : ".$oro_entry['place_of_pub'];
+	}
+	
+	$line = implode( " | ", $tmp );
+	
+	return( $line );
 }

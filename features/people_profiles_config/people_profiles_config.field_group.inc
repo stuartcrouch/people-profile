@@ -153,7 +153,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'Blog',
-    'weight' => '81',
+    'weight' => '218',
     'children' => array(
       0 => 'field_oup_blog',
       1 => 'field_prv_blog',
@@ -178,6 +178,58 @@ function people_profiles_config_field_group_info() {
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_categories|node|profile|form';
+  $field_group->group_name = 'group_categories';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'profile';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_content_groups';
+  $field_group->data = array(
+    'label' => 'Non-PIMs Categories',
+    'weight' => '150',
+    'children' => array(
+      0 => 'field_profile_taxonomy',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_categories|node|profile|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_content_groups|node|pims|form';
+  $field_group->group_name = 'group_content_groups';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'pims';
+  $field_group->mode = 'form';
+  $field_group->parent_name = '';
+  $field_group->data = array(
+    'label' => 'Content Group',
+    'weight' => '0',
+    'children' => array(
+      0 => 'group_header',
+    ),
+    'format_type' => 'tabs',
+    'format_settings' => array(
+      'formatter' => '',
+      'instance_settings' => array(
+        'classes' => '',
+      ),
+    ),
+  );
+  $export['group_content_groups|node|pims|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_content_groups|node|profile|form';
   $field_group->group_name = 'group_content_groups';
   $field_group->entity_type = 'node';
@@ -193,6 +245,8 @@ function people_profiles_config_field_group_info() {
       2 => 'group_layout_design',
       3 => 'group_oup_oubs_0153',
       4 => 'group_teaching_research_interest',
+      5 => 'group_categories',
+      6 => 'group_media_expert',
     ),
     'format_type' => 'tabs',
     'format_settings' => array(
@@ -300,7 +354,7 @@ function people_profiles_config_field_group_info() {
       'label' => 'External Profiles',
       'instance_settings' => array(
         'required_fields' => 1,
-        'classes' => '',
+        'classes' => 'privacy_options',
         'description' => '',
       ),
       'formatter' => 'closed',
@@ -355,7 +409,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'Flickr',
-    'weight' => '84',
+    'weight' => '221',
     'children' => array(
       0 => 'field_oup_flickr',
       1 => 'field_prv_flickr',
@@ -376,6 +430,33 @@ function people_profiles_config_field_group_info() {
     ),
   );
   $export['group_flickr|node|profile|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_header|node|pims|form';
+  $field_group->group_name = 'group_header';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'pims';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_content_groups';
+  $field_group->data = array(
+    'label' => 'Open University Information',
+    'weight' => '24',
+    'children' => array(
+      0 => 'group_sss_info',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_header|node|pims|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -432,6 +513,35 @@ function people_profiles_config_field_group_info() {
     ),
   );
   $export['group_header|node|profile|default'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_header|node|profile|form';
+  $field_group->group_name = 'group_header';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'profile';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_content_groups';
+  $field_group->data = array(
+    'label' => 'Open University Information',
+    'weight' => '144',
+    'children' => array(
+      0 => 'group_sss_info',
+      1 => 'group_sss_overrides',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'label' => 'Open University Information',
+      'instance_settings' => array(
+        'required_fields' => 1,
+        'classes' => 'privacy_options',
+        'description' => '',
+      ),
+      'formatter' => 'closed',
+    ),
+  );
+  $export['group_header|node|profile|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -500,10 +610,9 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_layout_design';
   $field_group->data = array(
     'label' => 'Image',
-    'weight' => '212',
+    'weight' => '216',
     'children' => array(
       0 => 'field_oup_profile_layout_image',
-      1 => 'field_prv_profile_layout_image',
     ),
     'format_type' => 'div',
     'format_settings' => array(
@@ -635,12 +744,13 @@ function people_profiles_config_field_group_info() {
     ),
     'format_type' => 'tab',
     'format_settings' => array(
-      'formatter' => 'closed',
+      'label' => 'Layout settings',
       'instance_settings' => array(
-        'description' => '',
-        'classes' => '',
         'required_fields' => 1,
+        'classes' => '',
+        'description' => '',
       ),
+      'formatter' => 'closed',
     ),
   );
   $export['group_layout_design|node|profile|form'] = $field_group;
@@ -684,10 +794,9 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_layout_design';
   $field_group->data = array(
     'label' => 'Layout',
-    'weight' => '213',
+    'weight' => '217',
     'children' => array(
       0 => 'field_oup_profile_layout',
-      1 => 'field_prv_profile_layout',
     ),
     'format_type' => 'div',
     'format_settings' => array(
@@ -882,10 +991,9 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_layout_design';
   $field_group->data = array(
     'label' => 'Light Dark',
-    'weight' => '214',
+    'weight' => '218',
     'children' => array(
       0 => 'field_oup_profile_layout_colour',
-      1 => 'field_prv_profile_layout_colour',
     ),
     'format_type' => 'div',
     'format_settings' => array(
@@ -915,7 +1023,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'LinkedIn',
-    'weight' => '85',
+    'weight' => '222',
     'children' => array(
       0 => 'field_oup_linkedin',
       1 => 'field_prv_linkedin',
@@ -936,6 +1044,68 @@ function people_profiles_config_field_group_info() {
     ),
   );
   $export['group_linkedin|node|profile|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_media_expert|node|profile|form';
+  $field_group->group_name = 'group_media_expert';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'profile';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_content_groups';
+  $field_group->data = array(
+    'label' => 'Media Expert',
+    'weight' => '149',
+    'children' => array(
+      0 => 'field_media_expertise',
+      1 => 'field_oup_media_relations_bio',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'label' => 'Media Expert',
+      'instance_settings' => array(
+        'required_fields' => 0,
+        'classes' => '',
+        'description' => '',
+      ),
+      'formatter' => 'closed',
+    ),
+  );
+  $export['group_media_expert|node|profile|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_openlearn_bio|node|profile|form';
+  $field_group->group_name = 'group_openlearn_bio';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'profile';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_teaching_research_interest';
+  $field_group->data = array(
+    'label' => 'OpenLearn biography',
+    'weight' => '156',
+    'children' => array(
+      0 => 'field_oup_openlearn_bio',
+      1 => 'field_prv_openlearn_bio',
+    ),
+    'format_type' => 'div',
+    'format_settings' => array(
+      'label' => 'OpenLearn biography',
+      'instance_settings' => array(
+        'required_fields' => 1,
+        'classes' => 'ou-field',
+        'description' => '',
+        'show_label' => '0',
+        'label_element' => 'h3',
+        'effect' => 'none',
+        'speed' => 'fast',
+      ),
+      'formatter' => 'open',
+    ),
+  );
+  $export['group_openlearn_bio|node|profile|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -1020,12 +1190,13 @@ function people_profiles_config_field_group_info() {
     ),
     'format_type' => 'tab',
     'format_settings' => array(
-      'formatter' => 'closed',
+      'label' => 'OUBS',
       'instance_settings' => array(
-        'description' => '',
-        'classes' => '',
         'required_fields' => 1,
+        'classes' => 'privacy_options',
+        'description' => '',
       ),
+      'formatter' => 'closed',
     ),
   );
   $export['group_oup_oubs_0153|node|profile|form'] = $field_group;
@@ -1071,7 +1242,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_teaching_research_interest';
   $field_group->data = array(
     'label' => 'Personal Biography',
-    'weight' => '174',
+    'weight' => '153',
     'children' => array(
       0 => 'field_oup_personal_bio',
       1 => 'field_prv_personal_bio',
@@ -1203,7 +1374,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_teaching_research_interest';
   $field_group->data = array(
     'label' => 'Research interests',
-    'weight' => '177',
+    'weight' => '155',
     'children' => array(
       0 => 'field_oup_research_interests',
       1 => 'field_prv_research_interests',
@@ -1236,7 +1407,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'Slideshare',
-    'weight' => '83',
+    'weight' => '220',
     'children' => array(
       0 => 'field_oup_slideshare',
       1 => 'field_prv_slideshare',
@@ -1257,6 +1428,57 @@ function people_profiles_config_field_group_info() {
     ),
   );
   $export['group_slideshare|node|profile|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_sss_info|node|pims|form';
+  $field_group->group_name = 'group_sss_info';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'pims';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_header';
+  $field_group->data = array(
+    'label' => 'Staff Self Service Information',
+    'weight' => '24',
+    'children' => array(
+      0 => 'field_pims_appt_job_title',
+      1 => 'field_pims_appt_role_desc',
+      2 => 'field_pims_l1_estab_unit_code',
+      3 => 'field_pims_l1_estab_unit_desc',
+      4 => 'field_pims_l2_estab_unit_name',
+      5 => 'field_pims_l3_estab_unit_name',
+      6 => 'field_pims_l4_estab_unit_name',
+      7 => 'field_pims_oucu',
+      8 => 'field_pims_ou_email_address',
+      9 => 'field_pims_personal_website',
+      10 => 'field_pims_pref_forenames',
+      11 => 'field_pims_pref_surname',
+      12 => 'field_pims_staff_forenames',
+      13 => 'field_pims_staff_id',
+      14 => 'field_pims_staff_initials',
+      15 => 'field_pims_staff_surname',
+      16 => 'field_pims_staff_title',
+      17 => 'field_pims_unique_id',
+      18 => 'field_pims_l2_estab_unit_code',
+      19 => 'field_pims_l3_estab_unit_code',
+      20 => 'field_pims_l4_estab_unit_code',
+      21 => 'metatags',
+      22 => 'title',
+      23 => 'path',
+      24 => 'field_pims_appt_role_code',
+    ),
+    'format_type' => 'fieldset',
+    'format_settings' => array(
+      'formatter' => 'collapsible',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_sss_info|node|pims|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -1471,7 +1693,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_teaching_research_interest';
   $field_group->data = array(
     'label' => 'Teaching interests',
-    'weight' => '175',
+    'weight' => '154',
     'children' => array(
       0 => 'field_oup_teaching_interests',
       1 => 'field_prv_teaching_interests',
@@ -1537,13 +1759,14 @@ function people_profiles_config_field_group_info() {
       0 => 'group_personal_biography',
       1 => 'group_teaching_interests',
       2 => 'group_research_interests',
+      3 => 'group_openlearn_bio',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
       'label' => 'Biographical Information',
       'instance_settings' => array(
         'required_fields' => 1,
-        'classes' => '',
+        'classes' => 'privacy_options',
         'description' => '',
       ),
       'formatter' => 'closed',
@@ -1590,7 +1813,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'Twitter',
-    'weight' => '82',
+    'weight' => '219',
     'children' => array(
       0 => 'field_oup_twitter',
       1 => 'field_prv_twitter',
@@ -1656,7 +1879,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'Web Links',
-    'weight' => '86',
+    'weight' => '223',
     'children' => array(
       0 => 'field_oup_web_links',
       1 => 'field_prv_web_links',

@@ -61,9 +61,6 @@ function ou_profile_install() {
     $node->body = "Enter your information about people here";
     $node->type = 'page';   // Your specified content type
     $node->created = time();
-    //print_r(_profile_installed_fields());
-    //print_r(_profile_installed_instances());
-    //die();
     $node->changed = $node->created;
     $node->status = 1;
     $node->promote = 1;
@@ -286,21 +283,21 @@ function _profile_installed_instances() {
           'field_name' => 'field_pims_unique_id',
           'label' => 'PIMS unique ID',
           'widget' => array(
-              'type' => 'text_textfield',
+              'type' => 'textfield',
           ),
       ),
       'field_oup_oucu' => array(
           'field_name' => 'field_oup_oucu',
           'label' => 'OUCU',
           'widget' => array(
-              'type' => 'text_textfield',
+              'type' => 'textfield',
           ),
       ),
       'field_oup_staff_id' => array(
           'field_name' => 'field_oup_staff_id',
           'label' => 'Staff ID',
           'widget' => array(
-              'type' => 'text_textfield',
+              'type' => 'textfield',
           ),
       ),
     );

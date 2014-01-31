@@ -137,7 +137,8 @@ div#ou-region1 {
 /* I SEE THE LIGHT */
 
 body.light h1,
-body.light h2 {color:#000; }
+body.light h2,
+body.light h3, {color:#000; }
 
 body.light div#ou-page,
 body.light div#ou-region1 {
@@ -202,7 +203,8 @@ body.dark .profile-sidebar {background-color:#333;}
 body.dark .profile-content {opacity:.7;} /*let bg image show through slightly*/
 
 body.dark h1, 
-body.dark h2, 
+body.dark h2,
+body.dark h3,
 body.dark div.profile a {color:#fff;}
 
 body.dark div.profile a:hover {color:#999;}
@@ -579,4 +581,20 @@ body.dark ul.ou-sections li.myprofile a {
 .content .list-items ul.ou_profile_names li {
   display: block;
   padding: 0 0 0 1em;
+}
+
+
+/*TABS*/
+html.js div.ou-binder div.tab-content {
+	display: none;
+	visibility: hidden;
+}
+
+html.js div.ou-binder div.tab-content.selected {
+	display: block;
+	visibility: visible;
+}
+
+div.tab-content {
+	margin-top: 1em;
 }

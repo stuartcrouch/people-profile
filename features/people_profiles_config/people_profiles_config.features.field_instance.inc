@@ -10,6 +10,1920 @@
 function people_profiles_config_field_default_field_instances() {
   $field_instances = array();
 
+  // Exported field_instance: 'node-allowed_sites-field_media_expertise'
+  $field_instances['node-allowed_sites-field_media_expertise'] = array(
+    'bundle' => 'allowed_sites',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'Use the "Ctrl" key to make multiple selections.',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 6,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_media_expertise',
+    'label' => 'Media Expertise',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 3,
+    ),
+  );
+
+  // Exported field_instance: 'node-allowed_sites-field_ou_unit_ref'
+  $field_instances['node-allowed_sites-field_ou_unit_ref'] = array(
+    'bundle' => 'allowed_sites',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'The OU unit / department that this site is hosting. This is ignored if the allowed site is the profiles server (path = /people/)',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'node_reference',
+        'settings' => array(),
+        'type' => 'node_reference_default',
+        'weight' => 0,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'node_reference',
+        'settings' => array(),
+        'type' => 'node_reference_default',
+        'weight' => 0,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'node_reference',
+        'settings' => array(),
+        'type' => 'node_reference_default',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'node_reference',
+        'settings' => array(),
+        'type' => 'node_reference_default',
+        'weight' => 0,
+      ),
+      'token' => array(
+        'label' => 'above',
+        'module' => 'node_reference',
+        'settings' => array(),
+        'type' => 'node_reference_default',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_ou_unit_ref',
+    'label' => 'Unit ref',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 0,
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 1,
+    ),
+    'widget_type' => 'nodereference_select',
+  );
+
+  // Exported field_instance: 'node-allowed_sites-field_profile_taxonomy'
+  $field_instances['node-allowed_sites-field_profile_taxonomy'] = array(
+    'bundle' => 'allowed_sites',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'Use the "Ctrl" key to make multiple selections.',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 5,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_profile_taxonomy',
+    'label' => 'Profile Taxonomy',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 2,
+    ),
+  );
+
+  // Exported field_instance: 'node-allowed_sites-field_site_path'
+  $field_instances['node-allowed_sites-field_site_path'] = array(
+    'bundle' => 'allowed_sites',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_site_path][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => 'Enter the path name of the drupal site including all preceding and trailing slashes. e.g. /mbaopen/',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+      'token' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_site_path',
+    'label' => 'Site path',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 3,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 4,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-allowed_sites-field_site_visibility'
+  $field_instances['node-allowed_sites-field_site_visibility'] = array(
+    'bundle' => 'allowed_sites',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => 'Is this a public website, or an intranet?',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 4,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 4,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 4,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 4,
+      ),
+      'token' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 4,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_site_visibility',
+    'label' => 'Site visibility',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 4,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'options',
+      'settings' => array(
+        'default_value_php' => NULL,
+      ),
+      'type' => 'options_buttons',
+      'weight' => 5,
+    ),
+    'widget_type' => 'optionwidgets_buttons',
+  );
+
+  // Exported field_instance: 'node-ou_unit-field_unit_code'
+  $field_instances['node-ou_unit-field_unit_code'] = array(
+    'bundle' => 'ou_unit',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_unit_code][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 0,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'token' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_unit_code',
+    'label' => 'Unit code',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 5,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-ou_unit-field_unit_level'
+  $field_instances['node-ou_unit-field_unit_level'] = array(
+    'bundle' => 'ou_unit',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'number',
+        'settings' => array(
+          'decimal_separator' => '.',
+          'prefix_suffix' => 0,
+          'scale' => 0,
+          'thousand_separator' => ' ',
+        ),
+        'type' => 'number_integer',
+        'weight' => 5,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_unit_level',
+    'label' => 'Unit level',
+    'required' => 0,
+    'settings' => array(
+      'max' => '',
+      'min' => '',
+      'prefix' => '',
+      'suffix' => '',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 0,
+      'module' => 'number',
+      'settings' => array(),
+      'type' => 'number',
+      'weight' => 6,
+    ),
+  );
+
+  // Exported field_instance: 'node-ou_unit-field_unit_name_lv1'
+  $field_instances['node-ou_unit-field_unit_name_lv1'] = array(
+    'bundle' => 'ou_unit',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 1,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_unit_name_lv1',
+    'label' => 'Unit name lv1',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 1,
+    ),
+  );
+
+  // Exported field_instance: 'node-ou_unit-field_unit_name_lv2'
+  $field_instances['node-ou_unit-field_unit_name_lv2'] = array(
+    'bundle' => 'ou_unit',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 2,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_unit_name_lv2',
+    'label' => 'Unit name lv2',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 2,
+    ),
+  );
+
+  // Exported field_instance: 'node-ou_unit-field_unit_name_lv3'
+  $field_instances['node-ou_unit-field_unit_name_lv3'] = array(
+    'bundle' => 'ou_unit',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_unit_name_lv3',
+    'label' => 'Unit name lv3',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 3,
+    ),
+  );
+
+  // Exported field_instance: 'node-ou_unit-field_unit_name_lv4'
+  $field_instances['node-ou_unit-field_unit_name_lv4'] = array(
+    'bundle' => 'ou_unit',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 4,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_unit_name_lv4',
+    'label' => 'Unit name lv4',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 4,
+    ),
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_appt_job_title'
+  $field_instances['node-pims-field_pims_appt_job_title'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_appt_job_title][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 7,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_appt_job_title',
+    'label' => 'Appt job title',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 28,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_appt_role_code'
+  $field_instances['node-pims-field_pims_appt_role_code'] = array(
+    'bundle' => 'pims',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 8,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_appt_role_code',
+    'label' => 'Appt Role Code',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 37,
+    ),
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_appt_role_desc'
+  $field_instances['node-pims-field_pims_appt_role_desc'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_appt_role_desc][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 9,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_appt_role_desc',
+    'label' => 'Appt Role Desc',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 38,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_l1_estab_unit_code'
+  $field_instances['node-pims-field_pims_l1_estab_unit_code'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_l1_estab_unit_code][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 14,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_l1_estab_unit_code',
+    'label' => 'Level 1 Establishment Unit code',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 36,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_l1_estab_unit_desc'
+  $field_instances['node-pims-field_pims_l1_estab_unit_desc'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_l1_estab_unit_desc][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 13,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_l1_estab_unit_desc',
+    'label' => 'Level 1 Establishment Unit Desc',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 35,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_l2_estab_unit_code'
+  $field_instances['node-pims-field_pims_l2_estab_unit_code'] = array(
+    'bundle' => 'pims',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 16,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_l2_estab_unit_code',
+    'label' => 'Level 2 Establishment Unit code',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 41,
+    ),
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_l2_estab_unit_name'
+  $field_instances['node-pims-field_pims_l2_estab_unit_name'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_l2_estab_unit_name][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 15,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_l2_estab_unit_name',
+    'label' => 'Level 2 Establishment Unit name',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 40,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_l3_estab_unit_code'
+  $field_instances['node-pims-field_pims_l3_estab_unit_code'] = array(
+    'bundle' => 'pims',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 18,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_l3_estab_unit_code',
+    'label' => 'Level 3 Establishment Unit code',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 44,
+    ),
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_l3_estab_unit_name'
+  $field_instances['node-pims-field_pims_l3_estab_unit_name'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_l3_estab_unit_name][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 17,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_l3_estab_unit_name',
+    'label' => 'Level 3 Establishment Unit name',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 43,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_l4_estab_unit_code'
+  $field_instances['node-pims-field_pims_l4_estab_unit_code'] = array(
+    'bundle' => 'pims',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 20,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_l4_estab_unit_code',
+    'label' => 'Level 4 Establishment Unit code',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 46,
+    ),
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_l4_estab_unit_name'
+  $field_instances['node-pims-field_pims_l4_estab_unit_name'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_l4_estab_unit_name][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 19,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_l4_estab_unit_name',
+    'label' => 'Level 4 Establishment Unit name',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 45,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_ou_email_address'
+  $field_instances['node-pims-field_pims_ou_email_address'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_ou_email_address][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 12,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_ou_email_address',
+    'label' => 'OU email address',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 39,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_oucu'
+  $field_instances['node-pims-field_pims_oucu'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_oucu][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 10,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_oucu',
+    'label' => 'OUCU',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 42,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_personal_website'
+  $field_instances['node-pims-field_pims_personal_website'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_personal_website][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 21,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_personal_website',
+    'label' => 'Personal Website',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 34,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_pref_forenames'
+  $field_instances['node-pims-field_pims_pref_forenames'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_pref_forenames][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 3,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 34,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 34,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 34,
+      ),
+      'token' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 34,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_pref_forenames',
+    'label' => 'Preferred Staff Forenames',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 34,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 120,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 48,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_pref_surname'
+  $field_instances['node-pims-field_pims_pref_surname'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_pref_surname][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 1,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_pref_surname',
+    'label' => 'Preferred Staff Surname',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 27,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_staff_forenames'
+  $field_instances['node-pims-field_pims_staff_forenames'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_staff_forenames][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 2,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_staff_forenames',
+    'label' => 'Staff Forenames',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 29,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_staff_id'
+  $field_instances['node-pims-field_pims_staff_id'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_staff_id][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 5,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_staff_id',
+    'label' => 'Staff ID',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 33,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_staff_initials'
+  $field_instances['node-pims-field_pims_staff_initials'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_staff_initials][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 4,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_staff_initials',
+    'label' => 'Staff initials',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 30,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_staff_surname'
+  $field_instances['node-pims-field_pims_staff_surname'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_staff_surname][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 0,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_staff_surname',
+    'label' => 'Staff Surname',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 32,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_staff_title'
+  $field_instances['node-pims-field_pims_staff_title'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_staff_title][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 6,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 31,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_staff_title',
+    'label' => 'Staff title',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 31,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 7,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 31,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-pims-field_pims_unique_id'
+  $field_instances['node-pims-field_pims_unique_id'] = array(
+    'bundle' => 'pims',
+    'default_value' => array(
+      0 => array(
+        'value' => '',
+        '_error_element' => 'default_value_widget][field_pims_unique_id][0][value',
+      ),
+    ),
+    'deleted' => 0,
+    'description' => 'This is a concatenation of staffid + L1 + L2 + L3 + L4 unit codes',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 11,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 33,
+      ),
+      'rss' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 33,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 33,
+      ),
+      'token' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 33,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_pims_unique_id',
+    'label' => 'PIMS unique ID (computed)',
+    'required' => FALSE,
+    'settings' => array(
+      'text_processing' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'weight' => 33,
+    'widget' => array(
+      'active' => 0,
+      'module' => 'text',
+      'settings' => array(
+        'default_value_php' => NULL,
+        'rows' => 5,
+        'size' => 60,
+      ),
+      'type' => 'text_textfield',
+      'weight' => 47,
+    ),
+    'widget_type' => 'text_textfield',
+  );
+
+  // Exported field_instance: 'node-profile-field_media_expertise'
+  $field_instances['node-profile-field_media_expertise'] = array(
+    'bundle' => 'profile',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'Use the "Ctrl" key to make multiple selections.<br>
+This is one of the criteria that can be used to determine sites your profile will appear upon. It is not displayed on your profile.',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 132,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_media_expertise',
+    'label' => 'Media Expertise',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 152,
+    ),
+  );
+
   // Exported field_instance: 'node-profile-field_oup_alternative_email'
   $field_instances['node-profile-field_oup_alternative_email'] = array(
     'bundle' => 'profile',
@@ -227,7 +2141,7 @@ function people_profiles_config_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 207,
+      'weight' => 211,
     ),
     'widget_type' => 'text_textfield',
   );
@@ -309,7 +2223,7 @@ function people_profiles_config_field_default_field_instances() {
         'default_value_php' => NULL,
       ),
       'type' => 'link_field',
-      'weight' => 87,
+      'weight' => 91,
     ),
     'widget_type' => 'link',
   );
@@ -532,16 +2446,90 @@ function people_profiles_config_field_default_field_instances() {
     'widget_type' => 'link',
   );
 
+  // Exported field_instance: 'node-profile-field_oup_media_relations_bio'
+  $field_instances['node-profile-field_oup_media_relations_bio'] = array(
+    'bundle' => 'profile',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 133,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_oup_media_relations_bio',
+    'label' => 'Media relations biography',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 5,
+      ),
+      'type' => 'text_textarea',
+      'weight' => 153,
+    ),
+  );
+
+  // Exported field_instance: 'node-profile-field_oup_openlearn_bio'
+  $field_instances['node-profile-field_oup_openlearn_bio'] = array(
+    'bundle' => 'profile',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'text',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => 134,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_oup_openlearn_bio',
+    'label' => 'OpenLearn biography',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => 1,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'rows' => 5,
+      ),
+      'type' => 'text_textarea',
+      'weight' => 210,
+    ),
+  );
+
   // Exported field_instance: 'node-profile-field_oup_oubs_internatl_collabs'
   $field_instances['node-profile-field_oup_oubs_internatl_collabs'] = array(
     'bundle' => 'profile',
-    'default_value' => array(
-      0 => array(
-        'value' => '',
-        'format' => 1,
-        '_error_element' => 'default_value_widget][field_oup_oubs_internatl_collabs][0][value',
-      ),
-    ),
+    'default_value' => NULL,
     'deleted' => 0,
     'description' => 'Write about any type of international collaboration',
     'display' => array(
@@ -598,22 +2586,20 @@ function people_profiles_config_field_default_field_instances() {
     'entity_type' => 'node',
     'field_name' => 'field_oup_oubs_internatl_collabs',
     'label' => 'International links',
-    'required' => FALSE,
+    'required' => 0,
     'settings' => array(
       'text_processing' => 1,
       'user_register_form' => FALSE,
     ),
     'weight' => 89,
     'widget' => array(
-      'active' => 0,
+      'active' => 1,
       'module' => 'text',
       'settings' => array(
-        'default_value_php' => NULL,
         'rows' => 5,
-        'size' => 60,
       ),
       'type' => 'text_textarea',
-      'weight' => 209,
+      'weight' => 210,
     ),
     'widget_type' => 'text_textarea',
   );
@@ -621,13 +2607,7 @@ function people_profiles_config_field_default_field_instances() {
   // Exported field_instance: 'node-profile-field_oup_oubs_public_esteem'
   $field_instances['node-profile-field_oup_oubs_public_esteem'] = array(
     'bundle' => 'profile',
-    'default_value' => array(
-      0 => array(
-        'value' => '',
-        'format' => 1,
-        '_error_element' => 'default_value_widget][field_oup_oubs_public_esteem][0][value',
-      ),
-    ),
+    'default_value' => NULL,
     'deleted' => 0,
     'description' => 'Include items such as journal editorships, important consulting work, membership of important committees, honours, awards and prestigious posts',
     'display' => array(
@@ -684,19 +2664,17 @@ function people_profiles_config_field_default_field_instances() {
     'entity_type' => 'node',
     'field_name' => 'field_oup_oubs_public_esteem',
     'label' => 'External contributions',
-    'required' => FALSE,
+    'required' => 0,
     'settings' => array(
       'text_processing' => 1,
       'user_register_form' => FALSE,
     ),
     'weight' => 87,
     'widget' => array(
-      'active' => 0,
+      'active' => 1,
       'module' => 'text',
       'settings' => array(
-        'default_value_php' => NULL,
         'rows' => 5,
-        'size' => 60,
       ),
       'type' => 'text_textarea',
       'weight' => 209,
@@ -855,7 +2833,7 @@ function people_profiles_config_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 7,
+      'weight' => 6,
     ),
     'widget_type' => 'text_textfield',
   );
@@ -1022,15 +3000,19 @@ function people_profiles_config_field_default_field_instances() {
   // Exported field_instance: 'node-profile-field_oup_profile_layout'
   $field_instances['node-profile-field_oup_profile_layout'] = array(
     'bundle' => 'profile',
-    'default_value' => '',
+    'default_value' => array(
+      0 => array(
+        'value' => 'p2cl',
+      ),
+    ),
     'deleted' => 0,
     'description' => '',
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'text',
+        'module' => 'list',
         'settings' => array(),
-        'type' => 'text_default',
+        'type' => 'list_default',
         'weight' => 125,
       ),
       'full' => array(
@@ -1065,21 +3047,18 @@ function people_profiles_config_field_default_field_instances() {
     'entity_type' => 'node',
     'field_name' => 'field_oup_profile_layout',
     'label' => 'Layout',
-    'required' => FALSE,
+    'required' => 1,
     'settings' => array(
       'text_processing' => 0,
       'user_register_form' => FALSE,
     ),
     'weight' => 125,
     'widget' => array(
-      'active' => 0,
+      'active' => 1,
       'module' => 'options',
-      'settings' => array(
-        'default_value' => NULL,
-        'default_value_php' => NULL,
-      ),
+      'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 212,
+      'weight' => 219,
     ),
     'widget_type' => 'optionwidgets_buttons',
   );
@@ -1087,15 +3066,19 @@ function people_profiles_config_field_default_field_instances() {
   // Exported field_instance: 'node-profile-field_oup_profile_layout_colour'
   $field_instances['node-profile-field_oup_profile_layout_colour'] = array(
     'bundle' => 'profile',
-    'default_value' => '',
+    'default_value' => array(
+      0 => array(
+        'value' => 'light',
+      ),
+    ),
     'deleted' => 0,
     'description' => '',
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'text',
+        'module' => 'list',
         'settings' => array(),
-        'type' => 'text_default',
+        'type' => 'list_default',
         'weight' => 129,
       ),
       'full' => array(
@@ -1130,19 +3113,16 @@ function people_profiles_config_field_default_field_instances() {
     'entity_type' => 'node',
     'field_name' => 'field_oup_profile_layout_colour',
     'label' => 'Light / Dark',
-    'required' => FALSE,
+    'required' => 1,
     'settings' => array(
       'text_processing' => 0,
       'user_register_form' => FALSE,
     ),
     'weight' => 129,
     'widget' => array(
-      'active' => 0,
+      'active' => 1,
       'module' => 'options',
-      'settings' => array(
-        'default_value' => NULL,
-        'default_value_php' => NULL,
-      ),
+      'settings' => array(),
       'type' => 'options_buttons',
       'weight' => 214,
     ),
@@ -1303,7 +3283,7 @@ function people_profiles_config_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textarea',
-      'weight' => 177,
+      'weight' => 178,
     ),
     'widget_type' => 'text_textarea',
   );
@@ -1385,7 +3365,7 @@ function people_profiles_config_field_default_field_instances() {
         'default_value_php' => NULL,
       ),
       'type' => 'link_field',
-      'weight' => 86,
+      'weight' => 217,
     ),
     'widget_type' => 'link',
   );
@@ -1456,7 +3436,7 @@ function people_profiles_config_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 5,
+      'weight' => 4,
     ),
     'widget_type' => 'text_textfield',
   );
@@ -1616,14 +3596,9 @@ function people_profiles_config_field_default_field_instances() {
     'display' => array(
       'default' => array(
         'label' => 'above',
-        'module' => 'number',
-        'settings' => array(
-          'decimal_separator' => '.',
-          'prefix_suffix' => TRUE,
-          'scale' => 0,
-          'thousand_separator' => '',
-        ),
-        'type' => 'number_integer',
+        'module' => 'list',
+        'settings' => array(),
+        'type' => 'list_default',
         'weight' => 70,
       ),
       'full' => array(
@@ -1692,7 +3667,7 @@ function people_profiles_config_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 6,
+      'weight' => 5,
     ),
     'widget_type' => 'optionwidgets_buttons',
   );
@@ -2342,7 +4317,7 @@ function people_profiles_config_field_default_field_instances() {
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 79,
+      'weight' => 216,
     ),
     'widget_type' => 'text_textfield',
   );
@@ -3275,7 +5250,7 @@ function people_profiles_config_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 80,
+      'weight' => 217,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -3670,6 +5645,43 @@ function people_profiles_config_field_default_field_instances() {
     'widget_type' => 'nodereference_buttons',
   );
 
+  // Exported field_instance: 'node-profile-field_profile_taxonomy'
+  $field_instances['node-profile-field_profile_taxonomy'] = array(
+    'bundle' => 'profile',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => 'Use the "Ctrl" key to make multiple selections.<br>
+This is one of the criteria that can be used to determine sites your profile will appear upon. It is not displayed on your profile.',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 131,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_profile_taxonomy',
+    'label' => 'Profile Taxonomy',
+    'required' => 0,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 152,
+    ),
+  );
+
   // Exported field_instance: 'node-profile-field_prv_alternative_email'
   $field_instances['node-profile-field_prv_alternative_email'] = array(
     'bundle' => 'profile',
@@ -3860,7 +5872,7 @@ function people_profiles_config_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 206,
+      'weight' => 210,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -3925,7 +5937,7 @@ function people_profiles_config_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 86,
+      'weight' => 90,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -4123,6 +6135,47 @@ function people_profiles_config_field_default_field_instances() {
       'weight' => 87,
     ),
     'widget_type' => 'nodereference_buttons',
+  );
+
+  // Exported field_instance: 'node-profile-field_prv_openlearn_bio'
+  $field_instances['node-profile-field_prv_openlearn_bio'] = array(
+    'bundle' => 'profile',
+    'default_value' => array(
+      0 => array(
+        'nid' => 19916,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'node_reference',
+        'settings' => array(),
+        'type' => 'node_reference_default',
+        'weight' => 135,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_prv_openlearn_bio',
+    'label' => 'OpenLearn biography (privacy setting)',
+    'required' => 1,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_buttons',
+      'weight' => 209,
+    ),
   );
 
   // Exported field_instance: 'node-profile-field_prv_oubs_internatl_collabs'
@@ -4492,201 +6545,6 @@ function people_profiles_config_field_default_field_instances() {
     'widget_type' => 'nodereference_buttons',
   );
 
-  // Exported field_instance: 'node-profile-field_prv_profile_layout'
-  $field_instances['node-profile-field_prv_profile_layout'] = array(
-    'bundle' => 'profile',
-    'default_value' => array(
-      0 => array(
-        'nid' => 19916,
-      ),
-    ),
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 126,
-      ),
-      'full' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 126,
-      ),
-      'rss' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 126,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 126,
-      ),
-      'token' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 126,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_prv_profile_layout',
-    'label' => 'Layout (privacy setting)',
-    'required' => 1,
-    'settings' => array(
-      'user_register_form' => FALSE,
-    ),
-    'weight' => 126,
-    'widget' => array(
-      'active' => 1,
-      'module' => 'options',
-      'settings' => array(),
-      'type' => 'options_buttons',
-      'weight' => 213,
-    ),
-    'widget_type' => 'nodereference_buttons',
-  );
-
-  // Exported field_instance: 'node-profile-field_prv_profile_layout_colour'
-  $field_instances['node-profile-field_prv_profile_layout_colour'] = array(
-    'bundle' => 'profile',
-    'default_value' => array(
-      0 => array(
-        'nid' => 19916,
-      ),
-    ),
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 130,
-      ),
-      'full' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 130,
-      ),
-      'rss' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 130,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 130,
-      ),
-      'token' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 130,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_prv_profile_layout_colour',
-    'label' => 'Light / Dark (privacy setting)',
-    'required' => 1,
-    'settings' => array(
-      'user_register_form' => FALSE,
-    ),
-    'weight' => 130,
-    'widget' => array(
-      'active' => 1,
-      'module' => 'options',
-      'settings' => array(),
-      'type' => 'options_buttons',
-      'weight' => 215,
-    ),
-    'widget_type' => 'nodereference_buttons',
-  );
-
-  // Exported field_instance: 'node-profile-field_prv_profile_layout_image'
-  $field_instances['node-profile-field_prv_profile_layout_image'] = array(
-    'bundle' => 'profile',
-    'default_value' => array(
-      0 => array(
-        'nid' => 19916,
-      ),
-    ),
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 128,
-      ),
-      'full' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 128,
-      ),
-      'rss' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 128,
-      ),
-      'teaser' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 128,
-      ),
-      'token' => array(
-        'label' => 'above',
-        'module' => 'node_reference',
-        'settings' => array(),
-        'type' => 'node_reference_default',
-        'weight' => 128,
-      ),
-    ),
-    'entity_type' => 'node',
-    'field_name' => 'field_prv_profile_layout_image',
-    'label' => 'Image (privacy setting)',
-    'required' => 1,
-    'settings' => array(
-      'user_register_form' => FALSE,
-    ),
-    'weight' => 128,
-    'widget' => array(
-      'active' => 1,
-      'module' => 'options',
-      'settings' => array(),
-      'type' => 'options_buttons',
-      'weight' => 214,
-    ),
-    'widget_type' => 'nodereference_buttons',
-  );
-
   // Exported field_instance: 'node-profile-field_prv_research_interests'
   $field_instances['node-profile-field_prv_research_interests'] = array(
     'bundle' => 'profile',
@@ -4761,7 +6619,7 @@ function people_profiles_config_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 176,
+      'weight' => 177,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -4826,7 +6684,7 @@ function people_profiles_config_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 85,
+      'weight' => 216,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -5046,8 +6904,10 @@ function people_profiles_config_field_default_field_instances() {
   t('Add a link to your main blog here and if you have any more blogs to your name add them as other web links');
   t('Alternative Email address');
   t('Alternative Email address (privacy setting)');
+  t('Appt Role Code');
   t('Appt Role Desc');
   t('Appt Role Desc (privacy setting) ');
+  t('Appt job title');
   t('Appt job title ');
   t('Appt job title (privacy setting)');
   t('Areas of expertise');
@@ -5056,12 +6916,12 @@ function people_profiles_config_field_default_field_instances() {
   t('Blog (privacy setting)');
   t('Enter an alternative Open University Email address if you have one.');
   t('Enter links to relevant websites - e.g. your inaugural lecture');
+  t('Enter the path name of the drupal site including all preceding and trailing slashes. e.g. /mbaopen/');
   t('External contributions');
   t('External contributions (privacy setting)');
   t('Flickr page');
   t('Flickr page (privacy settings)');
   t('Image');
-  t('Image (privacy setting)');
   t('Impact and engagement');
   t('Impact and engagement (privacy setting)');
   t('Include a relevant flickr page here');
@@ -5069,28 +6929,38 @@ function people_profiles_config_field_default_field_instances() {
   t('Include items such as journal editorships, important consulting work, membership of important committees, honours, awards and prestigious posts');
   t('International links');
   t('International links (privacy setting)');
+  t('Is this a public website, or an intranet?');
   t('Layout');
-  t('Layout (privacy setting)');
   t('Letters after name');
   t('Letters after name (privacy setting)');
   t('Level 1 Establishment Unit Desc');
   t('Level 1 Establishment Unit Desc (privacy setting) ');
+  t('Level 1 Establishment Unit code');
+  t('Level 2 Establishment Unit code');
   t('Level 2 Establishment Unit name');
   t('Level 2 Establishment Unit name (privacy setting)');
+  t('Level 3 Establishment Unit code');
   t('Level 3 Establishment Unit name');
   t('Level 3 Establishment Unit name (privacy setting)');
+  t('Level 4 Establishment Unit code');
   t('Level 4 Establishment Unit name');
   t('Level 4 Establishment Unit name (privacy setting)');
   t('Light / Dark');
-  t('Light / Dark (privacy setting)');
   t('Link to your slideshare account where your presentations may be stored');
   t('LinkedIn profile');
   t('LinkedIn profile (privacy setting)');
+  t('Media Expertise');
+  t('Media relations biography');
   t('OU Email address');
+  t('OU email address');
   t('OU email address (privacy setting) ');
   t('OUCU');
+  t('OpenLearn biography');
+  t('OpenLearn biography (privacy setting)');
+  t('PIMS unique ID (computed)');
   t('Personal Biography');
   t('Personal Biography (privacy setting)');
+  t('Personal Website');
   t('Personal website ');
   t('Personal website (privacy setting)');
   t('Photograph');
@@ -5101,9 +6971,12 @@ function people_profiles_config_field_default_field_instances() {
   t('Preferred Staff Forenames (privacy setting) ');
   t('Preferred Staff Surname');
   t('Preferred Staff Surname (privacy setting) ');
+  t('Profile Taxonomy');
   t('Profile visibility');
   t('Research interests');
   t('Research interests (privacy setting)');
+  t('Site path');
+  t('Site visibility');
   t('Slideshare');
   t('Slideshare (privacy setting)');
   t('Staff Forenames');
@@ -5117,10 +6990,22 @@ function people_profiles_config_field_default_field_instances() {
   t('Staff title (privacy setting) ');
   t('Teaching interests');
   t('Teaching interests (privacy setting)');
+  t('The OU unit / department that this site is hosting. This is ignored if the allowed site is the profiles server (path = /people/)');
+  t('This is a concatenation of staffid + L1 + L2 + L3 + L4 unit codes');
   t('Twitter user name');
   t('Twitter user name (privacy setting)');
   t('Unabbreviated job title');
   t('Unabbreviated job title (privacy setting)');
+  t('Unit code');
+  t('Unit level');
+  t('Unit name lv1');
+  t('Unit name lv2');
+  t('Unit name lv3');
+  t('Unit name lv4');
+  t('Unit ref');
+  t('Use the "Ctrl" key to make multiple selections.');
+  t('Use the "Ctrl" key to make multiple selections.<br>
+This is one of the criteria that can be used to determine sites your profile will appear upon. It is not displayed on your profile.');
   t('Web links');
   t('Web links (privacy setting)');
   t('Write about any type of international collaboration');

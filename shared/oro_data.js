@@ -21,8 +21,8 @@
   //Processes the JSON data and updates the page with data
   function process_oro( oro_data_json )
   {
-    
     $.each(oro_data_json, function(key1, oro_entry){
+
       switch( oro_entry.type)
       {
         case "article":
@@ -31,29 +31,35 @@
           $("#oro .article ul").append( oro_entry.publication + ( (oro_entry.pagerange) ? ( hasNumber( oro_entry.pagerange ) ? (" (pp. " + oro_entry.pagerange + ")" ) : (" " + oro_entry.pagerange ) ) : "" ) );
           $("#oro .article ul").append( "<hr />" );
           break;
+		  
+		  
         case "book":
           $("#oro .book ul").append( "<strong><a href='" + oro_entry.uri + "'>" + oro_entry.title +"</a> (" + oro_entry.date +") </strong><br />" );
           $("#oro .book ul").append( "" + ( (oro_entry.creators) ? (get_creators( oro_entry.creators ) +"<br />") : "" ) );
           $("#oro .book ul").append( "" + oro_entry.isbn + " : " + oro_entry.publisher + " (" + oro_entry.place_of_pub +")" );
           $("#oro .book ul").append( "<hr />" );
           break;
+
         case "book_section":
           $("#oro .book_section ul").append( "<strong><a href='" + oro_entry.uri + "'>" + oro_entry.title +"</a> (" + oro_entry.date +") </strong><br />" );
           $("#oro .book_section ul").append( "" + ( (oro_entry.creators) ? (get_creators( oro_entry.creators ) +"<br />") : "" ) );
           $("#oro .book_section ul").append( oro_entry.book_title + "<br /> " + oro_entry.isbn + " : " + oro_entry.publisher + " (" + oro_entry.place_of_pub +")" );
           $("#oro .book_section ul").append( "<hr />" );
           break;
+		  
         case "bookedit":
           $("#oro .bookedit ul").append( "<strong><a href='" + oro_entry.uri + "'>" + oro_entry.title +"</a> (" + oro_entry.date +") </strong><br />" );
           $("#oro .bookedit ul").append( "" + ( (oro_entry.creators) ? (get_creators( oro_entry.creators ) +"<br />") : "" ) );
           $("#oro .bookedit ul").append( "" + oro_entry.isbn + " : " + oro_entry.publisher + " (" + oro_entry.place_of_pub +")" );
           $("#oro .bookedit ul").append( "<hr />" );
           break;
+		  
         case "conference_item":
           $("#oro .conference_item ul").append( "<strong><a href='" + oro_entry.uri + "'>" + oro_entry.title +"</a> (" + oro_entry.date +") </strong><br />" );
           $("#oro .conference_item ul").append( "" + ( (oro_entry.creators) ? (get_creators( oro_entry.creators ) +"<br />") : "" ) );
           $("#oro .conference_item ul").append( "In : " + oro_entry.event_title + " (" + oro_entry.event_dates + ", " + oro_entry.event_location + ")<hr />" );
           break;
+
         default:
           $("#oro .other ul").append( "<strong><a href='" + oro_entry.uri + "'>" + oro_entry.title +"</a> (" + oro_entry.date +") </strong><br />" );
           $("#oro .other ul").append( "" + ( (oro_entry.creators) ? (get_creators( oro_entry.creators ) +"<br />") : "" ) );
@@ -107,27 +113,26 @@
   }
 
   $( document ).ready(function() {
-    
-    //Get the profile ORO data. NOTE : "oro_link" is declared in node--profile.tpl.php
-    $.ajax({
-      dataType: "json",
-      url: oro_link,
-      success: function( oro_data_json, textStatus ) {
-        process_oro( oro_data_json );
-      },
-      error: function( jqXHR, textStatus, errorThrown ) {
-        console.log( "Ajax request fail : " + textStatus + " ERROR: " + errorThrown );
+  
+	process_oro( oro_data_json );
 
-        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
-        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
-        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
-        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
-        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
-        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
-        //========================= TEMP LOCAL WORKROUND. REMOVE LINE BELOW ON SERVER
-        process_oro( oro_data_json );
-      }
+/*
+    //Get the profile ORO data. NOTE : "oro_link" is declared in node--profile.tpl
+    $.ajax({
+		url: oro_link,
+		dataType: "json",
+		success: function( oro_data_json, textStatus )
+		{
+			process_oro( oro_data_json );
+		},
+		error: function( jqXHR, textStatus, errorThrown )
+		{
+			console.log( "Ajax : Request fail for : " + oro_link );
+			console.log( "Ajax : " + textStatus + " ERROR: " + errorThrown );
+			console.log( "Ajax : " + jqXHR.responseText );
+		}
     });
-    
+    */
   });
 })(jQuery);
+

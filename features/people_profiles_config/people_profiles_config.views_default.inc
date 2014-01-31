@@ -63,6 +63,89 @@ function people_profiles_config_views_default_views() {
   $export['ordered_privacy_settings'] = $view;
 
   $view = new view();
+  $view->name = 'ou_units';
+  $view->description = '';
+  $view->tag = 'default';
+  $view->base_table = 'node';
+  $view->human_name = 'OU Units';
+  $view->core = 7;
+  $view->api_version = '3.0';
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+  /* Display: Master */
+  $handler = $view->new_display('default', 'Master', 'default');
+  $handler->display->display_options['title'] = 'PIMs Units';
+  $handler->display->display_options['use_more_always'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'perm';
+  $handler->display->display_options['cache']['type'] = 'none';
+  $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['pager']['type'] = 'none';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['style_plugin'] = 'references_style';
+  $handler->display->display_options['row_plugin'] = 'references_fields';
+  $handler->display->display_options['row_options']['default_field_elements'] = FALSE;
+  /* Field: Content: Unit name lv1 */
+  $handler->display->display_options['fields']['field_unit_name_lv1']['id'] = 'field_unit_name_lv1';
+  $handler->display->display_options['fields']['field_unit_name_lv1']['table'] = 'field_data_field_unit_name_lv1';
+  $handler->display->display_options['fields']['field_unit_name_lv1']['field'] = 'field_unit_name_lv1';
+  $handler->display->display_options['fields']['field_unit_name_lv1']['label'] = '';
+  $handler->display->display_options['fields']['field_unit_name_lv1']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_unit_name_lv1']['element_default_classes'] = FALSE;
+  /* Field: Content: Unit name lv2 */
+  $handler->display->display_options['fields']['field_unit_name_lv2']['id'] = 'field_unit_name_lv2';
+  $handler->display->display_options['fields']['field_unit_name_lv2']['table'] = 'field_data_field_unit_name_lv2';
+  $handler->display->display_options['fields']['field_unit_name_lv2']['field'] = 'field_unit_name_lv2';
+  $handler->display->display_options['fields']['field_unit_name_lv2']['label'] = '';
+  $handler->display->display_options['fields']['field_unit_name_lv2']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_unit_name_lv2']['element_default_classes'] = FALSE;
+  /* Field: Content: Unit name lv3 */
+  $handler->display->display_options['fields']['field_unit_name_lv3']['id'] = 'field_unit_name_lv3';
+  $handler->display->display_options['fields']['field_unit_name_lv3']['table'] = 'field_data_field_unit_name_lv3';
+  $handler->display->display_options['fields']['field_unit_name_lv3']['field'] = 'field_unit_name_lv3';
+  $handler->display->display_options['fields']['field_unit_name_lv3']['label'] = '';
+  $handler->display->display_options['fields']['field_unit_name_lv3']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_unit_name_lv3']['element_default_classes'] = FALSE;
+  /* Field: Content: Unit name lv4 */
+  $handler->display->display_options['fields']['field_unit_name_lv4']['id'] = 'field_unit_name_lv4';
+  $handler->display->display_options['fields']['field_unit_name_lv4']['table'] = 'field_data_field_unit_name_lv4';
+  $handler->display->display_options['fields']['field_unit_name_lv4']['field'] = 'field_unit_name_lv4';
+  $handler->display->display_options['fields']['field_unit_name_lv4']['label'] = '';
+  $handler->display->display_options['fields']['field_unit_name_lv4']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['field_unit_name_lv4']['element_default_classes'] = FALSE;
+  /* Sort criterion: Content: Title */
+  $handler->display->display_options['sorts']['title']['id'] = 'title';
+  $handler->display->display_options['sorts']['title']['table'] = 'node';
+  $handler->display->display_options['sorts']['title']['field'] = 'title';
+  /* Contextual filter: Content: Title */
+  $handler->display->display_options['arguments']['title']['id'] = 'title';
+  $handler->display->display_options['arguments']['title']['table'] = 'node';
+  $handler->display->display_options['arguments']['title']['field'] = 'title';
+  $handler->display->display_options['arguments']['title']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['title']['summary']['format'] = 'default_summary';
+  /* Filter criterion: Content: Published */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'node';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = 1;
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'ou_unit' => 'ou_unit',
+  );
+
+  /* Display: References */
+  $handler = $view->new_display('references', 'References', 'references_1');
+  $handler->display->display_options['defaults']['title'] = FALSE;
+  $handler->display->display_options['pager']['type'] = 'none';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $export['ou_units'] = $view;
+
+  $view = new view();
   $view->name = 'profile_search';
   $view->description = '';
   $view->tag = '';
@@ -82,15 +165,25 @@ function people_profiles_config_views_default_views() {
   $handler->display->display_options['pager']['type'] = 'full';
   $handler->display->display_options['pager']['options']['items_per_page'] = 50;
   $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['grouping'] = array(
+    0 => array(
+      'field' => 'field_pdat_l2_estab_unit_name',
+      'rendered' => 1,
+      'rendered_strip' => 0,
+    ),
+  );
   $handler->display->display_options['style_options']['columns'] = array(
     'nid' => 'nid',
-    'field_oup_profile_layout_image' => 'field_oup_profile_layout_image',
+    'field_oup_photo' => 'field_oup_photo',
     'title' => 'title',
     'field_pdat_appt_job_title' => 'field_pdat_appt_job_title',
     'field_pdat_l1_estab_unit_desc' => 'field_pdat_l1_estab_unit_desc',
     'field_pdat_l2_estab_unit_name' => 'field_pdat_l2_estab_unit_name',
     'field_pdat_pref_forenames' => 'field_pdat_pref_forenames',
     'field_pdat_pref_surname' => 'field_pdat_pref_surname',
+    'field_pdat_ou_email_address' => 'field_pdat_ou_email_address',
+    'field_oup_blog' => 'field_oup_blog',
+    'field_oup_twitter' => 'field_oup_twitter',
   );
   $handler->display->display_options['style_options']['default'] = '-1';
   $handler->display->display_options['style_options']['info'] = array(
@@ -101,7 +194,7 @@ function people_profiles_config_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
-    'field_oup_profile_layout_image' => array(
+    'field_oup_photo' => array(
       'sortable' => 0,
       'default_sort_order' => 'asc',
       'align' => '',
@@ -150,6 +243,27 @@ function people_profiles_config_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
+    'field_pdat_ou_email_address' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_oup_blog' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'field_oup_twitter' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
   );
   /* Field: Content: Nid */
   $handler->display->display_options['fields']['nid']['id'] = 'nid';
@@ -157,44 +271,11 @@ function people_profiles_config_views_default_views() {
   $handler->display->display_options['fields']['nid']['field'] = 'nid';
   $handler->display->display_options['fields']['nid']['label'] = '';
   $handler->display->display_options['fields']['nid']['exclude'] = TRUE;
-  /* Field: Broken/missing handler */
-  $handler->display->display_options['fields']['field_oup_photo_fid']['id'] = 'field_oup_photo_fid';
-  $handler->display->display_options['fields']['field_oup_photo_fid']['table'] = 'node_data_field_oup_photo';
-  $handler->display->display_options['fields']['field_oup_photo_fid']['field'] = 'field_oup_photo_fid';
-  $handler->display->display_options['fields']['field_oup_photo_fid']['label'] = 'Photograph';
-  $handler->display->display_options['fields']['field_oup_photo_fid']['hide_empty'] = TRUE;
   /* Field: Content: Title */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
   $handler->display->display_options['fields']['title']['field'] = 'title';
   $handler->display->display_options['fields']['title']['label'] = 'Name';
-  /* Field: Broken/missing handler */
-  $handler->display->display_options['fields']['field_pdat_appt_job_title_value']['id'] = 'field_pdat_appt_job_title_value';
-  $handler->display->display_options['fields']['field_pdat_appt_job_title_value']['table'] = 'node_data_field_pdat_appt_job_title';
-  $handler->display->display_options['fields']['field_pdat_appt_job_title_value']['field'] = 'field_pdat_appt_job_title_value';
-  $handler->display->display_options['fields']['field_pdat_appt_job_title_value']['label'] = 'Appt job title ';
-  /* Field: Broken/missing handler */
-  $handler->display->display_options['fields']['field_pdat_l1_estab_unit_desc_value']['id'] = 'field_pdat_l1_estab_unit_desc_value';
-  $handler->display->display_options['fields']['field_pdat_l1_estab_unit_desc_value']['table'] = 'node_data_field_pdat_l1_estab_unit_desc';
-  $handler->display->display_options['fields']['field_pdat_l1_estab_unit_desc_value']['field'] = 'field_pdat_l1_estab_unit_desc_value';
-  $handler->display->display_options['fields']['field_pdat_l1_estab_unit_desc_value']['label'] = 'Level 1 Establishment Unit Desc';
-  /* Field: Broken/missing handler */
-  $handler->display->display_options['fields']['field_pdat_l2_estab_unit_name_value']['id'] = 'field_pdat_l2_estab_unit_name_value';
-  $handler->display->display_options['fields']['field_pdat_l2_estab_unit_name_value']['table'] = 'node_data_field_pdat_l2_estab_unit_name';
-  $handler->display->display_options['fields']['field_pdat_l2_estab_unit_name_value']['field'] = 'field_pdat_l2_estab_unit_name_value';
-  $handler->display->display_options['fields']['field_pdat_l2_estab_unit_name_value']['label'] = 'Level 2 Establishment Unit name';
-  /* Field: Broken/missing handler */
-  $handler->display->display_options['fields']['field_pdat_staff_forenames_value']['id'] = 'field_pdat_staff_forenames_value';
-  $handler->display->display_options['fields']['field_pdat_staff_forenames_value']['table'] = 'node_data_field_pdat_staff_forenames';
-  $handler->display->display_options['fields']['field_pdat_staff_forenames_value']['field'] = 'field_pdat_staff_forenames_value';
-  $handler->display->display_options['fields']['field_pdat_staff_forenames_value']['label'] = 'Staff Forenames';
-  $handler->display->display_options['fields']['field_pdat_staff_forenames_value']['exclude'] = TRUE;
-  /* Field: Broken/missing handler */
-  $handler->display->display_options['fields']['field_pdat_staff_surname_value']['id'] = 'field_pdat_staff_surname_value';
-  $handler->display->display_options['fields']['field_pdat_staff_surname_value']['table'] = 'node_data_field_pdat_staff_surname';
-  $handler->display->display_options['fields']['field_pdat_staff_surname_value']['field'] = 'field_pdat_staff_surname_value';
-  $handler->display->display_options['fields']['field_pdat_staff_surname_value']['label'] = 'Staff Surname';
-  $handler->display->display_options['fields']['field_pdat_staff_surname_value']['exclude'] = TRUE;
   /* Sort criterion: Content: Preferred Staff Forenames (field_pdat_pref_forenames) */
   $handler->display->display_options['sorts']['field_pdat_pref_forenames_value']['id'] = 'field_pdat_pref_forenames_value';
   $handler->display->display_options['sorts']['field_pdat_pref_forenames_value']['table'] = 'field_data_field_pdat_pref_forenames';
@@ -269,11 +350,13 @@ function people_profiles_config_views_default_views() {
   $handler->display->display_options['fields']['field_pdat_l1_estab_unit_desc']['table'] = 'field_data_field_pdat_l1_estab_unit_desc';
   $handler->display->display_options['fields']['field_pdat_l1_estab_unit_desc']['field'] = 'field_pdat_l1_estab_unit_desc';
   $handler->display->display_options['fields']['field_pdat_l1_estab_unit_desc']['label'] = 'Unit';
+  $handler->display->display_options['fields']['field_pdat_l1_estab_unit_desc']['exclude'] = TRUE;
   /* Field: Content: Level 2 Establishment Unit name */
   $handler->display->display_options['fields']['field_pdat_l2_estab_unit_name']['id'] = 'field_pdat_l2_estab_unit_name';
   $handler->display->display_options['fields']['field_pdat_l2_estab_unit_name']['table'] = 'field_data_field_pdat_l2_estab_unit_name';
   $handler->display->display_options['fields']['field_pdat_l2_estab_unit_name']['field'] = 'field_pdat_l2_estab_unit_name';
   $handler->display->display_options['fields']['field_pdat_l2_estab_unit_name']['label'] = 'Sub Unit';
+  $handler->display->display_options['fields']['field_pdat_l2_estab_unit_name']['exclude'] = TRUE;
   /* Field: Content: Preferred Staff Forenames */
   $handler->display->display_options['fields']['field_pdat_pref_forenames']['id'] = 'field_pdat_pref_forenames';
   $handler->display->display_options['fields']['field_pdat_pref_forenames']['table'] = 'field_data_field_pdat_pref_forenames';
@@ -284,6 +367,23 @@ function people_profiles_config_views_default_views() {
   $handler->display->display_options['fields']['field_pdat_pref_surname']['table'] = 'field_data_field_pdat_pref_surname';
   $handler->display->display_options['fields']['field_pdat_pref_surname']['field'] = 'field_pdat_pref_surname';
   $handler->display->display_options['fields']['field_pdat_pref_surname']['exclude'] = TRUE;
+  /* Field: Content: OU Email address */
+  $handler->display->display_options['fields']['field_pdat_ou_email_address']['id'] = 'field_pdat_ou_email_address';
+  $handler->display->display_options['fields']['field_pdat_ou_email_address']['table'] = 'field_data_field_pdat_ou_email_address';
+  $handler->display->display_options['fields']['field_pdat_ou_email_address']['field'] = 'field_pdat_ou_email_address';
+  $handler->display->display_options['fields']['field_pdat_ou_email_address']['alter']['alter_text'] = TRUE;
+  $handler->display->display_options['fields']['field_pdat_ou_email_address']['alter']['text'] = '[field_pdat_ou_email_address]@open.ac.uk';
+  /* Field: Content: Blog */
+  $handler->display->display_options['fields']['field_oup_blog']['id'] = 'field_oup_blog';
+  $handler->display->display_options['fields']['field_oup_blog']['table'] = 'field_data_field_oup_blog';
+  $handler->display->display_options['fields']['field_oup_blog']['field'] = 'field_oup_blog';
+  $handler->display->display_options['fields']['field_oup_blog']['click_sort_column'] = 'url';
+  /* Field: Content: Twitter user name */
+  $handler->display->display_options['fields']['field_oup_twitter']['id'] = 'field_oup_twitter';
+  $handler->display->display_options['fields']['field_oup_twitter']['table'] = 'field_data_field_oup_twitter';
+  $handler->display->display_options['fields']['field_oup_twitter']['field'] = 'field_oup_twitter';
+  $handler->display->display_options['fields']['field_oup_twitter']['alter']['make_link'] = TRUE;
+  $handler->display->display_options['fields']['field_oup_twitter']['alter']['path'] = 'http://www.twitter.com/[field_oup_twitter]';
   $handler->display->display_options['path'] = 'search/%';
   $handler->display->display_options['menu']['title'] = 'Search test';
   $handler->display->display_options['menu']['weight'] = '0';

@@ -83,6 +83,30 @@ function people_profiles_config_image_default_styles() {
  */
 function people_profiles_config_node_info() {
   $items = array(
+    'allowed_sites' => array(
+      'name' => t('Allowed sites'),
+      'base' => 'node_content',
+      'description' => t('This contain details of sites that are allowed to use the People Profiles system and the profiles they are allowed to access.'),
+      'has_title' => '1',
+      'title_label' => t('Description'),
+      'help' => '',
+    ),
+    'ou_unit' => array(
+      'name' => t('OU Units'),
+      'base' => 'node_content',
+      'description' => t('OU unit'),
+      'has_title' => '1',
+      'title_label' => t('Unit name'),
+      'help' => '',
+    ),
+    'pims' => array(
+      'name' => t('PIMS profile'),
+      'base' => 'node_content',
+      'description' => t('PIMS profile read from data file'),
+      'has_title' => '1',
+      'title_label' => t('Title'),
+      'help' => '',
+    ),
     'profile' => array(
       'name' => t('Profile'),
       'base' => 'node_content',

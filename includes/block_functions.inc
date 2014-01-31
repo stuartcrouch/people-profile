@@ -8,60 +8,71 @@ $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
 require_once "$INCLUDES/people_functions.inc";
   
 
-function ou_profile_get_unit_list_block() {
-  
-  global $user;
-  
-  if (count($user->roles) > 1) {
+//Displays a block containing all the level 1 pims units
+function ou_profile_get_unit_list_block()
+{
+	global $user;
+	
+	// Is the user more than just "authenticated"
+	if( count( $user->roles ) > 1 )
+	{
+		// Check to see if a unit has been requested via querystring so that it can be highlighted in the list
+		$unit_id = "";
+		if( isset( $_GET['unit'] ) )
+		{
+			if (is_numeric($_GET['unit']))
+			{
+				$unit_id = $_GET['unit'];
+			}
+		}
 
-    // Check to see if a unit has been requested via GET
-    $unit_id = "";
-    if ($_GET['unit']) {
-      if (is_numeric($_GET['unit'])) {
-        $unit_id = $_GET['unit'];
-      }
-    }
-    
-    // our block content
-    $unit_list = "";
-    # Get a list of units
-    $query = "SELECT n.title, u.field_unit_code_value FROM {node} AS n, content_type_ou_unit AS u WHERE n.nid=u.nid ";
-    if (!in_array('DRADMIN', array_values($user->roles))) {
-      $query .= "AND (";
-      $qor = "";
-      foreach ($user->roles as $role) {
-        if (strpos($role, "PP") !== FALSE) {
-          if ($qor != "")
-            $qor .= "OR ";
-          $qor .= "u.field_unit_code_value = '" . str_replace("PP", "", $role) . "' ";
-        }
-      }
-      
-      $query .= $qor . ") ";
-    }
-    $query .= "ORDER by n.title";
-    
-    $results = db_query($query);
-    $unit_title = "";
-    
-    //while ($data = db_fetch_object($result)) {
-    foreach ($results as $data) {
-      
-      if ($data->field_unit_code_value == $unit_id) {
-        $title = "<strong>[$data->title]</strong>";
-        $unit_title = $data->title;
-      } 
-      else 
-        $title = $data->title;
-      
-      $unit_list .= "<li><a href='?unit=$data->field_unit_code_value'>$title</a></li>\n";
-    }
-    
-    $block['subject'] = t("PIMS Units List");
-    $block['content']['#markup'] = $unit_list;
-  }
-  
-  return $block;
+		// our block content
+		$unit_list = "";
+		
+		# Get a list of units
+		$query = db_select('node', 'n');
+		$query->join('field_data_field_unit_code', 'uc', 'n.nid = uc.entity_id');
+		$query->join('field_data_field_unit_level', 'ul', 'n.nid = ul.entity_id');
+		$query->condition( 'ul.field_unit_level_value', '1', '=' ); //Only get level 1 units
+		$query->addField('n', 'title');
+		$query->addField('uc', 'field_unit_code_value', 'unit_code');
+		$query->orderBy( 'n.title' ); 
+		
+		//This checks for those admin roles (e.g. PP0110 & PP0153)
+		if (!in_array('DRADMIN', array_values($user->roles)))
+		{
+			$qor = array();
+			foreach ($user->roles as $role)
+			{
+				if (strpos($role, "PP") !== FALSE)
+				{
+					$qor[] = str_replace( "PP", "", $role );
+				}
+			}
+			$query->condition( 'uc.field_unit_code_value', $qor, 'IN' );
+		}
+		
+		$all_pims_units = $query->execute()->fetchAll();
+
+		//Loop through the results and produce a list of pims units
+		foreach( $all_pims_units as $pims_unit )
+		{
+			if ($pims_unit->unit_code == $unit_id)
+			{
+				$title = "<strong>[".$pims_unit->title."]</strong>";
+			} else {
+				$title = $pims_unit->title;
+			}
+			$unit_list .= "<li><a href='?unit=".$pims_unit->unit_code."'>".$title."</a></li>\n";
+		}
+
+		$block['subject'] = t("PIMS Units List");
+		$block['content']['#markup'] = $unit_list;
+		
+		return $block;
+	}
+
+	return '';
 }
 
 function ou_profile_get_people_search_block() {

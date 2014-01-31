@@ -29,6 +29,36 @@ function ou_profile_get_people_and_job_titles($staff_node_ids, $search_query = N
   if (isset($_GET["tags"]))
     $tag_search = $_GET["tags"];
 
+	//Get the values of any filter fields
+	if (isset( $_GET[ 'keyword' ] ) )
+	{
+		$filter_keyword = trim( strtolower( urldecode( $_GET[ 'keyword' ] ) ) );
+	}
+	if (isset( $_GET[ 'job' ] ) )
+	{
+		$filter_job = trim( strtolower( urldecode( $_GET[ 'job' ] ) ) );
+	}
+	if (isset( $_GET[ 'dept' ] ) )
+	{
+		$filter_dept = trim( strtolower( urldecode( $_GET[ 'dept' ] ) ) );
+		switch( substr( $filter_dept, -1 ) )
+			{
+			case '1':
+				$deptfield = 'field_pims_l1_estab_unit_desc';
+				break;
+			case '2':
+				$deptfield = 'field_pims_l2_estab_unit_name';
+				break;
+			case '3':
+				$deptfield = 'field_pims_l3_estab_unit_name';
+				break;
+			case '4':
+				$deptfield = 'field_pims_l4_estab_unit_name';
+				break;
+			}
+		$filter_dept = substr( $filter_dept, 0, strlen( $filter_dept )-2 );
+	}
+
   ou_profile_log("ou_profile_get_people_and_job_titles q = %q t = %t", array("%q" => $search_query, "%t" => $tag_search));
 
   // Loop through all the staff we have
@@ -53,8 +83,6 @@ function ou_profile_get_people_and_job_titles($staff_node_ids, $search_query = N
           if (preg_match("/" . $search_query . "/i", $snode->title))
             $display_person = TRUE;
 
-          //print_r($snode);die();
-                    
           // See if the search was found in the surname
           if (isset ($snode->ou_profile['pdata']['field_pims_pref_surname']['value']) && 
               preg_match("/" . $search_query . "/i", $snode->ou_profile['pdata']['field_pims_pref_surname']['value']))
@@ -77,29 +105,82 @@ function ou_profile_get_people_and_job_titles($staff_node_ids, $search_query = N
               $display_person = TRUE;
           }
         }
+	
+		//Check for the keyword value
+		if( isset( $filter_keyword ) )
+		{
+			$user_field_values = field_get_items( 'node', $snode, 'field_profile_taxonomy' );
+			if( $user_field_values )
+			{
+				$user_field = array();
+				foreach( $user_field_values as $data )
+				{
+					$user_field[] = trim( strtolower( $data[ 'value' ] ) );
+				}
+				if( !array_search( $filter_keyword, $user_field ) )
+				{
+					$display_person = FALSE;
+				}
+				
+			} else {
+				$display_person = FALSE;
+			}
+		}
+
+		//Check for the job title value
+		if( isset( $filter_job ) )
+		{
+			$user_field_values = field_get_items( 'node', $snode, 'field_pims_appt_job_title' );
+			if( $user_field_values )
+			{
+				if( $filter_job != trim( strtolower( $user_field_values[0]['value'] )))
+				{
+					$display_person = FALSE;
+				}
+				
+			} else {
+				$display_person = FALSE;
+			}
+		}
+
+		//Check for the dept
+		if( isset( $filter_dept ) )
+		{
+			$user_field_values = field_get_items( 'node', $snode, $deptfield );
+			if( $user_field_values )
+			{
+				if( $filter_dept != trim( strtolower( $user_field_values[0]['value'] )))
+				{
+					$display_person = FALSE;
+				}
+				
+			} else {
+				$display_person = FALSE;
+			}
+		}
+
 
         // If we matched the search (or there was no search) add it to the list of valid IDs
         if ($display_person) {
 
-          //print_r($snode);
           // Build the persons name and role
-          $list_item = l($snode->title, "node/" . $snid);
+          $list_item = l($snode->title, "node/" . $snid, array('attributes' => array('class' => array('ou_profile_profile_link'))) );
 
-          if (isset($snode->ou_profile['pdata']['field_oup_job_title'])) {
-            $list_item .= $snode->ou_profile['data']['field_oup_job_title']['value'];
+          if ( isset( $snode->field_oup_job_title['und'] ) ) {
+            $list_item .= '<div class="ou_profile_job_title">'.$snode->field_oup_job_title['und'][0]['safe_value'].'</div>';
           } 
-          elseif (isset($snode->ou_profile['pdata']['field_pims_appt_job_title'])) {
-            $list_item .= $snode->ou_profile['pdata']['field_pims_appt_job_title']['value'];
+          elseif ( isset( $snode->field_pims_appt_job_title['und'] ) ) {
+            $list_item .= '<div class="ou_profile_job_title">'.$snode->field_pims_appt_job_title['und'][0]['safe_value'].'</div>';
           }
 
           // Figure out where they belong in the list
           if ($staff_data['pref_surname']) {
-            $initial = substr($staff_data['pref_surname'], 0, 1);
+            $initial = strtoupper( substr($staff_data['pref_surname'], 0, 1) );
           } 
           else {
-            $initial = substr($staff_data['surname'], 0, 1);
+            $initial = strtoupper( substr($staff_data['surname'], 0, 1) );
           }
-
+		  
           // Add it to the list
           if (!isset($abc_staff_list[$initial]))
             $abc_staff_list[$initial] = "";
@@ -115,11 +196,13 @@ function ou_profile_get_people_and_job_titles($staff_node_ids, $search_query = N
   }
 
 
-  if (count($abc_staff_list)) 
-    return $abc_staff_list;
-  else 
+  if (count($abc_staff_list))
+  {
+    ksort( $abc_staff_list );
+	return $abc_staff_list;
+  } else {
     return "<p>No staff biographies match your keyword search. Please try a different keyword.</p>";
-  
+  }
 }
 
 function ou_profile_field_search($in_array) {
@@ -203,7 +286,7 @@ function ou_profile_get_people_search_form($search_query = NULL) {
   $split_uri = preg_split("/\?/", request_uri());
   // TODO: Convert this to use the FORMS API to avoid XSS
   $search_form = '<form action="' . $split_uri[0] . '" method="get" accept-charset="UTF-8" id="people-profiles-search-form">';
-  $search_form .= '<div><input type="text" maxlength="128" name="match" id="edit-match" size="15" value="' . $search_query . '" class="form-text" />';
+  $search_form .= '<div><input type="text" maxlength="128" name="match" id="edit-match" size="26" value="' . $search_query . '" class="form-text" placeholder="Search for a name" />';
   $search_form .= '<input type="submit" value="Search" class="form-submit"></div>';
   $search_form .= '</form>';
   
@@ -349,11 +432,10 @@ function ou_profile_get_title($node_title, $nid) {
 * using these unique ids to get local nodes
 *
 */
-function ou_profile_get_profile_nodes($query = NULL, $type = NULL) {
+function ou_profile_get_profile_nodes( $type = NULL )
+{
+
   
-  if (preg_match("/;/", $query)) {
-    return;
-  }
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/local_functions.inc";
 
@@ -362,57 +444,73 @@ function ou_profile_get_profile_nodes($query = NULL, $type = NULL) {
   $unit_code = $a_site_info['unit_code'];
 
   ou_profile_log("Unit code = " . $unit_code);
-  ou_profile_log("query = " . $query);
-  ou_profile_log("type = " . $type);
 
   // Set database to profiles
   db_set_active('profiles');
-
+  
   // This needs to stay as an old-school select for parameters to be passed to it
-  $server_query = "SELECT field_pims_unique_id_value, field_pims_pref_surname_value, field_pims_staff_surname_value ";
-  $server_query .= ", CONCAT_WS(',',field_pims_pref_surname_value, field_pims_staff_surname_value) AS ordername ";
-  $server_query .= "FROM content_type_pims ";
-  $server_query .= "WHERE ";
-  if ($query) {
-    $server_query .= $query . " ";
-  }
-  else { // no query specified so all results will be returned
-    $server_query .= " 1 ";
-  }
+  $server_query = 
+  "SELECT " .
+  "pims_unique_id.field_pims_unique_id_value, " .
+  "pims_pref_surname.field_pims_pref_surname_value, " .
+  "pims_staff_surname.field_pims_staff_surname_value, " .
+  "CONCAT_WS(',', pims_pref_surname.field_pims_pref_surname_value, pims_staff_surname.field_pims_staff_surname_value) AS ordername " .
+  "FROM field_data_field_pims_unique_id pims_unique_id " .
+  "INNER JOIN field_data_field_pims_pref_surname pims_pref_surname ON pims_unique_id.entity_id = pims_pref_surname.entity_id " .
+  "INNER JOIN field_data_field_pims_staff_surname pims_staff_surname ON pims_unique_id.entity_id = pims_staff_surname.entity_id " .
+  "INNER JOIN field_data_".$a_site_info['unit_code_field']." pims_unit_code ON pims_unique_id.entity_id = pims_unit_code.entity_id " .
+  "INNER JOIN field_data_field_pims_staff_id pims_staff_id ON pims_unique_id.entity_id = pims_staff_id.entity_id " .
+  "INNER JOIN field_data_field_oup_staff_id oup_staff_id ON pims_staff_id.field_pims_staff_id_value = oup_staff_id.field_oup_staff_id_value " .
+  "INNER JOIN field_data_field_oup_visibility oup_visibility ON oup_staff_id.entity_id = oup_visibility.entity_id " .
+  "WHERE oup_visibility.field_oup_visibility_value >= " . ( ( (int)$a_site_info['visibility'] ) -1 ) . " "; // only return visible profiles
 
+  //Filter the ou_unit
   if ($unit_code)
-    $server_query .= "AND field_pims_l1_estab_unit_code_value=" . $unit_code . " "; // only return results for unit
- 
-  $server_query .= "AND field_pims_staff_id_value IN " .
-    "(SELECT field_oup_staff_id_value FROM content_type_profile " . 
-    "WHERE field_oup_visibility_value= " .
-    (((int)$a_site_info['visibility'])-1) . ")" . // only return visible profiles!
-    " ORDER BY ordername ASC"; // order by preferred surname or surname if preferred surname is not set
+  {
+    $server_query .= "AND pims_unit_code.".$a_site_info['unit_code_field']."_value ='" . $unit_code . "' "; // only return results for unit
+  }
+  $server_query .= "ORDER BY ordername ASC"; // order by preferred surname or surname if preferred surname is not set
   ou_profile_log("server_query = " . $server_query);
   
   $server_result = db_query($server_query);
+  
+  //Create an array of results by surname using the pims_unique_id as the key
   $staff_ids = array();
-  //while ($pims_data = db_fetch_object($server_result)) {
-  foreach ($server_result as $pims_data) {
-    $staff_ids[$pims_data->field_pims_unique_id_value]['surname'] = $pims_data->field_pims_staff_surname_value;
-    $staff_ids[$pims_data->field_pims_unique_id_value]['pref_surname'] = $pims_data->field_pims_pref_surname_value;
-  }
+  foreach ($server_result as $pims_data)
+  {
+    //$staff_ids[$pims_data->field_pims_unique_id_value]['surname'] = $pims_data->field_pims_staff_surname_value;
+	if( $pims_data->field_pims_pref_surname_value == '' )
+	{
+      $staff_ids[$pims_data->field_pims_unique_id_value]['pref_surname'] = $pims_data->field_pims_staff_surname_value;
+	} else {
+      $staff_ids[$pims_data->field_pims_unique_id_value]['pref_surname'] = $pims_data->field_pims_pref_surname_value;
+	}
+  } 
+
 
   // Set database back to original and query client website to get local, matching profiles
   db_set_active();
   
+
   $client_profiles = array();
   $INLIST = "";
   // loop over staff ids and get local nodes on client website
-  foreach ($staff_ids as $staff_id => $staff_data) { 
+  foreach ($staff_ids as $staff_id => $staff_data) 
+  { 
      $INLIST .= "'" . $staff_id . "',";
   }
 
+  
   $unordered_client_profiles = array();
-  if ($INLIST) {
+  if ($INLIST)
+  {
      $INLIST = rtrim($INLIST, ",");
-     if ($site_path != ou_profile_server_site_path()) {
-      $client_query = "SELECT node.nid, node.title, field_data_field_pims_unique_id.field_pims_unique_id_value as staff_id " .
+	
+     if ($site_path != ou_profile_server_site_path())
+	 {
+	   // On client site, get the list of matching profiles using the pims_unique_id
+       $client_query = 
+	      "SELECT node.nid, node.title, field_data_field_pims_unique_id.field_pims_unique_id_value as staff_id " .
           "FROM {node}, {field_data_field_pims_unique_id} " .
           "WHERE " .
           "node.type in ('ou_profile') " .
@@ -420,33 +518,34 @@ function ou_profile_get_profile_nodes($query = NULL, $type = NULL) {
           "AND node.nid = field_data_field_pims_unique_id.entity_id " .
           "AND field_data_field_pims_unique_id.field_pims_unique_id_value IN (" . $INLIST . ")";
           // N.B. 'ORDER BY find_in_set(staff_id, $INLIST)' cannot be used here as all profiles may not be on client server
-    }
-    else {
-      $client_query = "SELECT node.nid, node.title, content_type_pims.field_pims_unique_id_value as staff_id FROM {node}, {content_type_pims} ";
-      $client_query .= "WHERE ";
-      $client_query .= "node.type in ('pims') AND node.status='1' ";
-      $client_query .= "AND node.nid=content_type_pims.nid ";
-      $client_query .= "AND content_type_pims.field_pims_unique_id_value IN (" . $INLIST . ") "; 
-      // N.B. 'ORDER BY find_in_set(staff_id, $INLIST)' cannot be used here as all profiles may not be on client server
+     } else {
+       $client_query = 
+          "SELECT n.nid, n.title, pims_unique_id.field_pims_unique_id_value as staff_id " .
+          "FROM node n " .
+          "INNER JOIN field_data_field_pims_unique_id pims_unique_id ON pims_unique_id.entity_id = n.nid " .
+          "WHERE n.type in ('pims') ".
+          "AND n.status = '1' " .
+          "AND pims_unique_id.field_pims_unique_id_value IN (" . $INLIST .") ";
     }
 
     ou_profile_log("client query = " . $client_query);
     $client_result = db_query($client_query);
-    //while ($profile = db_fetch_array($client_result)) {
+
     foreach ($client_result as $profile) {
-      if ($type == "list") {
-      ou_profile_log("creating list item for - " . $profile['title']);
-              $unordered_client_profiles[$profile['staff_id']] = l($profile['title'], "node/" . $profile['nid']); // Drupal function to return well-formed link to node
-      }
-      else {
-       $unordered_client_profiles[$profile->staff_id] = $profile->nid;
+      if ($type == "list")
+	  {
+          ou_profile_log("creating list item for - " . $profile['title']);
+          $unordered_client_profiles[$profile['staff_id']] = l($profile['title'], "node/" . $profile['nid']); // Drupal function to return well-formed link to node
+      } else {
+          $unordered_client_profiles[$profile->staff_id] = $profile->nid;
       }
     }
-  }
-  else
+  } else {
      return;
-
+  }
+  
   ou_profile_log("re-ordering data");
+  
   foreach ($staff_ids as $staff_id => $staff_data) { // reorder the unordered client profiles to restore surname order
     if (isset($unordered_client_profiles[$staff_id])) {
       // If we were asked for an array, we pass back the staff_data array
@@ -458,5 +557,61 @@ function ou_profile_get_profile_nodes($query = NULL, $type = NULL) {
   }
 
   ou_profile_log("returning profiles");
+
   return $client_profiles;
+}
+
+/**
+*
+* Author: Mark Williams
+*
+* Return an array of expertise keywords for the client website's unit
+*
+*/
+function theme_get_expertise_tags() {
+  
+  $a_site_info = ou_profile_lget_site_info();
+  $unit_code = $a_site_info['unit_code'];
+  $site_visibility = (int) $a_site_info['visibility'];
+
+  // Set database to profiles
+  db_set_active('profiles');
+
+  // TODO: Rewrite me as db_query array
+  //$sql_query = db_select('node', 'n')->distinct();
+  $sql_query = db_select('field_data_field_oup_expertise', 'expertise')->distinct();
+  $sql_query->addField('expertise', 'field_oup_expertise_value');
+
+  $sql_query->join('field_data_field_prv_expertise', 'expertise_privacy', 'expertise.entity_id = expertise_privacy.entity_id');
+  $sql_query->join('field_data_field_privacy_value', 'privacy', 'privacy.entity_id = expertise_privacy.field_prv_expertise_nid');
+  $sql_query->join('field_data_field_pims_l1_estab_unit_code', 'l1_estab_unit', 'expertise.entity_id = l1_estab_unit.entity_id');
+  
+  $sql_query
+    ->condition( 'privacy.field_oup_visibility_value', $site_visibility,'>=')
+    ->condition( 'l1_estab_unit.field_pims_l1_estab_unit_code_value', $unit_code, '=' );
+  
+  $sql_query->isNotNull('expertise.field_oup_expertise_value');
+
+
+  /*$sql_query = "SELECT DISTINCT field_oup_expertise_value ";
+  $sql_query .= "FROM {content_type_profile}, {content_type_pims}, {content_field_oup_expertise}, {content_type_privacy_value} ";
+  $sql_query .= "WHERE content_field_oup_expertise.nid = content_type_profile.nid ";
+  $sql_query .= "AND content_type_profile.field_oup_staff_id_value=content_type_pims.field_pims_staff_id_value ";
+  $sql_query .= "AND content_type_profile.field_prv_expertise_nid=content_type_privacy_value.nid ";
+  $sql_query .= "AND content_type_privacy_value.field_privacy_value_value >=" . $site_visibility . " ";
+  $sql_query .= "AND content_type_pims.field_pims_l1_estab_unit_code_value =" . $unit_code . " ";
+  $sql_query .= "AND content_field_oup_expertise.field_oup_expertise_value IS NOT NULL ";
+*/
+
+
+  $sql_result = db_query($sql_query);
+
+  $tags = array();
+  while ($row = db_fetch_object($sql_result)) {
+    $tags[] = $row->field_oup_expertise_value;
+  }
+
+  db_set_active();
+
+  return $tags;
 }

@@ -1,9 +1,9 @@
 <?php
+/*
 error_reporting(E_ALL);
 ini_set('display_errors', TRUE);
 ini_set('display_startup_errors', TRUE);
-
-
+*/
 
 // $Id: node.tpl.php,v 3.1 2012/06/29 09:00:00 laustin (07779 146104) $
 /**
@@ -58,12 +58,12 @@ ini_set('display_startup_errors', TRUE);
  * @see template_preprocess()
  * @see template_preprocess_node()
  */
-// print_r($node);
 ?>
 <?php 
 global $user;
-if (!isset($node->ou_profile))
+if (!isset($node->ou_profile)):
   return;
+endif;
 ?>
 <!-- start node.tpl.php -->
 <div id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?>"<?php print $attributes; ?>>
@@ -72,7 +72,8 @@ if (!isset($node->ou_profile))
   <?php print render($title_prefix); ?>
   <h1>
     <?php print $title;
-    if ($node->ou_profile['pdata']['group_sss_overrides']['group_letters_after_name']['field_oup_letters']['value']) {
+    if( isset( $node->ou_profile['pdata']['group_sss_overrides']['group_letters_after_name']['field_oup_letters']['value']['und']) )
+	{
       print (" - " .$node->ou_profile['pdata']['group_sss_overrides']['group_letters_after_name']['field_oup_letters']['value']['und'][0]['value']);
     } 
     ?>
@@ -85,7 +86,7 @@ if (!isset($node->ou_profile))
     * Currently works for content owner and admin.
     * TODO: Add a role so that IT/Comms etc can test and access all profile edit options.
     */
-    print (ou_profile_edit_profile_link($node, $user, $account));
+    print( ou_profile_edit_profile_link( $node, $user ) );
   ?>
 
   <div class="content clearfix"<?php print $content_attributes; ?>>
@@ -99,12 +100,9 @@ if (!isset($node->ou_profile))
       hide($content['field_image']);
       
     ?>
-    
-  <!-- NODE DATA - <?php print_r($node->ou_profile['pdata']); ?> -->
-  <?php
-    //kprint_r($node->ou_profile['pdata']);
+ 
+ <?php
     $profile_header = '';
-    $profile_content = '';
     $profile_sidebar = '';
     $profile_summary = '';
     $inpage_navigation = array();
@@ -220,13 +218,19 @@ if (!isset($node->ou_profile))
     // Setup inline anchor navigation
     // loop through 'group_teaching_research_interest' group
     //===============================================================
-  if ($node->ou_profile['pdata']['group_teaching_research_interest'])
+
+
+  //This is for the "Profile" Tab
+  $profile_bio = "";
+  if( isset( $node->ou_profile['pdata']['group_teaching_research_interest'] ) )
   {
+    //Remove the openlearn bio (Remove this line for sites that require the bio).
+    unset( $node->ou_profile['pdata']['group_teaching_research_interest']['group_openlearn_bio'] );
+
     foreach ($node->ou_profile['pdata']['group_teaching_research_interest'] as $item) {
       // This is now an array of one element, so step into it
       $item = reset($item);
       if ($item['value']) {
-        $inpage_navigation[] .= '<li><a href="#'.$item['label'].'">'.$item['label'].'</a></li>';
         if (is_array($item['value'])){
           $fields_item = NULL;
           foreach ($item['value'] as $fields) {
@@ -235,13 +239,69 @@ if (!isset($node->ou_profile))
               $fields_item .= $fields['value'];
             }
           }
-          $profile_content .= '<h2 id="'.$item['label'].'">'.$item['label'].'</h2>'."\n<ul>".$fields_item."</ul>";
+		  
+		  if( !empty( $fields_item ) )
+		  {
+			  $profile_bio .= '<h2 id="'.$item['label'].'">'.$item['label'].'</h2>'."\n<ul>".$fields_item."</ul>";
+			  $inpage_navigation[] .= '<li><a href="#'.$item['label'].'">'.$item['label'].'</a></li>';
+		  }
+		  
         } else {
-          $profile_content .= '<h2 id="'.$item['label'].'">'.$item['label'].'</h2>';
-          $profile_content .= $item['value'];
+		  if( !empty( $item['value'] ) )
+		  {
+		      $profile_bio .= '<h2 id="'.$item['label'].'">'.$item['label'].'</h2>';
+              $profile_bio .= $item['value'];
+		  }
         }
       }
     }
+	if( $profile_bio != "" )
+	{
+      $profile_content['Profile'] = $profile_bio;
+	}
+  }
+
+  //This is for the "Media" tab, uncomment this is required by the site
+  /*
+  $media_bio = "";
+  if( isset( $node->ou_profile['pdata']['group_content_groups']['group_media_expert'] ) )
+  {
+
+	$item = $node->ou_profile['pdata']['group_content_groups']['group_media_expert']['field_oup_media_relations_bio'];
+
+      if ($item['value'])
+	  {
+        if (is_array($item['value']))
+		{
+          $fields_item = NULL;
+          foreach ($item['value'] as $fields)
+		  {
+            $fields = reset($fields);
+            if (isset($fields['value']))
+			{
+              $fields_item .= $fields['value'];
+            }
+          }
+          $media_bio .= '<h2 id="media_bio">Biography</h2>'."\n<ul>".$fields_item."</ul>";
+        } else {
+          $media_bio .= '<h2 id="media_bio">Biography</h2>';
+          $media_bio .= $item['value'];
+        }
+      }
+    
+	if( $media_bio != "" )
+	{
+      $profile_content['Media Profile'] = $media_bio;
+	}
+  }
+  */
+  $oro = _ou_profile_generate_oro_html( $node );
+  
+  if( $oro <> "" )
+  {
+    $profile_content['Publications'] = $oro;
+  }
+   
 
     //===============================================================
     // Create weblinks
@@ -275,28 +335,33 @@ if (!isset($node->ou_profile))
           
           // Grab the array contents for easier processing
           $link_info = $node->ou_profile['pdata']['group_external_profiles_accounts']['group_' . $link_field]['field_oup_' .$link_field]['value']['und'][0];
-          
-          // If we are twitter, it only asks for the name so do it different
-          // NB: Lee Austin asks - Why are we using a different class name here.
-          if ($link_field == 'twitter') {
-            $weblinks .= '<li class="twitter"><a href="http://twitter.com/' . $link_info['value'] . '">Follow @' . $link_info['value'] . ' on Twitter</a></li>';
-          }
-          else {
-            // Display the links.
-            if (isset($link_info['url'])) {
-              $weblinks .= '<li class="'.$link_field.'"><a href="'. $link_info['url'] .'">'.$link_info['title'].'</a></li>';
-            }
-          }
+		  
+		  //Check if first item in array is empty (pims import creates empty fields. When profile is save for first time, they are deleted.)
+		  $first_value = reset( $link_info );
+		  if( !empty( $first_value ) )
+		  {
+			  // If we are twitter, it only asks for the name so do it different
+			  // NB: Lee Austin asks - Why are we using a different class name here.
+			  if ($link_field == 'twitter') {
+				$weblinks .= '<li class="twitter"><a href="http://twitter.com/' . $link_info['value'] . '">Follow @' . $link_info['value'] . ' on Twitter</a></li>';
+			  }
+			  else {
+				// Display the links.
+				if (isset($link_info['url'])) {
+				  $weblinks .= '<li class="'.$link_field.'"><a href="'. $link_info['url'] .'">'.$link_info['title'].'</a></li>';
+				}
+			  }
+		  }
         }
     }
-    if (isset($weblinks) || isset($text_links)) {
+    if ( $weblinks != "" || $text_links != "" ) {
       $inpage_navigation[] .= '<li><a href="#weblinks">Web links</a></li>';
       //$profile_sidebar .= '<div class="profile-summary"><h2>Profile summary</h2><ul>'.$profile_summary.'</ul></div>';
       
-      if (isset($text_links)) {
+      if( $text_links != "" ) {
         $profile_sidebar .= '<div class="profile-text-links"><ul class="profile-text-links">'.$text_links.'</ul></div>';
       }
-      if (isset($weblinks)) {
+      if( $weblinks != "" ) {
         $profile_sidebar .= '<div class="profile-web-links"><h2>Web links</h2><div class="icons"><ul>'.$weblinks.'</ul></div></div>';
       }
     }
@@ -323,29 +388,44 @@ if (!isset($node->ou_profile))
      if ($profile_sidebar) {
        print '<div class="profile-sidebar"><div class="wrap">'.$profile_sidebar.'</div></div>';
      }
-     if ($profile_content) {
-       print '<div class="profile-content"><div class="wrap">'.$profile_content.'<div id="oro"><div class="oro_title"></div><div class="article"><ul></ul></div><div class="book"><ul></ul></div><div class="book_section"><ul></ul></div><div class="conference_item"><ul></ul></div><div class="bookedit"><ul></ul></div><div class="other"><ul></ul></div></div></div></div>';
-     }
-    print '</div></div>';
-  }
-  
-  if( isset( $node->oucu ) )
-  {
-    //http://oro.open.ac.uk/cgi/exportview/person/ma3776/HTML/ma3776.html
-    $oro_url = "http://oro.open.ac.uk/cgi/exportview/person/".$node->oucu."/JSON/".$node->oucu.".js";
-    print "<script> var oro_link = '".$oro_url."';</script>";
+	 
+	 
+	 if( isset( $profile_content ) )
+	 {
+	   $profile_content_html = "";
+	   
+       $profile_content_html = '<div class="profile-content"><div class="wrap">';
+	   
+	   $profile_tabs = '<ul class="ou-sections tabs">';
+       $profile_tabs_content = '<div class="ou-binder">';
+       $tab = 1;
+	   foreach( $profile_content as $tab_title => $tab_content )
+	   {
+	      if( $tab == 1 )
+		  {
+            $profile_tabs .="<li><a class='ou-selected' href='#tab".$tab."'>".$tab_title."</a></li> \n";
+            $profile_tabs_content .='<div class="tab-content selected tab'.$tab.'">'.$tab_content.'</div>';
+          } else {
+            $profile_tabs .="<li><a href='#tab".$tab."'>".$tab_title."</a></li> \n";
+            $profile_tabs_content .='<div class="tab-content tab'.$tab.'">'.$tab_content.'</div>';
+		  }
+		  
+		  $tab++;
+	   }
+	   $profile_tabs .= '</ul>';
+	   $profile_tabs_content .='</div>';
 
+	   $profile_content_html .= $profile_tabs;
+	   $profile_content_html .= $profile_tabs_content;
+	   
+	   $profile_content_html .= '</div></div>';
+	   
+	   print $profile_content_html;
+     }
+	 
+	 
+    print '</div></div>';
 	
-    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
-    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
-    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
-    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
-    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
-    //========================= TEMP LOCAL WORKROUND. REMOVE 2 LINES BELOW ON SERVER
-    $oro_data_json = file_get_contents( $oro_url );
-    print "<script> var oro_data_json = ".$oro_data_json.";</script>";
-  }
-  
   ?>
   </div>
 

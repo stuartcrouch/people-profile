@@ -1,7 +1,7 @@
 name = OU Profile Server
 description = Manages OU profiles
 package = The Open University
-version = "7.x-1.3"
+version = "7.x-1.4dev"
 core = 7.x
 
 files[] = ou_profile.module

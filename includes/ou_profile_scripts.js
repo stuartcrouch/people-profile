@@ -7,12 +7,10 @@ function addSelectAllRadio(){
 
   jQuery(document).ready(function($){
   
-    // Get all of the field-group-tab(s)
-    groups = $('fieldset.[class^="field-group-tab"]');
+    // Get all of the field-group-tab(s) with the "privacy_options" class
+    groups = $('fieldset.privacy_options');
     for (i = 0; i < groups.length; i++) {
       group = groups[i];
-      
-       //alert (group.className);
     
       // The second value of the parent is the group name
       // If its not empty, create a radio selector and assign it to this group
@@ -47,8 +45,8 @@ function wrapper($classname){
 function addClickEvent(){
   jQuery(document).ready(function($){
   
-    // Set a click watch on the "header-radios" for each "field-group-tab"
-    $('fieldset.[class^="field-group-tab"] > div.header-radios input').click(function () { 
+    // Set a click watch on the "header-radios" for each tab with "privacy_options" class
+    $('fieldset.privacy_options > div.header-radios input').click(function () { 
       if ($(this).is(':checked')) {
         attribs = this.className.split(" ");
         
