@@ -650,8 +650,23 @@ function ou_profile_request_image($style_name, $image_name) {
     return theme_image_style(array('style_name' => $style_name, 'path' => $image_name, 'width' => null, 'height' => null));
   }
   else {
+    //This is for client sites
     $image_name = str_replace("public://", "", $image_name);
-    return '<img src="' . $request_url . '/sites/' . $request_path . '/files/styles/' . $style_name . '/public/' . $image_name . '" />';
+	
+	switch( $style_name )
+	{
+	  case 'profile_photo':
+	    return '<img src="' . $request_url . '/sites/' . $request_path . '/files/styles/' . $style_name . '/public/' . $image_name . '" width="210" height="181" />';
+	  break;
+	  
+	  case 'profile_image':
+	    return '<img src="' . $request_url . '/sites/' . $request_path . '/files/styles/' . $style_name . '/public/' . $image_name . '" width="922" height="300" />';
+	  break;
+	  
+	  default:
+        return '<img src="' . $request_url . '/sites/' . $request_path . '/files/styles/' . $style_name . '/public/' . $image_name . '" />';
+	  break;
+	}
   }
 }
 

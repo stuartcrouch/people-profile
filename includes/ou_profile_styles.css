@@ -3,6 +3,7 @@
 .profile,
 .profile-title,
 .profile-photo {float:left; clear:both; overflow:hidden; width:100%; height:auto;}
+.profile-image img {margin-bottom: 1.5em;}
 
 .profile-title {position:relative;}
 
@@ -134,7 +135,7 @@ div#ou-region1 {
 /* ---------------------------------- */
 
 
-/* I SEE THE LIGHT */
+/* Light profile theme */
 
 body.light h1,
 body.light h2,
@@ -169,18 +170,32 @@ body.light img.dark {display:none;}
 
 
 
-/* DARKNESS FALLS */
-
+/* Dark profile theme */
 
 body.dark div#ou-page {border-color:#000;}
 
+body.dark div#ou-region1 ul.ou-sections a {
+	background-color: #222;
+	background-image: none;
+}
+body.dark div#ou-region1 ul.ou-sections a.ou-selected {
+	background-color: #444;
+	background-image: none;
+}
+body.dark div#ou-region1 ul.ou-sections.tabs {
+	background-color: transparent;
+	border-bottom: 1px solid #444;
+}
+body.dark div.ou-binder {
+	background-color: transparent;
+	border: none;
+}
 body.dark div#ou-page,
 body.dark div#ou-region1 {
   background-color:#222;
   color:#ccc;
   background-repeat:no-repeat;
 }
-
 body.dark .profile-title {
   background-color:#000;
   background-image: linear-gradient(bottom, #000 0%, #222 100%);
@@ -288,7 +303,7 @@ ul.ou-sections li a {padding:.4em .4em .3em .4em; margin:0.3em 0em 0 0;}
 
 div#ou-site {margin-bottom:0.5em;}
 
-div.profile-image {padding:0.5em 0; width:100%; margin: 0;}
+div.profile-image {padding:0.5em 0; width:100%; margin: 0; }
 div.profile-image img {display:block; margin:1em auto; max-width:100%; float:none; clear:both;}
 
 div.profile-menu, 

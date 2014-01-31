@@ -135,8 +135,7 @@ function ou_profile_node_view($node, $view_mode, $langcode) {
 
 
 function ou_profile_node_view_profile($node, $view_mode, $langcode) {
-  ou_profile_log( "ou_profile_node_view_profile_DEBUG" );
-  watchdog( 'ou_profile_node_view_profile', print_r( debug_backtrace(), true ) );
+  ou_profile_log( "ou_profile_node_view_profile" );
   
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/local_functions.inc";
@@ -156,24 +155,14 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
 
   $query = 'SELECT entity_id from {field_data_field_pims_staff_id} WHERE field_pims_staff_id_value = ' . $staff_id;
   $pims_entity_id = db_query($query)->fetchField();
-
-  //Some profiles do not have an associated PIMS record. System previously deleted PIMs records. We now unpublish
-  if( !$pims_entity_id )
+  
+  $unit_code = '';
+  if( $pims_entity_id )
   {
-     $node->do_not_show = TRUE;
-     db_set_active();
-	 return;
-  }
-
     $query = 'SELECT field_pims_l1_estab_unit_code_value FROM {field_data_field_pims_l1_estab_unit_code} WHERE entity_id = ' . $pims_entity_id;
     $unit_code = db_query($query)->fetchField();
-
-  if( !$unit_code )
-  {
-     $node->do_not_show = TRUE;
-     db_set_active();
-	 return;
   }
+
 
   db_set_active();
   $node->do_not_show = FALSE;
@@ -181,7 +170,6 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
   $site_visibility = SITE_NOT_ALLOWED;
   if ($p['site_path'] == ou_profile_server_site_path())
     $site_visibility = SITE_PUBLIC;
-
 
   if ($p['unit_code'] || $p['site_path'] == ou_profile_server_site_path()) {
 
@@ -195,7 +183,6 @@ function ou_profile_node_view_profile($node, $view_mode, $langcode) {
     if (!$profile_visibility) {
       // Person does not want profile to be viewed
       $node->do_not_show = TRUE;
-      return;
     }
     $NID = $profile['pims_data']['nid'];
     $VID = $profile['pims_data']['vid'];
