@@ -416,4 +416,4 @@ features_exclude[field][node-pims-field_pims_l2_estab_unit_code] = node-pims-fie
 features_exclude[field][node-pims-field_pims_l3_estab_unit_code] = node-pims-field_pims_l3_estab_unit_code
 features_exclude[field][node-pims-field_pims_l4_estab_unit_code] = node-pims-field_pims_l4_estab_unit_code
 features_exclude[field][node-pims-field_pims_appt_role_code] = node-pims-field_pims_appt_role_code
-project path = sites/www.open.ac.uk.people/modules/custom_features
+project path = sites/www.open.ac.uk.people/modules/people-profile/features
