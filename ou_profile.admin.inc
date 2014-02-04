@@ -6,24 +6,6 @@
  */
 
 
-/**
-* Implementation of hook_menu().
-*
-* People profile administration form link in /admin/config/system/ou_profile
-*/
-function ou_profile_menu()
-{
-	$items = array();
-	$items['admin/config/system/ou_profile'] = array(
-		'title' => t('People Profile Server Settings'),
-		'description' => t('Manage People Profiles server settings and data imports'),
-		'page callback' => 'drupal_get_form',
-		'page arguments'   => array('_config_form'),
-		'access arguments' => array('administer data load'),
-		'type' => MENU_NORMAL_ITEM,
-	);
-	return $items;
-}
 
 /**
  * Builds the administration form to allow users to configure the PIMs import

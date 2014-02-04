@@ -11,6 +11,8 @@ files[] = ../includes/block_functions.inc
 files[] = ../includes/local_functions.inc
 files[] = ../includes/people_functions.inc
 
+configure = admin/config/system/ou_profile
+
 dependencies[] = email
 dependencies[] = features
 dependencies[] = field_group

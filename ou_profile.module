@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', TRUE);
+ini_set('display_startup_errors', TRUE);
 
 /**
  * Authors Paul Dixon and Mark Williams
@@ -401,6 +404,7 @@ function ou_profile_node_view_profile_page($node, $view_mode, $langcode)
 				$profile_query->join('field_data_field_pims_pref_surname', 'sname_pref', 'pims_unit.entity_id = sname_pref.entity_id');
 				$profile_query->join('field_data_field_pims_staff_id', 'staff_id', 'pims_unit.entity_id = staff_id.entity_id');
 				$profile_query->join('field_data_field_oup_staff_id', 'pr_staff_id', 'pr_staff_id.field_oup_staff_id_value = staff_id.field_pims_staff_id_value');
+				$profile_query->join('node', 'n', 'pr_staff_id.entity_id = n.nid');
 				$profile_query->condition( 'pims_unit.field_pims_l1_estab_unit_code_value', $unit_id, '=' );
 				$profile_query->addField( 'pims_unit_name', 'field_pims_l1_estab_unit_desc_value');
 				$profile_query->addField( 'fname', 'field_pims_staff_forenames_value');
@@ -408,8 +412,10 @@ function ou_profile_node_view_profile_page($node, $view_mode, $langcode)
 				$profile_query->addField( 'sname', 'field_pims_staff_surname_value');
 				$profile_query->addField( 'sname_pref', 'field_pims_pref_surname_value');
 				$profile_query->addField( 'pr_staff_id', 'entity_id', 'nid' );
+				$profile_query->addField( 'n', 'status');
 				$profile_query->orderBy( 'sname.field_pims_staff_surname_value' );
 				$profile_result = $profile_query->execute();
+
 
 				//Process the list and generate the HTML for the output
 				$group_list = "";
@@ -427,11 +433,19 @@ function ou_profile_node_view_profile_page($node, $view_mode, $langcode)
 						$surname .= " [$profile_data->field_pims_pref_surname_value]";
 					}
 					
-					$visibility = ou_profile_lget_profile_visibility($profile_data->nid);
+					
+					if( $profile_data->status == '0' ) //Profile has not been published
+					{
+						$visibility = 'invisible';
+					} else {
+						$visibility = ou_profile_lget_profile_visibility($profile_data->nid);
+					}
+					
 					if ($visibility)
 					{
 						$visibility = "&nbsp; <span style='color:" . $a_colour[$visibility] . "'>[$visibility]</span>";
 					}
+
 					$group_list .= "<li>" .
 						l($surname . ", " . $forenames, "node/" . $profile_data->nid) .
 						$visibility .
@@ -1014,10 +1028,28 @@ function ou_profile_theme($existing, $type, $theme, $path) {
       'template' => 'node-profile-edit',
       'path' => $modulepath . "/includes/templates",
       'render element' => 'form'
-    )
+    ),
+	'ou_profile_render_xml' => array(
+	'template'  => 'ou_profile--xml',
+	'path' =>  $modulepath . '/shared',
+	'arguments' => array(
+		'title' => NULL,
+		'content' => NULL,
+		'picture' => NULL,
+		'date' => NULL, 
+		'links' => NULL,
+		'name' => NULL, 
+		'node_url' => NULL,
+		'oucu' => NULL,
+		'submitted' => NULL,
+		'node' => NULL,
+		'type' => NULL,
+		'nid' => NULL,
+		'fields' => NULL,
+	     ),
+    ),
   );
-
-    return $retarray;
+  return $retarray;
 }
 
 function ou_profile_preprocess_node(&$vars) {
@@ -1516,3 +1548,136 @@ function _ou_profile_public_record_retrieve_access($op) {
   return TRUE;
 }
 
+
+
+/**
+* Implementation of hook_menu().
+*
+*/
+function ou_profile_menu()
+{
+	$items = array();
+	
+	//URL for XML profile for data.open.ac.uk
+	$items['xml/%'] = array(
+		'title' => 'xml',
+		'page callback' => 'ou_profile_render_xml',
+		'page arguments' => array(1),
+		'access arguments' => array('access content'),
+		'type' => MENU_CALLBACK,
+	);
+	
+	//People profile administration form link in /admin/config/system/ou_profile
+	$items['admin/config/system/ou_profile'] = array(
+		'title' => t('People Profile Server Settings'),
+		'description' => t('Manage People Profiles server settings and data imports'),
+		'page callback' => 'drupal_get_form',
+		'page arguments'   => array('_config_form'),
+		'access arguments' => array('administer data load'),
+		'type' => MENU_NORMAL_ITEM,
+	);
+	return $items;
+}
+
+
+//Call back for people/xml/oucu (URL defined in ou_profile_menu)
+//Renders the profile as an XML document
+function ou_profile_render_xml($oucu)
+{
+	//Using the OUCU from the URL, get the NID
+	$query = 'SELECT entity_id FROM {field_data_field_oup_oucu} WHERE field_oup_oucu_value=\'' . $oucu . '\'';
+	$nid = db_query($query)->fetchField();
+	
+	//Load the node
+	$node = node_load( $nid, NULL, FALSE );
+    ou_profile_log( 'ou_profile_render_xml nid = '.$nid );
+
+	//Loop through the NODE fields. Remove the privacy fields & standard node fields.
+	foreach( $node as $field_name => $field )
+	{
+		if( ( substr( $field_name ,0,10 ) == 'field_prv_' ) || ( substr( $field_name, 0, 11 ) == 'field_pprv_') )
+		{
+			unset( $node->{ $field_name } );
+		} else {
+			//Grab the node title (i.e. the profile name)
+			if( $field_name=='title' )
+			{
+				$node->fullname['und'][0] = $field;
+			}
+			
+			//Remove none data fields & blank fields
+			if( !isset( $field['und'][0] ) )
+			{
+				unset( $node->{$field_name} );
+			}
+		}
+	}
+
+	//Output the XML (this bypasses the drupal theme and just outputs the XML)
+	print '<?xml version="1.0" encoding="utf-8"?>';
+	print "<root>";
+	print "<fields>";
+	
+	//Loop through the remaining node fields and output as XML
+	foreach ($node as $key => $value)
+	{
+		//We don't need the 'und' details
+		if( isset( $value[ 'und' ] ) )
+		{
+			$value = $value[ 'und' ];
+		}
+		print ou_profile_render_content_as_xml($key, $value);
+	} 
+	print "</fields>";
+	print "</root>";
+}
+
+//Helper function for 'ou_profile_render_xml()'
+//Loop through each field and generate the XML field structure
+function ou_profile_render_content_as_xml( $in_key, $in_value )
+{
+	// Set up the variables that we'll use to return data
+	$node_start = "";
+	$node_content = "";
+	$node_end = "";
+	
+	// If the key was set to empty, make sure we dont render a tag for it.
+	if ($in_key != "")
+	{
+		$node_start = "<".$in_key.">";
+		$node_end = "</".$in_key.">";
+	}
+	
+	// If we are an array, recurse to create more xml nodes
+	if( is_array( $in_value ) )
+	{
+		foreach ($in_value as $key => $value)
+		{
+			// The next bit is to hide the arrays that only have one element, 
+			// the data will just sit under the parent node
+			
+			// Default to whatever the array key name is
+			$node_name = $key;
+			if (is_int($key))
+			{
+				if (count($in_value) > 1) // If theres lots of stuff in this array, add _data to the end
+				{
+					$node_name = $in_key."_data";
+				}
+				else if (count($in_value) == 1) // If theres only one item in the array, dont add the key as a node element
+				{
+					$node_name = ""; 
+				}
+			}
+						
+			// Because we are an array, repeat this function for all children, ignoring 'safe_value' & 'format'
+			if( $node_name != 'safe_value' && $node_name != 'format')
+			{
+				$node_content .= ou_profile_render_content_as_xml($node_name, $value);
+			}
+		}
+	} else {
+		$node_content = "<![CDATA[" . trim($in_value) . "]]>";
+	}
+	return $node_start . $node_content . $node_end; 
+}

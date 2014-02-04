@@ -454,7 +454,7 @@ function ou_profile_get_profile_nodes( $type = NULL )
   "pims_unique_id.field_pims_unique_id_value, " .
   "pims_pref_surname.field_pims_pref_surname_value, " .
   "pims_staff_surname.field_pims_staff_surname_value, " .
-  "CONCAT_WS(',', pims_pref_surname.field_pims_pref_surname_value, pims_staff_surname.field_pims_staff_surname_value) AS ordername " .
+  "CONCAT(pims_pref_surname.field_pims_pref_surname_value, pims_staff_surname.field_pims_staff_surname_value) AS ordername " .
   "FROM field_data_field_pims_unique_id pims_unique_id " .
   "INNER JOIN field_data_field_pims_pref_surname pims_pref_surname ON pims_unique_id.entity_id = pims_pref_surname.entity_id " .
   "INNER JOIN field_data_field_pims_staff_surname pims_staff_surname ON pims_unique_id.entity_id = pims_staff_surname.entity_id " .
@@ -476,6 +476,7 @@ function ou_profile_get_profile_nodes( $type = NULL )
   
   //Create an array of results by surname using the pims_unique_id as the key
   $staff_ids = array();
+  $INLIST = "";
   foreach ($server_result as $pims_data)
   {
     //$staff_ids[$pims_data->field_pims_unique_id_value]['surname'] = $pims_data->field_pims_staff_surname_value;
@@ -485,21 +486,15 @@ function ou_profile_get_profile_nodes( $type = NULL )
 	} else {
       $staff_ids[$pims_data->field_pims_unique_id_value]['pref_surname'] = $pims_data->field_pims_pref_surname_value;
 	}
+	
+    $INLIST .= "'" .$pims_data->field_pims_unique_id_value. "',";
   } 
-
 
   // Set database back to original and query client website to get local, matching profiles
   db_set_active();
   
 
   $client_profiles = array();
-  $INLIST = "";
-  // loop over staff ids and get local nodes on client website
-  foreach ($staff_ids as $staff_id => $staff_data) 
-  { 
-     $INLIST .= "'" . $staff_id . "',";
-  }
-
   
   $unordered_client_profiles = array();
   if ($INLIST)
@@ -534,7 +529,6 @@ function ou_profile_get_profile_nodes( $type = NULL )
     foreach ($client_result as $profile) {
       if ($type == "list")
 	  {
-          ou_profile_log("creating list item for - " . $profile['title']);
           $unordered_client_profiles[$profile['staff_id']] = l($profile['title'], "node/" . $profile['nid']); // Drupal function to return well-formed link to node
       } else {
           $unordered_client_profiles[$profile->staff_id] = $profile->nid;

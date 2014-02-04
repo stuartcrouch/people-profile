@@ -357,14 +357,6 @@ function ou_profile_client_permission() {
 function ou_profile_client_menu() {
   $items = array();
 
-  $items['xml/%'] = array(
-   'title' => 'xml',
-   'page callback' => 'ou_profile_render_xml',
-   'page arguments' => array(1),
-   'access arguments' => array('access content'),
-   'type' => MENU_CALLBACK,
-   );
-
   // This is the behind the scenes config (which directories to use, debug levels, etc)
   $items['admin/config/system/ou_profile'] = array(
       'title' => 'OU Profile Settings',
