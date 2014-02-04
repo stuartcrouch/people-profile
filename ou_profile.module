@@ -1614,6 +1614,7 @@ function ou_profile_render_xml($oucu)
 	}
 
 	//Output the XML (this bypasses the drupal theme and just outputs the XML)
+	header('Content-type: application/xml');
 	print '<?xml version="1.0" encoding="utf-8"?>';
 	print "<root>";
 	print "<fields>";
