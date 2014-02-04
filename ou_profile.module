@@ -1605,7 +1605,7 @@ function ou_profile_render_xml($oucu)
 				$node->fullname['und'][0] = $field;
 			}
 			
-			//Remove none data fields & blank fields
+			//Remove non-data fields & blank fields
 			if( !isset( $field['und'][0] ) )
 			{
 				unset( $node->{$field_name} );
@@ -1626,6 +1626,7 @@ function ou_profile_render_xml($oucu)
 		{
 			$value = $value[ 'und' ];
 		}
+		//This renders the field as XML
 		print ou_profile_render_content_as_xml($key, $value);
 	} 
 	print "</fields>";
@@ -1633,7 +1634,7 @@ function ou_profile_render_xml($oucu)
 }
 
 //Helper function for 'ou_profile_render_xml()'
-//Loop through each field and generate the XML field structure
+//Loop through a field and generate the XML field structure
 function ou_profile_render_content_as_xml( $in_key, $in_value )
 {
 	// Set up the variables that we'll use to return data
