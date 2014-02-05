@@ -110,6 +110,12 @@ function ou_profile_client_install() {
 
 function ou_profile_client_uninstall() {
 
+  //Delete admin fields
+  variable_del( 'ou_profile_reporting' );
+  variable_del( 'ou_profile_client_profile_taxonomy' );
+  variable_del( 'ou_profile_client_pims_units' );
+  variable_del( 'ou_profile_client_pims_job_title' );
+
   $sql = 'SELECT nid FROM {node} n WHERE n.type = :type';
   $result = db_query($sql, array(':type' => 'ou_profile'));
   $nids = array();
@@ -347,3 +353,33 @@ function _profile_client_installed_instances() {
     );
 }
 
+
+/**
+* Update Profile content type with new fields.
+*/
+function ou_profile_client_update_7100()
+{
+	// Create the fields we need for our content type.
+	foreach (_profile_client_installed_fields() as $field)
+	{
+		//Check they haven't already been created
+		if ( !field_info_field( $field[ 'field_name'] ))
+		{
+			field_create_field( $field );
+		}
+	}
+	
+	// Add instances of all the fields to the content type
+	foreach (_profile_client_installed_instances() as $instance)
+	{
+		//Check they haven't already been created
+		if( !field_info_instance( 'node', $field['field_name'], 'ou_profile' ) )
+		{
+			$instance['entity_type'] = 'node';
+			$instance['bundle'] = 'ou_profile';
+			field_create_instance( $instance );
+		}
+	}
+	
+	return( t( 'OU People Profile Client updates are complete.' ) );
+}
