@@ -363,7 +363,7 @@ function ou_profile_client_update_7100()
 	foreach (_profile_client_installed_fields() as $field)
 	{
 		//Check they haven't already been created
-		if ( !field_info_field( $field[ 'field_name'] ))
+		if ( is_null( field_info_field( $field[ 'field_name'] ) ) )
 		{
 			field_create_field( $field );
 		}
@@ -373,7 +373,7 @@ function ou_profile_client_update_7100()
 	foreach (_profile_client_installed_instances() as $instance)
 	{
 		//Check they haven't already been created
-		if( !field_info_instance( 'node', $field['field_name'], 'ou_profile' ) )
+		if( is_null( field_info_instance( 'node', $instance['field_name'], 'ou_profile' ) ) )
 		{
 			$instance['entity_type'] = 'node';
 			$instance['bundle'] = 'ou_profile';

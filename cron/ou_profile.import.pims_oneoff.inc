@@ -21,8 +21,6 @@
 //$import_type = cron, batch, drush
 function oneoff_pims_import_initialise( $import_type = "batch", &$batch = array() )
 {
-	//Force batch only
-	$import_type = "batch";
 	
 	//Array to hold the pims file data, unprocessed.
 	$pims_rawdata = array();
@@ -36,6 +34,9 @@ function oneoff_pims_import_initialise( $import_type = "batch", &$batch = array(
 	//Array to hold all the imported unique_ids
 	$pims_imported_unique_ids = array();
 
+	//Array to hold published pims records currently in system
+	$system_pims_unique_ids_published = array();
+	
 	//Array to hold pims records currently in system
 	$system_pims_unique_ids = array();
 
@@ -75,11 +76,15 @@ function oneoff_pims_import_initialise( $import_type = "batch", &$batch = array(
 		//Update the OU Business unit list with the one just imported
 		oneoff_pims_update_ou_units( $ou_units );
 
-		//Get the existing PIMs IDs
-		oneoff_pims_get_existing_data( $system_pims_unique_ids );
-		
+
+		//Get the existing PUBLISHED PIMs IDs
+		oneoff_pims_get_existing_data( $system_pims_unique_ids_published, TRUE );
+
+		//Get ALL the existing PIMs IDs
+		oneoff_pims_get_existing_data( $system_pims_unique_ids, FALSE );
+
 		// find all the IDs that are in the database, but are not in the file.
-		$pims2unpublish = array_diff( $system_pims_unique_ids, $pims_imported_unique_ids );
+		$pims2unpublish = array_diff( $system_pims_unique_ids_published, $pims_imported_unique_ids );
 		variable_set('ou_profile_pims_import_deletions', count( $pims2unpublish ) );
 		
 		// find all the IDs that are in the file, but arent in the databse.
@@ -401,21 +406,20 @@ function oneoff_pims_process_file( $rawdata, &$pims_importdata, &$pims_imported_
 
 
 
-//Get the list of current PIMs records
-function oneoff_pims_get_existing_data( &$system_pims_unique_ids )
+//Get the list of current published PIMs records. $published sets whether to return published records only
+function oneoff_pims_get_existing_data( &$system_pims_unique_ids, $published )
 {
 	//Create the query
-	$query = db_select('field_data_field_pims_unique_id', 'puid');
-	$query->fields('puid', array('entity_id', 'field_pims_unique_id_value') );
-	$result = $query->execute();
-	
-	foreach ($result as $data)
+	$query = db_select('node', 'n' );
+	$query->join( 'field_data_field_pims_unique_id', 'puid', 'n.nid = puid.entity_id' );
+	$query->addfield('n', 'nid', 'nid' );
+	$query->addfield('puid', 'field_pims_unique_id_value', 'pims_unique_id' );
+	if( $published )
 	{
-		$system_pims_unique_ids[ $data->entity_id ] =  trim($data->field_pims_unique_id_value);
+		$query->condition( 'n.status', 0, '>' );
 	}
-
+	$system_pims_unique_ids = $query->execute()->fetchAllKeyed();
 }
-
 
 
 //Updates the list of business units. One off process per import file.
