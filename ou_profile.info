@@ -15,10 +15,11 @@ files[] = includes/local_functions.inc
 files[] = includes/people_functions.inc
 files[] = install/ou_profile_content_type.inc
 
-dependencies[] = services
-dependencies[] = trigger
-dependencies[] = pathauto
 dependencies[] = email
 dependencies[] = field_group
+dependencies[] = pathauto
+dependencies[] = rdf
+dependencies[] = services
+dependencies[] = trigger
 
 configure = admin/config/system/ou_profile
