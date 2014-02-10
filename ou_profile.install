@@ -302,3 +302,305 @@ function _profile_installed_instances() {
       ),
     );
 }
+
+
+/**
+* Update People Profile server system with new taxonomy terms for 'Profile Taxonomy'.
+*/
+function ou_profile_update_7100()
+{
+	//Load the taxonomy (this is created by the PP features module)
+	$profile_taxonomy = taxonomy_vocabulary_machine_name_load( 'profile_taxonomy' );
+	if( !$profile_taxonomy )
+	{
+		throw new DrupalUpdateException('Cannot find taxonomy : profile_taxonomy.');
+		return FALSE;
+	} 
+	
+	$vid = $profile_taxonomy->vid;
+	
+	$pt = array();
+	$pt['Animal & Land Management'][] = 'Agricultural technology';
+	$pt['Animal & Land Management'][] = 'Agriculture';
+	$pt['Animal & Land Management'][] = 'Forestry';
+	$pt['Animal & Land Management'][] = 'Land & Property Management';
+	$pt['Animal & Land Management'][] = 'Land Management';
+	$pt['Animal & Land Management'][] = 'Landscape Architecture';
+	$pt['Animal & Land Management'][] = 'Landscape Design';
+	$pt['Animal & Land Management'][] = 'Landscape Studies';
+	$pt['Animal & Land Management'][] = 'Livestock Husbandry';
+	$pt['Animal & Land Management'][] = 'Organic Farming';
+	$pt['Animal & Land Management'][] = 'Property Management';
+	$pt['Animal & Land Management'][] = 'Property Valuation & Auctioneering';
+	$pt['Animal & Land Management'][] = 'Rural Estate Management';
+	$pt['Arts & Humanities'][] = 'Archaeology';
+	$pt['Arts & Humanities'][] = 'Celtic Studies';
+	$pt['Arts & Humanities'][] = 'Cinematics & Photography';
+	$pt['Arts & Humanities'][] = 'Classical Studies';
+	$pt['Arts & Humanities'][] = 'Crafts';
+	$pt['Arts & Humanities'][] = 'Creative Writing';
+	$pt['Arts & Humanities'][] = 'Dance';
+	$pt['Arts & Humanities'][] = 'Drama';
+	$pt['Arts & Humanities'][] = 'English Language';
+	$pt['Arts & Humanities'][] = 'English Literature';
+	$pt['Arts & Humanities'][] = 'Fine Art';
+	$pt['Arts & Humanities'][] = 'General Humanities';
+	$pt['Arts & Humanities'][] = 'History';
+	$pt['Arts & Humanities'][] = 'History of Art';
+	$pt['Arts & Humanities'][] = 'Illustration';
+	$pt['Arts & Humanities'][] = 'Linguistics';
+	$pt['Arts & Humanities'][] = 'Music';
+	$pt['Arts & Humanities'][] = 'Philosophy';
+	$pt['Arts & Humanities'][] = 'Theology & Religious Studies';
+	$pt['Building & Planning'][] = 'Architecture';
+	$pt['Building & Planning'][] = 'Building';
+	$pt['Building & Planning'][] = 'Buildings Conservation';
+	$pt['Building & Planning'][] = 'General Planning';
+	$pt['Building & Planning'][] = 'Surveying';
+	$pt['Building & Planning'][] = 'Urban, Rural & Regional Planning';
+	$pt['Business & Management'][] = 'Accounting';
+	$pt['Business & Management'][] = 'Auditing';
+	$pt['Business & Management'][] = 'Bookkeeping';
+	$pt['Business & Management'][] = 'Business Studies';
+	$pt['Business & Management'][] = 'Change Management';
+	$pt['Business & Management'][] = 'European Business Studies';
+	$pt['Business & Management'][] = 'Finance';
+	$pt['Business & Management'][] = 'Hospitality';
+	$pt['Business & Management'][] = 'Human Resources & Employment Law';
+	$pt['Business & Management'][] = 'Innovation, Enterprise & Creativity';
+	$pt['Business & Management'][] = 'International Business Studies';
+	$pt['Business & Management'][] = 'Leadership & General Management';
+	$pt['Business & Management'][] = 'Marketing';
+	$pt['Business & Management'][] = 'Organisational Administration';
+	$pt['Business & Management'][] = 'Project Management';
+	$pt['Business & Management'][] = 'Public Administration';
+	$pt['Business & Management'][] = 'Retail Management';
+	$pt['Business & Management'][] = 'Strategic Management';
+	$pt['Business & Management'][] = 'Tourism Management';
+	$pt['Business & Management'][] = 'Transport Management';
+	$pt['Business & Management'][] = 'Travel Management';
+	$pt['Computing & IT'][] = 'Artificial Intelligence';
+	$pt['Computing & IT'][] = 'Databases';
+	$pt['Computing & IT'][] = 'General Computing';
+	$pt['Computing & IT'][] = 'Human Computer Interaction';
+	$pt['Computing & IT'][] = 'Information Systems';
+	$pt['Computing & IT'][] = 'Networks';
+	$pt['Computing & IT'][] = 'Operating Systems';
+	$pt['Computing & IT'][] = 'Software Engineering';
+	$pt['Design'][] = 'Creative Design';
+	$pt['Design'][] = 'Engineering Design';
+	$pt['Design'][] = 'Fashion Design';
+	$pt['Design'][] = 'General Design';
+	$pt['Design'][] = 'Graphic Design';
+	$pt['Design'][] = 'Industrial Design';
+	$pt['Design'][] = 'Interactive Design';
+	$pt['Design'][] = 'Interior Design';
+	$pt['Design'][] = 'Product Design';
+	$pt['Education'][] = 'Academic Studies in Education';
+	$pt['Education'][] = 'Adult Education';
+	$pt['Education'][] = 'Careers Guidance';
+	$pt['Education'][] = 'Childhood & Youth';
+	$pt['Education'][] = 'Early Years Education';
+	$pt['Education'][] = 'English Language in Education';
+	$pt['Education'][] = 'Further Education';
+	$pt['Education'][] = 'General Education';
+	$pt['Education'][] = 'General Teacher Training';
+	$pt['Education'][] = 'Higher Education';
+	$pt['Education'][] = 'Management of Education';
+	$pt['Education'][] = 'Primary Education';
+	$pt['Education'][] = 'Research & Study Skills';
+	$pt['Education'][] = 'Secondary Education';
+	$pt['Education'][] = 'Specialist Education';
+	$pt['Engineering'][] = 'Aerospace Engineering';
+	$pt['Engineering'][] = 'Civil Engineering';
+	$pt['Engineering'][] = 'Electronic Engineering';
+	$pt['Engineering'][] = 'General Engineering';
+	$pt['Engineering'][] = 'Industrial Engineering';
+	$pt['Engineering'][] = 'Mechanical Engineering';
+	$pt['Engineering'][] = 'Naval Architecture';
+	$pt['Engineering'][] = 'Production & Manufacturing';
+	$pt['Environment & Sustainability'][] = 'Environmental Engineering/Technology';
+	$pt['Environment & Sustainability'][] = 'Environmental Sciences';
+	$pt['Environment & Sustainability'][] = 'Environmental Studies';
+	$pt['Health & Wellbeing'][] = 'Alternative Medicine';
+	$pt['Health & Wellbeing'][] = 'General Health';
+	$pt['Health & Wellbeing'][] = 'Nutrition';
+	$pt['Health & Wellbeing'][] = 'Sports & Fitness';
+	$pt['Languages'][] = 'African Languages';
+	$pt['Languages'][] = 'American Languages';
+	$pt['Languages'][] = 'Australasian Languages';
+	$pt['Languages'][] = 'Chinese';
+	$pt['Languages'][] = 'East European Languages';
+	$pt['Languages'][] = 'French';
+	$pt['Languages'][] = 'German';
+	$pt['Languages'][] = 'Italian';
+	$pt['Languages'][] = 'Japanese';
+	$pt['Languages'][] = 'Middle Eastern Languages';
+	$pt['Languages'][] = 'Other European Languages';
+	$pt['Languages'][] = 'Other Languages';
+	$pt['Languages'][] = 'Portuguese';
+	$pt['Languages'][] = 'Scandinavian Languages';
+	$pt['Languages'][] = 'South Asian Languages';
+	$pt['Languages'][] = 'Spanish';
+	$pt['Languages'][] = 'Translation Studies';
+	$pt['Languages'][] = 'Welsh';
+	$pt['Law'][] = 'Business & Commercial Law';
+	$pt['Law'][] = 'Comparative Law';
+	$pt['Law'][] = 'Contract Law';
+	$pt['Law'][] = 'Criminal Law';
+	$pt['Law'][] = 'European Law';
+	$pt['Law'][] = 'General Law';
+	$pt['Law'][] = 'International Law';
+	$pt['Law'][] = 'Jurisprudence';
+	$pt['Law'][] = 'Legal Practice';
+	$pt['Law'][] = 'Medical Law';
+	$pt['Law'][] = 'Private Law';
+	$pt['Law'][] = 'Property Law';
+	$pt['Law'][] = 'Public Law';
+	$pt['Law'][] = 'Torts';
+	$pt['Law'][] = 'UK Law';
+	$pt['Mathematics & Statistics'][] = 'Applied Mathematics';
+	$pt['Mathematics & Statistics'][] = 'Applied Statistics';
+	$pt['Mathematics & Statistics'][] = 'General Mathematics';
+	$pt['Mathematics & Statistics'][] = 'Mathematical Methods';
+	$pt['Mathematics & Statistics'][] = 'Mathematical Modelling';
+	$pt['Mathematics & Statistics'][] = 'Probability';
+	$pt['Mathematics & Statistics'][] = 'Pure Mathematics';
+	$pt['Media'][] = 'Curatorial Studies';
+	$pt['Media'][] = 'Documentation';
+	$pt['Media'][] = 'Information Services';
+	$pt['Media'][] = 'Journalism';
+	$pt['Media'][] = 'Librarianship';
+	$pt['Media'][] = 'Media Studies';
+	$pt['Media'][] = 'Publishing';
+	$pt['Medical Sciences'][] = 'Auditory & Oral Science';
+	$pt['Medical Sciences'][] = 'Cardiography';
+	$pt['Medical Sciences'][] = 'Complementary Medicine';
+	$pt['Medical Sciences'][] = 'General Medical Science';
+	$pt['Medical Sciences'][] = 'Human Anatomy';
+	$pt['Medical Sciences'][] = 'Medical Physics';
+	$pt['Medical Sciences'][] = 'Medical Technology';
+	$pt['Medical Sciences'][] = 'Neuroscience';
+	$pt['Medical Sciences'][] = 'Ophthalmology';
+	$pt['Medical Sciences'][] = 'Pathology';
+	$pt['Medical Sciences'][] = 'Pharmacology';
+	$pt['Medical Sciences'][] = 'Pharmacy';
+	$pt['Medical Sciences'][] = 'Physiotherapy';
+	$pt['Medical Sciences'][] = 'Toxicology';
+	$pt['Medicine & Dentistry'][] = 'Clinical Dentistry';
+	$pt['Medicine & Dentistry'][] = 'Clinical Medicine';
+	$pt['Medicine & Dentistry'][] = 'General Medicine & Dentistry';
+	$pt['Medicine & Dentistry'][] = 'Pre-Clinical Dentistry';
+	$pt['Medicine & Dentistry'][] = 'Pre-Clinical Medicine';
+	$pt['Nursing'][] = 'Adult Nursing';
+	$pt['Nursing'][] = 'Community Nursing';
+	$pt['Nursing'][] = 'Dental Nursing';
+	$pt['Nursing'][] = 'District Nursing';
+	$pt['Nursing'][] = 'General Nursing';
+	$pt['Nursing'][] = 'Health Visiting';
+	$pt['Nursing'][] = 'Medical Nursing';
+	$pt['Nursing'][] = 'Mental Health Nursing';
+	$pt['Nursing'][] = 'Midwifery';
+	$pt['Nursing'][] = 'Paediatric Nursing';
+	$pt['Nursing'][] = 'Paramedic Nursing';
+	$pt['Nursing'][] = 'Practice Nursing';
+	$pt['Nursing'][] = 'School Nursing';
+	$pt['Practice Based & Community Care'][] = 'Domestic Management';
+	$pt['Practice Based & Community Care'][] = 'Health & Community Care';
+	$pt['Practice Based & Community Care'][] = 'Occupational Health';
+	$pt['Practice Based & Community Care'][] = 'Occupational Therapy';
+	$pt['Practice Based & Community Care'][] = 'Probation Services';
+	$pt['Practice Based & Community Care'][] = 'Social Work';
+	$pt['Practice Based & Community Care'][] = 'Youth Work';
+	$pt['Psychology & Counselling'][] = 'Counselling';
+	$pt['Psychology & Counselling'][] = 'Psychology';
+	$pt['Science'][] = 'Analytical Science';
+	$pt['Science'][] = 'Animal Science';
+	$pt['Science'][] = 'Aquatic Science';
+	$pt['Science'][] = 'Astronomy';
+	$pt['Science'][] = 'Biochemistry';
+	$pt['Science'][] = 'Biology';
+	$pt['Science'][] = 'Botany';
+	$pt['Science'][] = 'Chemistry';
+	$pt['Science'][] = 'Climatology';
+	$pt['Science'][] = 'Earth Science';
+	$pt['Science'][] = 'Ecology';
+	$pt['Science'][] = 'Evolution';
+	$pt['Science'][] = 'Forensic Science';
+	$pt['Science'][] = 'Genetics';
+	$pt['Science'][] = 'Geology';
+	$pt['Science'][] = 'Materials Science';
+	$pt['Science'][] = 'Microbiology';
+	$pt['Science'][] = 'Natural Sciences';
+	$pt['Science'][] = 'Parasitology';
+	$pt['Science'][] = 'Physics';
+	$pt['Science'][] = 'Planetary Science';
+	$pt['Science'][] = 'Professional Science';
+	$pt['Science'][] = 'Science & Society';
+	$pt['Science'][] = 'Zoology';
+	$pt['Social Sciences'][] = 'Anthropology';
+	$pt['Social Sciences'][] = 'Criminology';
+	$pt['Social Sciences'][] = 'Economics';
+	$pt['Social Sciences'][] = 'General Social Science';
+	$pt['Social Sciences'][] = 'Geography';
+	$pt['Social Sciences'][] = 'Politics';
+	$pt['Social Sciences'][] = 'Social Policy';
+	$pt['Social Sciences'][] = 'Sociology';
+	$pt['Technology'][] = 'Biotechnology';
+	$pt['Technology'][] = 'Ceramics & Glass';
+	$pt['Technology'][] = 'Food & Beverage Studies';
+	$pt['Technology'][] = 'Maritime Technology';
+	$pt['Technology'][] = 'Material Technology';
+	$pt['Technology'][] = 'Metallurgy';
+	$pt['Technology'][] = 'Mineral Technology';
+	$pt['Technology'][] = 'Polymers & Textiles';
+	$pt['Technology'][] = 'Specialist Technology';
+	$pt['Veterinary Science'][] = 'Animal Welfare';
+	$pt['Veterinary Science'][] = 'Clinical Veterinary Science';
+	$pt['Veterinary Science'][] = 'General Veterinary Science';
+	$pt['Veterinary Science'][] = 'Pre-Clinical Veterinary Science';
+	$pt['Veterinary Science'][] = 'Veterinary Nursing';
+	
+	foreach( $pt as $parent=>$terms )
+	{
+		$term = new stdClass();
+		$term->name = $parent;
+		$term->vid = $vid;
+		taxonomy_term_save($term);
+		$parent_tid = $term->tid;
+		
+		foreach( $terms as $termname )
+		{
+			$term = new stdClass();
+			$term->name = $termname;
+			$term->vid = $vid;
+			$term->parent = array( $parent_tid );
+			taxonomy_term_save($term);
+		}
+		
+	}
+
+	$public_roles_tids = array();
+
+	//Get the list of public appointment types
+	$public_roles = variable_get( 'ou_profile_pims_default_public' );
+
+	if( isset( $public_roles ) )
+	{
+		$public_role_codes = explode( ',', $public_roles );
+		
+		foreach( $public_role_codes as $termname )
+		{
+			$term = new stdClass();
+			$term->name = $termname;
+			$term->vid = $vid;
+			taxonomy_term_save($term);
+			$public_roles_tids[] = $term->tid;
+		}
+		
+		$implode_array = implode( ',', $public_roles_tids );
+		variable_set( 'ou_profile_public_tids', $implode_array );
+
+	}
+	return( t('New taxonomy terms created' ) );
+}

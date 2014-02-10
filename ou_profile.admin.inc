@@ -41,8 +41,15 @@ function _config_form( $form_state )
 	$form['ou_profile_pims_import_settings']['ou_profile_pims_default_public'] = array(
 		'#type'          => 'textfield',
 		'#title'         => t('Public staff profiles'),
-		'#default_value' => variable_get('ou_profile_pims_default_public', 'PACC,PARG,PARS,PREL,PSEC,PVIS,PLTC,PRTC'),
+		'#default_value' => variable_get('ou_profile_pims_default_public', 'PACC,PARG,PARS,PVRS'),
 		'#description'   => t('Enter a comma separated list of staff role codes that should have a public profile by default.<br /> (E.g. PACC,PARG,PARS,PREL,PSEC,PVIS,PLTC,PRTC)'),
+		'#size'         => '100',
+	);
+	$form['ou_profile_pims_import_settings']['ou_profile_public_tids'] = array(
+		'#type'          => 'textfield',
+		'#title'         => t('Public staff profiles taxonomy IDs'),
+		'#default_value' => variable_get('ou_profile_public_tids', ''),
+		'#description'   => t('Enter a comma separated list of taxonomy TIDs from "Profile Taxonomy" (E.g. 1,4,6). Public profiles will be assigned these TIDs by default. The list should map the role codes above. i.e. first TID should be for the first value in the list.'),
 		'#size'         => '100',
 	);
 	$form['ou_profile_pims_import_settings']['ou_profile_profiles_public'] = array(
@@ -322,6 +329,7 @@ function _config_form_submit($form, &$form_state)
 	variable_set( 'ou_profile_pims_preproc_path', $form_fields['ou_profile_pims_preproc_path'] );
 	variable_set( 'ou_profile_pims_import_file_mod', $form_fields['ou_profile_pims_import_file_mod'] );
 	variable_set( 'ou_profile_pims_default_public', strtoupper( $form_fields['ou_profile_pims_default_public'] ) );
+	variable_set( 'ou_profile_public_tids', $form_fields['ou_profile_public_tids'] );
 	variable_set( 'ou_profile_reporting', $form_fields['ou_profile_reporting'] );
 	
 	/*

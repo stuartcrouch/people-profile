@@ -904,7 +904,7 @@ function _pims_import_data_into_profile_record( $a_pims_row, &$context )
 		//Set default privacy values if this is a public profile
 		if( $public )
 		{
-			_ou_profile_public_profile( $node, '3' );
+			_ou_profile_public_profile( $node, '3', $a_pims_row['appt_role_code'] );
 		}
 
 	}
@@ -938,7 +938,7 @@ function _pims_import_data_into_profile_record( $a_pims_row, &$context )
 
 //Sets all privacy field values on a profile
 //Sending privacy as a parameter, incase we need to change function
-function _ou_profile_public_profile( &$node, $privacy = '3' )
+function _ou_profile_public_profile( &$node, $privacy = '3', $role_code, $public_value )
 {
 
 	//Privacy fields.
@@ -977,25 +977,71 @@ function _ou_profile_public_profile( &$node, $privacy = '3' )
 		'field_prv_web_links'
 		);
 	
-	
-	//Privacy values are held in a content type "Privacy value". The privacy fields are "Node Reference" fields
-	//Theefore value must be set to the NID of the privacy value we want.
-	$privacy_values = ou_profile_lget_privacy_values();
-	//Currently, "Public" = 3, so we're searching for that value.
-	$public_value = array_search( $privacy, $privacy_values );
-	if( $public_value )
+	//Loop through all the fields defined earlier.
+	foreach( $public_fields as $public_field )
 	{
-		//array_search returns an integer. Need to change to string
-		$public_value = strval( $public_value );
+		$node->{$public_field}['und'][0]['nid'] = $public_value;
+	}
+	
+	//Set visibility
+	$node->field_oup_visibility['und'][0]['value'] = (int)$privacy - 1;
+	
+	//These are the TIDS we need to set on the profile for the research site.
+	$public_tids_var = variable_get( 'ou_profile_public_tids', '' );
+	$public_rolecodes_var = variable_get( 'ou_profile_pims_default_public', '' );
 
-		//Loop through all the fields defined earlier.
-		foreach( $public_fields as $public_field )
+	$public_tids = explode( ',', $public_tids_var );
+	$public_codes = explode( ',', $public_rolecodes_var );
+
+	//If public tids are detected..
+	if( $public_tids_var != '' )
+	{
+	
+		//Find the TID we need to set
+		$x = 0;
+		$tid_to_set = '';
+		foreach( $public_codes as $public_code )
 		{
-			$node->{$public_field}['und'][0]['nid'] = $public_value;
+			if( $public_code == $role_code )
+			{
+				$tid_to_set = $public_tids[ $x ];
+				break;
+			}
+			$x++;
 		}
 		
-		//Set visibility
-		$node->field_oup_visibility['und'][0]['value'] = (int)$privacy - 1;
+		//Only set the TID if a role code match is found
+		if( $tid_to_set != '' )
+		{
+			//Get the node tids. Need to do this so we don't unset values already set
+			$this_tids = array();
+			
+			if( isset( $node->field_profile_taxonomy['und'] ) )
+			{
+				foreach( $node->field_profile_taxonomy['und'] as $this_tid )
+				{
+					$this_tids[] = $this_tid['tid'];
+				}
+			}
+
+			//Add the new tid and check that it's unique
+			if( isset( $this_tids ) )
+			{
+				$this_tids[] = $tid_to_set;
+				$unique_array = array_unique( $this_tids );
+			} else {
+				$unique_array[] = $tid_to_set;
+			}
+		
+			//Reset the node tids field
+			unset( $node->field_profile_taxonomy['und'] );
+
+			//Set the new node tids
+			foreach( $unique_array as $new_tid )
+			{
+				$node->field_profile_taxonomy['und'][]['tid'] = $new_tid;
+			}
+		}
 	}
 }
 
@@ -1013,6 +1059,16 @@ function _ou_profile_profiles_public( $codes )
 		return( FALSE );
 	}
 
+	//Privacy values are held in a content type "Privacy value". The privacy fields are "Node Reference" fields
+	//Therefore value must be set to the NID of the privacy value we want.
+	$privacy_values = ou_profile_lget_privacy_values();
+	
+	//Currently, "Public" = 3, so we're searching for that value.
+	$public_value = array_search( '3', $privacy_values );
+
+	//array_search returns an integer. Need to change to string
+	$public_value = strval( $public_value );
+
 	//Create role code array for query
 	$role_codes = explode( ',', $codes );
 
@@ -1021,19 +1077,71 @@ function _ou_profile_profiles_public( $codes )
 	$query->join( 'field_data_field_pims_staff_id', 'staff_id', 'role_code.entity_id = staff_id.entity_id' );
 	$query->join( 'field_data_field_oup_staff_id', 'oup_staff_id', 'staff_id.field_pims_staff_id_value = oup_staff_id.field_oup_staff_id_value' );
 	$query->condition( 'role_code.field_pims_appt_role_code_value', $role_codes, 'IN' );
-	$query->addField( 'oup_staff_id', 'entity_id' );
-	$result = $query->execute()->fetchCol();
-	
-	//Loop through results and set public
-	foreach( $result as $profile_nid )
+	$query->addField( 'oup_staff_id', 'entity_id', 'nid' );
+	$query->addField( 'role_code', 'field_pims_appt_role_code_value', 'role_code_value' );
+	$result = $query->execute()->fetchAll();
+
+	$operations[] = array();
+	//Loop through results and put into batch
+	foreach( $result as $profile )
 	{
-		$node = node_load( $profile_nid );
-		if( $node )
-		{
-			_ou_profile_public_profile( $node, '3' );
-			node_save( $node );
-		}
+		$operations[] = array( "_public_profile_batch_process", array( array( $profile->nid, $profile->role_code_value, $public_value ) ) );
 	}
-	drupal_set_message(t( count( $result ).' profile(s) set to public'));
+
+	//Define the batch
+	$batch = array(
+		'operations' => $operations,
+		'title' => 'Set profiles to public',
+		'finished' => '_public_profile_batch_process_complete'
+	);
+
+	//Run the batch
+	batch_set( $batch );
 	return( TRUE );
+}
+
+//Batch processor for batch defined in _ou_profile_profiles_public
+function _public_profile_batch_process( $data, &$context )
+{
+	//Get the node
+	$node = node_load( $data[ 0 ] );
+
+	if( $node )
+	{
+		//Call function to set to public
+		_ou_profile_public_profile( $node, '3', $data[ 1 ], $data[ 2 ] );
+		node_save( $node );
+
+		//Store results in batch array
+		$context['results'][] = 'Making public : '.$data[ 0 ];
+		
+		// Optional message displayed under the progressbar.
+		$context['message']  = 'Making public : '.$data[ 0 ];
+	} else {
+		//Store results in batch array
+		$context['results'][] = 'Node not found : '.$data[ 0 ];
+	
+		// Optional message displayed under the progressbar.
+		$context['message']  = 'Node not found : '.$data[ 0 ];
+
+	}
+
+}
+
+//Function called when the batch process is complete
+function _public_profile_batch_process_complete( $success, $results, $operations )
+{
+	if( $success )
+	{
+		// Here we could do something meaningful with the results.
+		// We just display the number of nodes we processed...
+		drupal_set_message(t('@count records  processed.', array('@count' => count( $results ) ) ) );
+		ou_profile_log( 'Set profiles to public. Processed : '.count( $operations ) );
+	} else {
+		// An error occurred.
+		// $operations contains the operations that remained unprocessed.
+		$error_operation = reset( $operations );
+		drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
+	}
+
 }

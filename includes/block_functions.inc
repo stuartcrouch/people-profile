@@ -77,7 +77,7 @@ function ou_profile_get_unit_list_block()
 
 function ou_profile_get_people_search_block() {
   
-    $block['subject'] = t("Search for people");
+    $block['subject'] = t("Search by name");
     $block['content']['#markup'] = ou_profile_get_people_search_form();
     
     return $block;
