@@ -821,9 +821,18 @@ function oneoff_pims_import_data_into_profile_record( $a_pims_row, &$context )
 		//Set default privacy values if this is a public profile
 		if( $public )
 		{
-			oneoff_ou_profile_public_profile( $node, '3' );
-		}
+			//Privacy values are held in a content type "Privacy value". The privacy fields are "Node Reference" fields
+			//Therefore value must be set to the NID of the privacy value we want.
+			$privacy_values = ou_profile_lget_privacy_values();
+			
+			//Currently, "Public" = 3, so we're searching for that value.
+			$public_value = array_search( '3', $privacy_values );
 
+			//array_search returns an integer. Need to change to string
+			$public_value = strval( $public_value );
+
+			oneoff_ou_profile_public_profile( $node, '3', $a_pims_row['appt_role_code'], $public_value );
+		}
 	}
 	
 	if( $node )
@@ -853,9 +862,11 @@ function oneoff_pims_import_data_into_profile_record( $a_pims_row, &$context )
 	}
 }
 
+
+
 //Sets all privacy field values on a profile
 //Sending privacy as a parameter, incase we need to change function
-function oneoff_ou_profile_public_profile( &$node, $privacy = '3' )
+function oneoff_ou_profile_public_profile( &$node, $privacy = '3', $role_code, $public_value )
 {
 
 	//Privacy fields.
@@ -894,27 +905,81 @@ function oneoff_ou_profile_public_profile( &$node, $privacy = '3' )
 		'field_prv_web_links'
 		);
 	
-	
-	//Privacy values are held in a content type "Privacy value". The privacy fields are "Node Reference" fields
-	//Theefore value must be set to the NID of the privacy value we want.
-	$privacy_values = ou_profile_lget_privacy_values();
-	//Currently, "Public" = 3, so we're searching for that value.
-	$public_value = array_search( $privacy, $privacy_values );
-	if( $public_value )
+	//Loop through all the fields defined earlier.
+	foreach( $public_fields as $public_field )
 	{
-		//array_search returns an integer. Need to change to string
-		$public_value = strval( $public_value );
+		$node->{$public_field}['und'][0]['nid'] = $public_value;
+	}
+	
+	//Set visibility
+	$node->field_oup_visibility['und'][0]['value'] = (int)$privacy - 1;
+	
+	//These are the TIDS we need to set on the profile for the research site.
+	$public_tids_var = variable_get( 'ou_profile_public_tids', '' );
+	$public_rolecodes_var = variable_get( 'ou_profile_pims_default_public', '' );
 
-		//Loop through all the fields defined earlier.
-		foreach( $public_fields as $public_field )
+	$public_tids = explode( ',', $public_tids_var );
+	$public_codes = explode( ',', $public_rolecodes_var );
+
+	//If public tids are detected..
+	if( $public_tids_var != '' )
+	{
+	
+		//Find the TID we need to set
+		$x = 0;
+		$tid_to_set = '';
+		foreach( $public_codes as $public_code )
 		{
-			$node->{$public_field}['und'][0]['nid'] = $public_value;
+			if( $public_code == $role_code )
+			{
+				$tid_to_set = $public_tids[ $x ];
+				break;
+			}
+			$x++;
 		}
 		
-		//Set visibility
-		$node->field_oup_visibility['und'][0]['value'] = (int)$privacy - 1;
+		//Only set the TID if a role code match is found
+		if( $tid_to_set != '' )
+		{
+			//Get the node tids. Need to do this so we don't unset values already set
+			$this_tids = array();
+			
+			if( isset( $node->field_profile_taxonomy['und'] ) )
+			{
+				foreach( $node->field_profile_taxonomy['und'] as $this_tid )
+				{
+					$this_tids[] = $this_tid['tid'];
+				}
+			}
+
+			//Add the new tid and check that it's unique
+			if( isset( $this_tids ) )
+			{
+				$this_tids[] = $tid_to_set;
+				$unique_array = array_unique( $this_tids );
+			} else {
+				$unique_array[] = $tid_to_set;
+			}
+		
+			//Reset the node tids field
+			unset( $node->field_profile_taxonomy['und'] );
+
+			//Set the new node tids
+			foreach( $unique_array as $new_tid )
+			{
+				$node->field_profile_taxonomy['und'][]['tid'] = $new_tid;
+			}
+		}
 	}
 }
+
+
+
+
+
+
+
+
 
 /* Process to set profiles to public
  * This is invoked though the PP server admin page, called through _config_form_submit

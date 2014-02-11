@@ -904,7 +904,17 @@ function _pims_import_data_into_profile_record( $a_pims_row, &$context )
 		//Set default privacy values if this is a public profile
 		if( $public )
 		{
-			_ou_profile_public_profile( $node, '3', $a_pims_row['appt_role_code'] );
+			//Privacy values are held in a content type "Privacy value". The privacy fields are "Node Reference" fields
+			//Therefore value must be set to the NID of the privacy value we want.
+			$privacy_values = ou_profile_lget_privacy_values();
+			
+			//Currently, "Public" = 3, so we're searching for that value.
+			$public_value = array_search( '3', $privacy_values );
+
+			//array_search returns an integer. Need to change to string
+			$public_value = strval( $public_value );
+
+			_ou_profile_public_profile( $node, '3', $a_pims_row['appt_role_code'], $public_value );
 		}
 
 	}
