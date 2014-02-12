@@ -36,7 +36,7 @@ function _config_form( $form_state )
 		'#type'          => 'checkbox',
 		'#title'         => t('ONE-OFF : Force import on submit'),
 		'#default_value' =>  0,
-		'#description'   => t('THIS IS A ONE-OFF PROCESS THAT WILL FORCE A **FULL IMPORT OF PIMS.TXT VIA THE BATCH PROCESS. If you submit this form with this checked, the import process will be started. The "Import file date" is ignored.'),
+		'#description'   => t('THIS IS A ONE-OFF PROCESS THAT WILL FORCE A **IMPORT OF PIMS.TXT VIA THE BATCH PROCESS. If you submit this form with this checked, the import process will be started. The "Import file date" is ignored. NOTE : The OU Units data should be imported first via drush.'),
 	);
 	$form['ou_profile_pims_import_settings']['ou_profile_pims_default_public'] = array(
 		'#type'          => 'textfield',

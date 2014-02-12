@@ -1,4 +1,8 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', TRUE);
+ini_set('display_startup_errors', TRUE);
+
 /**
  * @file
  * Functions for PIMs import. Can be initiated either through the admin page or Cron
@@ -14,13 +18,55 @@
 
 
 
+function oneoff_pims_import_initialise_units( $import_type = "batch" )
+{
+	
+	//Array to hold the pims file data, unprocessed.
+	$pims_rawdata = array();
 
+	//Array to hold the pims data, after it is processed and split into the fields.
+	$pims_importdata = array();
+	
+	//Array to hold the business units imported from PIMs
+	$ou_units = array();
+
+	//Array to hold all the imported unique_ids
+	$pims_imported_unique_ids = array();
+
+	//Get pims filename from the config page /admin/config/system/ou_profile
+	$filepath = variable_get('ou_profile_pims_preproc_path', '/drupalshared/interface_files');
+	$pims_file = $filepath.'/PIMS.txt';
+
+	if( file_exists( $pims_file ) )
+	{
+		$file_time = filemtime( $pims_file );
+		variable_set('ou_profile_pims_import_file_mod', date("d F Y H:i:s", $file_time ) );
+		
+		//Import pims file into an array in one go.
+		$pims_rawdata = file( $pims_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+		
+		//Split out the data into columns.
+		//Takes $pims_rawdata as input, returns the remaining arrays populated. pims arrays are
+		//one per row. $ou_units is one per unit.
+		oneoff_pims_process_file( $pims_rawdata, $pims_importdata, $pims_imported_unique_ids, $ou_units );
+		
+		//Delete the raw data, don't need it.
+		unset( $pims_rawdata );
+		
+		//Update the OU Business unit list with the one just imported
+		oneoff_pims_update_ou_units( $ou_units );
+
+	}
+	
+	drupal_set_message( 'Imported OU Units.' );
+}
 
 
 //MAIN ROUTINE TO MANAGE THE PIMS IMPORT
 //$import_type = cron, batch, drush
 function oneoff_pims_import_initialise( $import_type = "batch", &$batch = array() )
 {
+	ou_profile_log( 'oneoff_pims_import_initialise' );
 	
 	//Array to hold the pims file data, unprocessed.
 	$pims_rawdata = array();
@@ -59,23 +105,30 @@ function oneoff_pims_import_initialise( $import_type = "batch", &$batch = array(
 
 	if( file_exists( $pims_file ) )
 	{
+		ou_profile_log( 'oneoff_pims_import_initialise' );
+
 		$file_time = filemtime( $pims_file );
 		variable_set('ou_profile_pims_import_file_mod', date("d F Y H:i:s", $file_time ) );
 		
 		//Import pims file into an array in one go.
+		ou_profile_log( 'Import pims into array-start' );
 		$pims_rawdata = file( $pims_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+		ou_profile_log( 'Import pims into array-finish' );
 		
 		//Split out the data into columns.
 		//Takes $pims_rawdata as input, returns the remaining arrays populated. pims arrays are
 		//one per row. $ou_units is one per unit.
+		ou_profile_log( 'Process PIMS-start' );
 		oneoff_pims_process_file( $pims_rawdata, $pims_importdata, $pims_imported_unique_ids, $ou_units );
+		ou_profile_log( 'Process PIMS-Finish' );
 		
 		//Delete the raw data, don't need it.
 		unset( $pims_rawdata );
 		
 		//Update the OU Business unit list with the one just imported
-		oneoff_pims_update_ou_units( $ou_units );
+		//oneoff_pims_update_ou_units( $ou_units );
 
+		ou_profile_log( 'Create Arrays-start' );
 
 		//Get the existing PUBLISHED PIMs IDs
 		oneoff_pims_get_existing_data( $system_pims_unique_ids_published, TRUE );
@@ -94,6 +147,8 @@ function oneoff_pims_import_initialise( $import_type = "batch", &$batch = array(
 		// Find all the IDs that are in both the database and the file
 		$pims2update = array_intersect( $system_pims_unique_ids, $pims_imported_unique_ids );
 		variable_set('ou_profile_pims_import_updates', count( $pims2update ) );
+
+		ou_profile_log( 'Create Arrays-Finish' );
 		
 		//Create the batch or update the queue
 		//NOTE : Be aware that the processing could run more than once for each entry
@@ -193,6 +248,7 @@ function oneoff_pims_import_initialise( $import_type = "batch", &$batch = array(
 //Process each batch operation
 function oneoff_pims_batch_process( $pims_data, &$context )
 {
+
 	//Shift off the first value and return
 	$process_type = array_shift( $pims_data );
 	
@@ -441,17 +497,19 @@ function oneoff_pims_update_ou_units( $ou_units )
 		}
 	}
 
-
 	//Walk array and create the ou_units nodes
 	foreach( $ou_units as $key1 => $lv1 )
 	{
+		
 		foreach( $lv1 as $key2 => $lv2 )
 		{
+
 			foreach( $lv2 as $key3 => $lv3 )
 			{
 
 				foreach( $lv3 as $key4 => $lv4 )
 				{
+
 					//Get the Business Unit nid using the unit_code
 					$query = db_select('field_data_field_unit_code', 'df_ucode')
 								->fields('df_ucode', array('entity_id') )
@@ -512,6 +570,8 @@ function oneoff_pims_update_ou_units( $ou_units )
 			}
 		}
 	}
+	ou_profile_log( 'OU units walk array : Finish' );
+
 }
 
 
