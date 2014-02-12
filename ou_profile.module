@@ -714,12 +714,10 @@ function ou_profile_form_alter(&$form, $form_state, $form_id) {
 			  $form['#after_build'][] = '_ou_profile_after_build';
 			}
 
-
-
-			$query = db_select('field_data_field_pims_l1_estab_unit_code', 'l1_units');
+			$query = db_select( 'field_data_field_pims_staff_id', 'pims_staff_id' );
+			$query->join( 'field_data_field_pims_l1_estab_unit_code', 'l1_units', 'pims_staff_id.entity_id = l1_units.entity_id' );
 			$query->addField('l1_units', 'field_pims_l1_estab_unit_code_value', 'pims_l1_estab_unit_code');
-			$query->condition('l1_units.entity_id', $form['#node']->nid, '=');
-
+			$query->condition('pims_staff_id.field_pims_staff_id_value', $staff_id, '=');
 			$unit_code = $query->execute()->fetchField();
 
 			// Prevent the field group group_oubs from being displayed.
@@ -730,13 +728,14 @@ function ou_profile_form_alter(&$form, $form_state, $form_id) {
 			// Thus we get a list of field groups and determine whether to show
 			// the fields in that field group.
 			// But allow for general groups which don't have unit codes in them
-			foreach ($form as $key => $val) {
+			foreach ($form['#groups'] as $key => $val) {
 			  if (preg_match("/^group_oup_/", $key)) {
 				$fg_unit_code = substr($key, -4);
 				if ($fg_unit_code != $unit_code && is_numeric($fg_unit_code)) {
 				  // Hide the field group if the person is not in the unit / department
 				  // the field group belongs to.
-				  unset($form[$key]);
+				  unset($form['#groups'][$key]);
+				  unset($form['#fieldgroups'][$key]);
 				}
 			  }
 			}

@@ -224,7 +224,7 @@ function oneoff_pims_batch_process( $pims_data, &$context )
 			
 			//Get pims filename from the config page /admin/config/system/ou_profile
 			$filepath = variable_get('ou_profile_pims_preproc_path', '/drupalshared/interface_files');
-			$pims_file = $filepath.'/pims.txt';
+			$pims_file = $filepath.'/PIMS.txt';
 						
 			//Delete PIMS_PP_Imported.txt if it already exists
 			if( unlink( $filepath.'/PIMS_PP_Imported.txt' ) )
