@@ -12,7 +12,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 // Include the ou_profile local functions so we can use the log command
 $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
-require_once "$INCLUDES/local_functions.inc";
+require_once "$INCLUDES/server_client_functions.inc";
 
 $INCLUDES = drupal_get_path('module', 'ou_profile_client');
 require_once "$INCLUDES/ou_profile_client.cron.inc";
@@ -27,9 +27,6 @@ $staff_id = NULL;
 $oucu = NULL;
 
 function ou_profile_client_node_load($nodes, $types) {
-
-  $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
-  require_once "$INCLUDES/local_functions.inc";
 
   if (count(array_intersect(array("profile", "ou_profile"), $types))) {
 
@@ -49,9 +46,9 @@ function ou_profile_client_node_load($nodes, $types) {
           if ((isset($params[0]) && $params[0] == 'node') && 
               (isset($params[1]) && $params[1] == $node->nid)) 
 			  {
-					if (isset($node->field_pims_unique_id[$node->language][0]['value'])) 
+					if (isset($node->field_pims_unique_id['und'][0]['value'])) 
 					{
-						$unique_id = $node->field_pims_unique_id[$node->language][0]['value'];
+						$unique_id = $node->field_pims_unique_id['und'][0]['value'];
 						$staff_id = substr($unique_id, 0,  8);
 						$node->ou_profile = ou_profile_client_rest_call($staff_id);
 					}
@@ -65,23 +62,12 @@ function ou_profile_client_node_load($nodes, $types) {
   }
 }
 
+//REST call to get the data for $node->ou_profile for display
 function ou_profile_client_rest_call($param) {
 
-  $env = strtolower(getenv('OUENV'));
-  switch ($env) {
-    case 'live':
-      $request_url = 'http://www.open.ac.uk/people/';
-      break;
+  ou_profile_log( "Getting profile data" );
 
-    case 'acct':
-      $request_url = 'http://www-acct.open.ac.uk/people/';
-      break;
-
-    case 'dev':
-    case 'test':
-    default:
-      $request_url = 'http://www-' . $env . '.open.ac.uk/people/';
-  }
+  $request_url = ou_profile_get_request_url();
   
   $headers = array();
   $options = array(
@@ -92,22 +78,89 @@ function ou_profile_client_rest_call($param) {
       'method' => 'GET',
       //'data' => $data
   );
-
-
-  $response = drupal_http_request($request_url . 'services/ou_site_profile/' . $param, $options);
-
+  $response = drupal_http_request($request_url . '/services/ou_site_profile/' . $param, $options);
   $data = json_decode($response->data,true);
 
   return $data;
 }
 
+
+//REST call to get TIDS decriptions
+function ou_profile_client_get_tid_rest_call( $tid )
+{
+
+	$request_url = ou_profile_get_request_url();
+
+	$options = array(
+		'headers' => array(
+		'Accept' => 'application/json',
+		'Referer' => $GLOBALS['base_url'],
+		),
+		'method' => 'GET',
+	);
+	
+	//The last element in the URl '/list' doesn't do anything. Rest call would not work without us sending a parameter, so I'm just sending a value that's never used
+	$response = drupal_http_request($request_url . '/services/ou_profile_get_taxonomy_tree/'.$tid, $options);
+	
+	$data = json_decode( $response->data, true );
+	return $data;
+}
+
+
+
+//REST call to get PIMS & Profile NIDs that the site is allowed to access
+function ou_profile_client_all_nids_rest_call()
+{
+
+	$request_url = ou_profile_get_request_url();
+
+	$headers = array();
+	$options = array(
+		'headers' => array(
+		'Accept' => 'application/json',
+		'Referer' => $GLOBALS['base_url'],
+		),
+		'method' => 'GET',
+	);
+	
+	//The last element in the URl '/list' doesn't do anything. Rest call would not work without us sending a parameter, so I'm just sending a value that's never used
+	$response = drupal_http_request($request_url . '/services/ou_profile_nid_list/list', $options);
+	
+	//Returns an associative array, ['pims_entity_id']
+	//									['pims_entity_id']
+	//									['profile_entity_id']
+	//									['puid']
+	$data = json_decode( $response->data, true );
+	return $data;
+}
+
+
+//REST call to get PIMS & Profile NIDs that the site is allowed to access
+function ou_profile_client_get_pp_node( $nid )
+{
+
+	$request_url = ou_profile_get_request_url();
+
+	$headers = array();
+	$options = array(
+		'headers' => array(
+		'Accept' => 'application/json',
+		'Referer' => $GLOBALS['base_url'],
+		),
+		'method' => 'GET',
+	);
+	
+	//The last element in the URl '/list' doesn't do anything. Rest call would not work without us sending a parameter, so I'm just sending a value that's never used
+	$response = drupal_http_request($request_url . '/services/ou_profile_get_node/'.$nid, $options);
+	$data = json_decode( $response->data, true );
+	return $data;
+}
+
+
 /////////////////////////////////////////////// VIEW NODES //////////////////////////////////////////////
 
 
 function ou_profile_client_node_view($node, $view_mode, $langcode) {
-
-	$INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
-	require_once "$INCLUDES/local_functions.inc";
 
 	drupal_add_css(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_styles.css');
 	drupal_add_js( drupal_get_path('module', 'ou_profile') .'/shared/ou_profile_tabs.js');
@@ -235,6 +288,7 @@ function ou_profile_client_add_body_classes(&$vars)
 * in the form of a nice HTML list of links or an array of node ids
 *
 */
+/*
 function theme_get_profile_node_list($query = NULL, $type = "array") {
   // Include the local functions so that we can call the log command
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
@@ -264,62 +318,6 @@ function theme_get_profile_node_list($query = NULL, $type = "array") {
           return "<p>No results found for query: $query</p>";
     }
        }
-}
-
-/**
-*
-* Author: Mark Williams
-*
-* Return an array of expertise keywords for the client website's unit
-*
-*/
-/*
-function theme_get_expertise_tags() {
-  
-  $a_site_info = ou_profile_lget_site_info();
-  $unit_code = $a_site_info['unit_code'];
-  $site_visibility = (int) $a_site_info['visibility'];
-
-  // Set database to profiles
-  db_set_active('profiles');
-
-  // TODO: Rewrite me as db_query array
-  //$sql_query = db_select('node', 'n')->distinct();
-  $sql_query = db_select('field_data_field_oup_expertise', 'expertise')->distinct();
-  $sql_query->addField('expertise', 'field_oup_expertise_value');
-
-  $sql_query->join('field_data_field_prv_expertise', 'expertise_privacy', 'expertise.entity_id = expertise_privacy.entity_id');
-  $sql_query->join('field_data_field_privacy_value', 'privacy', 'privacy.entity_id = expertise_privacy.field_prv_expertise_nid');
-  $sql_query->join('field_data_field_pims_l1_estab_unit_code', 'l1_estab_unit', 'expertise.entity_id = l1_estab_unit.entity_id');
-  
-  $sql_query
-    ->condition( 'privacy.field_oup_visibility_value', $site_visibility,'>=')
-    ->condition( 'l1_estab_unit.field_pims_l1_estab_unit_code_value', $unit_code, '=' );
-  
-  $sql_query->isNotNull('expertise.field_oup_expertise_value');
-
-
-//  $sql_query = "SELECT DISTINCT field_oup_expertise_value ";
-//  $sql_query .= "FROM {content_type_profile}, {content_type_pims}, {content_field_oup_expertise}, {content_type_privacy_value} ";
-//  $sql_query .= "WHERE content_field_oup_expertise.nid = content_type_profile.nid ";
-//  $sql_query .= "AND content_type_profile.field_oup_staff_id_value=content_type_pims.field_pims_staff_id_value ";
-//  $sql_query .= "AND content_type_profile.field_prv_expertise_nid=content_type_privacy_value.nid ";
-//  $sql_query .= "AND content_type_privacy_value.field_privacy_value_value >=" . $site_visibility . " ";
-//  $sql_query .= "AND content_type_pims.field_pims_l1_estab_unit_code_value =" . $unit_code . " ";
-//  $sql_query .= "AND content_field_oup_expertise.field_oup_expertise_value IS NOT NULL ";
-
-
-
-  $sql_result = db_query($sql_query);
-
-  $tags = array();
-  while ($row = db_fetch_object($sql_result)) {
-    $tags[] = $row->field_oup_expertise_value;
-  }
-
-  db_set_active();
-
-  return $tags;
 }
 */
 
@@ -374,6 +372,7 @@ function ou_profile_client_menu() {
 *
 */
 
+/*
 // TODO: Share these across both modules
 function ou_profile_client_block_info() {
   $blocks = array();
@@ -398,6 +397,7 @@ function ou_profile_client_block_info() {
 * Implementation of hook_block_view()
 *
 */
+/*
 function ou_profile_client_block_view($delta = '') {
   $INCLUDES = drupal_get_path('module', 'ou_profile') . "/includes";
   require_once "$INCLUDES/block_functions.inc";
@@ -423,6 +423,7 @@ function ou_profile_client_block_view($delta = '') {
 }
 
 /* List all available units on right of page */
+/*
 function ou_profile_client_block($op='list', $delta = 0) {
 
   // listing of blocks, such as on the admin/block page
@@ -479,6 +480,7 @@ function ou_profile_client_block($op='list', $delta = 0) {
     return $block;
   }
 }
+*/
 
 // Provide a way to automate the URL generation, rather than forcing the path
 function ou_profile_client_token_list($type = 'all') {
@@ -509,3 +511,26 @@ function ou_profile_client_token_values($type, $object = NULL, $options = array(
 //    array_walk( debug_backtrace(), create_function( '$a,$b', 'print "<br /><b>" . basename( $a[\'file\'] ). "</b> &nbsp; <font color=\"red\">{$a[\'line\']}</font> &nbsp; <font color=\"green\">{$a[\'function\']} ()</font> &nbsp; -- " . dirname( $a[\'file\'] ). "/";' ) );
 // }
 
+/**
+ *
+ Implements hook_views_post_render(&$view, &$output, &$cache)
+ *
+ */
+function ou_profile_client_views_post_render(&$view, &$output, &$cache)
+{
+	if( !$view->editing )
+	{
+		//Adds the profile stylesheet to the view
+		if( $view->name == 'people' || $view->name == 'research_profiles' )
+		{
+		  drupal_add_css(drupal_get_path('module', 'ou_profile') . '/includes/ou_profile_styles.css');
+		}
+		
+		if( $view->name == 'people' || ( $view->name == 'research_profiles' && $view->current_display =='people_by_atoz' ) )
+		{
+		  drupal_add_js( drupal_get_path('module', 'ou_profile_client') .'/ou_profile_client.js');
+		}
+	}
+}
+
+?>

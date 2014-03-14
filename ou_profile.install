@@ -604,3 +604,5 @@ function ou_profile_update_7100()
 	}
 	return( t('New taxonomy terms created' ) );
 }
+
+?>

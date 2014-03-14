@@ -984,7 +984,9 @@ function _ou_profile_public_profile( &$node, $privacy = '3', $role_code, $public
 		'field_prv_slideshare',
 		'field_prv_teaching_interests',
 		'field_prv_twitter',
-		'field_prv_web_links'
+		'field_prv_web_links',
+		'field_prv_rps',
+		'field_prv_oro'
 		);
 	
 	//Loop through all the fields defined earlier.
@@ -1155,3 +1157,5 @@ function _public_profile_batch_process_complete( $success, $results, $operations
 	}
 
 }
+
+?>

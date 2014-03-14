@@ -120,7 +120,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_oup_oubs_0153';
   $field_group->data = array(
     'label' => 'Areas of expertise',
-    'weight' => '204',
+    'weight' => '223',
     'children' => array(
       0 => 'field_oup_expertise',
       1 => 'field_prv_expertise',
@@ -153,7 +153,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'Blog',
-    'weight' => '218',
+    'weight' => '232',
     'children' => array(
       0 => 'field_oup_blog',
       1 => 'field_prv_blog',
@@ -186,7 +186,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_content_groups';
   $field_group->data = array(
     'label' => 'Non-PIMs Categories',
-    'weight' => '150',
+    'weight' => '152',
     'children' => array(
       0 => 'field_profile_taxonomy',
     ),
@@ -240,13 +240,15 @@ function people_profiles_config_field_group_info() {
     'label' => 'Content Group',
     'weight' => '0',
     'children' => array(
-      0 => 'group_external_profiles_accounts',
-      1 => 'group_header',
-      2 => 'group_layout_design',
-      3 => 'group_oup_oubs_0153',
-      4 => 'group_teaching_research_interest',
-      5 => 'group_categories',
-      6 => 'group_media_expert',
+      0 => 'group_categories',
+      1 => 'group_external_profiles_accounts',
+      2 => 'group_header',
+      3 => 'group_layout_design',
+      4 => 'group_media_expert',
+      5 => 'group_oup_oubs_0153',
+      6 => 'group_teaching_research_interest',
+      7 => 'group_research_activity',
+      8 => 'group_publications',
     ),
     'format_type' => 'tabs',
     'format_settings' => array(
@@ -269,7 +271,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_oup_oubs_0153';
   $field_group->data = array(
     'label' => 'External contributions',
-    'weight' => '206',
+    'weight' => '226',
     'children' => array(
       0 => 'field_oup_oubs_public_esteem',
       1 => 'field_prv_oubs_public_esteem',
@@ -338,15 +340,15 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_content_groups';
   $field_group->data = array(
     'label' => 'External Profiles',
-    'weight' => '147',
+    'weight' => '149',
     'children' => array(
       0 => 'field_pdat_personal_website',
       1 => 'field_pprv_personal_website',
       2 => 'group_blog',
-      3 => 'group_twitter',
-      4 => 'group_slideshare',
-      5 => 'group_flickr',
-      6 => 'group_linkedin',
+      3 => 'group_flickr',
+      4 => 'group_linkedin',
+      5 => 'group_slideshare',
+      6 => 'group_twitter',
       7 => 'group_web_links',
     ),
     'format_type' => 'tab',
@@ -409,7 +411,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'Flickr',
-    'weight' => '221',
+    'weight' => '235',
     'children' => array(
       0 => 'field_oup_flickr',
       1 => 'field_prv_flickr',
@@ -610,7 +612,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_layout_design';
   $field_group->data = array(
     'label' => 'Image',
-    'weight' => '216',
+    'weight' => '154',
     'children' => array(
       0 => 'field_oup_profile_layout_image',
     ),
@@ -642,7 +644,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_oup_oubs_0153';
   $field_group->data = array(
     'label' => 'Impact and engagement',
-    'weight' => '205',
+    'weight' => '225',
     'children' => array(
       0 => 'field_oup_oubs_research_impact',
       1 => 'field_prv_oubs_research_impact',
@@ -675,7 +677,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_oup_oubs_0153';
   $field_group->data = array(
     'label' => 'International links',
-    'weight' => '208',
+    'weight' => '227',
     'children' => array(
       0 => 'field_oup_oubs_internatl_collabs',
       1 => 'field_prv_oubs_internatl_collabs',
@@ -736,10 +738,10 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_content_groups';
   $field_group->data = array(
     'label' => 'Layout settings',
-    'weight' => '148',
+    'weight' => '150',
     'children' => array(
-      0 => 'group_layout',
-      1 => 'group_image',
+      0 => 'group_image',
+      1 => 'group_layout',
       2 => 'group_light_dark',
     ),
     'format_type' => 'tab',
@@ -794,7 +796,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_layout_design';
   $field_group->data = array(
     'label' => 'Layout',
-    'weight' => '217',
+    'weight' => '155',
     'children' => array(
       0 => 'field_oup_profile_layout',
     ),
@@ -991,7 +993,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_layout_design';
   $field_group->data = array(
     'label' => 'Light Dark',
-    'weight' => '218',
+    'weight' => '156',
     'children' => array(
       0 => 'field_oup_profile_layout_colour',
     ),
@@ -1023,7 +1025,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'LinkedIn',
-    'weight' => '222',
+    'weight' => '236',
     'children' => array(
       0 => 'field_oup_linkedin',
       1 => 'field_prv_linkedin',
@@ -1056,7 +1058,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_content_groups';
   $field_group->data = array(
     'label' => 'Media Expert',
-    'weight' => '149',
+    'weight' => '151',
     'children' => array(
       0 => 'field_media_expertise',
       1 => 'field_oup_media_relations_bio',
@@ -1106,6 +1108,38 @@ function people_profiles_config_field_group_info() {
     ),
   );
   $export['group_openlearn_bio|node|profile|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_oro_data|node|profile|form';
+  $field_group->group_name = 'group_oro_data';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'profile';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_publications';
+  $field_group->data = array(
+    'label' => 'Publications',
+    'weight' => '88',
+    'children' => array(
+      0 => 'field_prv_oro',
+    ),
+    'format_type' => 'div',
+    'format_settings' => array(
+      'label' => 'Publications',
+      'instance_settings' => array(
+        'required_fields' => 1,
+        'classes' => 'ou-field',
+        'description' => '',
+        'show_label' => '1',
+        'label_element' => 'h3',
+        'effect' => 'none',
+        'speed' => 'fast',
+      ),
+      'formatter' => 'open',
+    ),
+  );
+  $export['group_oro_data|node|profile|form'] = $field_group;
 
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
@@ -1181,11 +1215,11 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_content_groups';
   $field_group->data = array(
     'label' => 'OUBS',
-    'weight' => '146',
+    'weight' => '148',
     'children' => array(
       0 => 'group_areas_of_expertise',
-      1 => 'group_impact_engagement',
-      2 => 'group_ext_contrib',
+      1 => 'group_ext_contrib',
+      2 => 'group_impact_engagement',
       3 => 'group_international_links',
     ),
     'format_type' => 'tab',
@@ -1366,6 +1400,93 @@ function people_profiles_config_field_group_info() {
   $field_group = new stdClass();
   $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
   $field_group->api_version = 1;
+  $field_group->identifier = 'group_publications|node|profile|form';
+  $field_group->group_name = 'group_publications';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'profile';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_content_groups';
+  $field_group->data = array(
+    'label' => 'Publications',
+    'weight' => '147',
+    'children' => array(
+      0 => 'group_oro_data',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'formatter' => 'closed',
+      'instance_settings' => array(
+        'description' => '',
+        'classes' => '',
+        'required_fields' => 1,
+      ),
+    ),
+  );
+  $export['group_publications|node|profile|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_research_activity|node|profile|form';
+  $field_group->group_name = 'group_research_activity';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'profile';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_content_groups';
+  $field_group->data = array(
+    'label' => 'Research Activity',
+    'weight' => '146',
+    'children' => array(
+      0 => 'group_research_groups',
+    ),
+    'format_type' => 'tab',
+    'format_settings' => array(
+      'label' => 'Research Activity',
+      'instance_settings' => array(
+        'required_fields' => 1,
+        'classes' => '',
+        'description' => '',
+      ),
+      'formatter' => 'closed',
+    ),
+  );
+  $export['group_research_activity|node|profile|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
+  $field_group->identifier = 'group_research_groups|node|profile|form';
+  $field_group->group_name = 'group_research_groups';
+  $field_group->entity_type = 'node';
+  $field_group->bundle = 'profile';
+  $field_group->mode = 'form';
+  $field_group->parent_name = 'group_research_activity';
+  $field_group->data = array(
+    'label' => 'Research Groups',
+    'weight' => '221',
+    'children' => array(
+      0 => 'field_prv_rps',
+    ),
+    'format_type' => 'div',
+    'format_settings' => array(
+      'label' => 'Research Groups',
+      'instance_settings' => array(
+        'required_fields' => 1,
+        'classes' => ' ou-field',
+        'description' => '',
+        'show_label' => '1',
+        'label_element' => 'h3',
+        'effect' => 'none',
+        'speed' => 'fast',
+      ),
+      'formatter' => 'open',
+    ),
+  );
+  $export['group_research_groups|node|profile|form'] = $field_group;
+
+  $field_group = new stdClass();
+  $field_group->disabled = FALSE; /* Edit this to true to make a default field_group disabled initially */
+  $field_group->api_version = 1;
   $field_group->identifier = 'group_research_interests|node|profile|form';
   $field_group->group_name = 'group_research_interests';
   $field_group->entity_type = 'node';
@@ -1407,7 +1528,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'Slideshare',
-    'weight' => '220',
+    'weight' => '234',
     'children' => array(
       0 => 'field_oup_slideshare',
       1 => 'field_prv_slideshare',
@@ -1493,29 +1614,30 @@ function people_profiles_config_field_group_info() {
     'label' => 'Staff Self Service Info',
     'weight' => '152',
     'children' => array(
-      0 => 'group_staff_title',
-      1 => 'group_staff_forenames',
+      0 => 'group_appt_job_title',
+      1 => 'group_appt_role_desc',
       2 => 'group_level_1_est',
       3 => 'group_level_2_est',
       4 => 'group_level_3_est',
       5 => 'group_level_4_est',
-      6 => 'group_appt_job_title',
-      7 => 'group_ou_email_address',
+      6 => 'group_ou_email_address',
+      7 => 'group_photograph',
       8 => 'group_pref_staff_fore',
       9 => 'group_pref_staff_sur',
-      10 => 'group_staff_surname',
+      10 => 'group_staff_forenames',
       11 => 'group_staff_initials',
-      12 => 'group_appt_role_desc',
-      13 => 'group_photograph',
+      12 => 'group_staff_surname',
+      13 => 'group_staff_title',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
-      'formatter' => 'collapsible',
+      'label' => 'Staff Self Service Info',
       'instance_settings' => array(
-        'description' => '',
-        'classes' => '',
         'required_fields' => 1,
+        'classes' => '',
+        'description' => '',
       ),
+      'formatter' => 'collapsible',
     ),
   );
   $export['group_sss_info|node|profile|form'] = $field_group;
@@ -1533,9 +1655,9 @@ function people_profiles_config_field_group_info() {
     'label' => 'Staff Self Service Overrides',
     'weight' => '154',
     'children' => array(
-      0 => 'group_letters_after_name',
-      1 => 'group_unab_job_title',
-      2 => 'group_alt_email_add',
+      0 => 'group_alt_email_add',
+      1 => 'group_letters_after_name',
+      2 => 'group_unab_job_title',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(
@@ -1756,10 +1878,10 @@ function people_profiles_config_field_group_info() {
     'label' => 'Biographical Information',
     'weight' => '145',
     'children' => array(
-      0 => 'group_personal_biography',
-      1 => 'group_teaching_interests',
+      0 => 'group_openlearn_bio',
+      1 => 'group_personal_biography',
       2 => 'group_research_interests',
-      3 => 'group_openlearn_bio',
+      3 => 'group_teaching_interests',
     ),
     'format_type' => 'tab',
     'format_settings' => array(
@@ -1813,7 +1935,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'Twitter',
-    'weight' => '219',
+    'weight' => '233',
     'children' => array(
       0 => 'field_oup_twitter',
       1 => 'field_prv_twitter',
@@ -1879,7 +2001,7 @@ function people_profiles_config_field_group_info() {
   $field_group->parent_name = 'group_external_profiles_accounts';
   $field_group->data = array(
     'label' => 'Web Links',
-    'weight' => '223',
+    'weight' => '237',
     'children' => array(
       0 => 'field_oup_web_links',
       1 => 'field_prv_web_links',

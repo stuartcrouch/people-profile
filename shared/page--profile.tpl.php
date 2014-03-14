@@ -37,9 +37,9 @@
           }
         ?>
         <div class="ou-content" id="ou-content">
-          <?php if ($tabs): ?><div id="tabs-wrapper" class="clearfix"><?php endif; ?>
+          <?php if ($tabs && $is_admin): ?><div id="tabs-wrapper" class="clearfix"><?php endif; ?>
           <?php print $feed_icons ?>
-          <?php if ($tabs): ?><?php print render($tabs); ?></div><?php endif; ?>
+          <?php if ($tabs && $is_admin): ?><?php print render($tabs); ?></div><?php endif; ?>
           <?php print render($tabs2); ?>
           <?php print $messages; ?>
           <?php print render($page['help']); ?>

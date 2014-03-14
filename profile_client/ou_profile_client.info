@@ -7,9 +7,7 @@ core = 7.x
 files[] = ou_profile_client.module
 files[] = ou_profile_client.install
 files[] = cron/client_cron.inc
-files[] = ../includes/block_functions.inc
-files[] = ../includes/local_functions.inc
-files[] = ../includes/people_functions.inc
+files[] = ../includes/server_client_functions.inc
 
 configure = admin/config/system/ou_profile
 

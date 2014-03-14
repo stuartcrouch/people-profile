@@ -31,6 +31,10 @@ function ou_profile_client_install() {
 
 
   // See if we already have some people pages, and if not then create them
+  /*
+  
+  REPLACED BY VIEW
+  
   $node_check = drupal_lookup_path('source', 'people');
 
   if (empty($node_check)) {
@@ -102,53 +106,11 @@ function ou_profile_client_install() {
   }
 
   // Now default both profile types to use the /people path for any created content
+*/
 
   //    ou_profile: used only on the client, contains only the staff id
   variable_set('pathauto_node_ou_profile_pattern', 'people/[node:oucu]');
 
-}
-
-function ou_profile_client_uninstall() {
-
-  //Delete admin fields
-  variable_del( 'ou_profile_reporting' );
-  variable_del( 'ou_profile_client_profile_taxonomy' );
-  variable_del( 'ou_profile_client_pims_units' );
-  variable_del( 'ou_profile_client_pims_job_title' );
-
-  $sql = 'SELECT nid FROM {node} n WHERE n.type = :type';
-  $result = db_query($sql, array(':type' => 'ou_profile'));
-  $nids = array();
-  foreach ($result as $row) {
-    $nids[] = $row->nid;
-  }
-
-  // Delete all the nodes at once
-  // http://api.drupal.org/api/function/node_delete_multiple/7
-  node_delete_multiple($nids);
-
-  // Loop over each of the fields defined by this module and delete
-  // all instances of the field, their data, and the field itself.
-  // http://api.drupal.org/api/function/field_delete_field/7
-  foreach (array_keys(_profile_client_installed_fields()) as $field) {
-    field_delete_field($field);
-  }
-
-  // Loop over any remaining field instances attached to the node_example
-  // content type (such as the body field) and delete them individually.
-  // http://api.drupal.org/api/function/field_delete_field/7
-  $instances = field_info_instances('node', 'ou_profile');
-  foreach ($instances as $instance_name => $instance) {
-    field_delete_instance($instance);
-  }
-
-  // Delete our content type
-  // http://api.drupal.org/api/function/node_type_delete/7
-  node_type_delete('ou_profile');
-
-  // Purge all field infromation
-  // http://api.drupal.org/api/function/field_purge_batch/7
-  field_purge_batch(1000);
 }
 
 function ou_profile_client_node_client_profile_manage() {
@@ -215,8 +177,22 @@ function _profile_client_installed_fields() {
               'max_length' => 60,
           )
       ),
-      'field_oup_job_title' => array(
-          'field_name' => 'field_oup_job_title',
+      'field_pims_staff_title' => array(
+          'field_name' => 'field_pims_staff_title',
+          'type' => 'text',
+          'settings' => array(
+              'max_length' => 255,
+          )
+      ),
+      'field_pims_pref_surname' => array(
+          'field_name' => 'field_pims_pref_surname',
+          'type' => 'text',
+          'settings' => array(
+              'max_length' => 255,
+          )
+      ),
+      'field_pims_pref_forenames' => array(
+          'field_name' => 'field_pims_pref_forenames',
           'type' => 'text',
           'settings' => array(
               'max_length' => 255,
@@ -224,6 +200,13 @@ function _profile_client_installed_fields() {
       ),
       'field_pims_appt_job_title' => array(
           'field_name' => 'field_pims_appt_job_title',
+          'type' => 'text',
+          'settings' => array(
+              'max_length' => 255,
+          )
+      ),
+      'field_oup_job_title' => array(
+          'field_name' => 'field_oup_job_title',
           'type' => 'text',
           'settings' => array(
               'max_length' => 255,
@@ -294,9 +277,23 @@ function _profile_client_installed_instances() {
               'type' => 'textfield',
           ),
       ),
-      'field_oup_job_title' => array(
-          'field_name' => 'field_oup_job_title',
-          'label' => 'Abbreviated job title',
+   'field_pims_staff_title' => array(
+          'field_name' => 'field_pims_staff_title',
+          'label' => 'Staff title',
+          'widget' => array(
+              'type' => 'textfield',
+          ),
+      ),
+      'field_pims_pref_surname' => array(
+          'field_name' => 'field_pims_pref_surname',
+          'label' => 'Surname',
+          'widget' => array(
+              'type' => 'textfield',
+          ),
+      ),
+      'field_pims_pref_forenames' => array(
+          'field_name' => 'field_pims_pref_forenames',
+          'label' => 'Forenames',
           'widget' => array(
               'type' => 'textfield',
           ),
@@ -304,6 +301,13 @@ function _profile_client_installed_instances() {
       'field_pims_appt_job_title' => array(
           'field_name' => 'field_pims_appt_job_title',
           'label' => 'PIMs job title',
+          'widget' => array(
+              'type' => 'textfield',
+          ),
+      ),
+      'field_oup_job_title' => array(
+          'field_name' => 'field_oup_job_title',
+          'label' => 'Abbreviated job title',
           'widget' => array(
               'type' => 'textfield',
           ),
@@ -383,3 +387,84 @@ function ou_profile_client_update_7100()
 	
 	return( t( 'OU People Profile Client updates are complete.' ) );
 }
+
+
+/**
+* Update Profile content type with new fields.
+*/
+function ou_profile_client_update_7200()
+{
+	// Create the fields we need for our content type.
+	foreach (_profile_client_installed_fields() as $field)
+	{
+		//Check they haven't already been created
+		if ( is_null( field_info_field( $field[ 'field_name'] ) ) )
+		{
+			field_create_field( $field );
+		}
+	}
+	
+	// Add instances of all the fields to the content type
+	foreach (_profile_client_installed_instances() as $instance)
+	{
+		//Check they haven't already been created
+		if( is_null( field_info_instance( 'node', $instance['field_name'], 'ou_profile' ) ) )
+		{
+			$instance['entity_type'] = 'node';
+			$instance['bundle'] = 'ou_profile';
+			field_create_instance( $instance );
+		}
+	}
+	
+	return( t( 'OU People Profile Client updates are complete.' ) );
+}
+
+function ou_profile_client_uninstall() {
+
+  //Delete admin fields
+  variable_del( 'ou_profile_reporting' );
+  variable_del( 'ou_profile_client_profile_taxonomy' );
+  variable_del( 'ou_profile_client_pims_units' );
+  variable_del( 'ou_profile_client_pims_job_title' );
+
+  //Tmp vars that may be hanging around
+  variable_del( 'ou_profile_client_profile_taxonomy_tmp' );
+  variable_del( 'ou_profile_client_pims_units_tmp' );
+  variable_del( 'ou_profile_client_pims_job_title_tmp' );
+
+  $sql = 'SELECT nid FROM {node} n WHERE n.type = :type';
+  $result = db_query($sql, array(':type' => 'ou_profile'));
+  $nids = array();
+  foreach ($result as $row) {
+    $nids[] = $row->nid;
+  }
+
+  // Delete all the nodes at once
+  // http://api.drupal.org/api/function/node_delete_multiple/7
+  node_delete_multiple($nids);
+
+  // Loop over each of the fields defined by this module and delete
+  // all instances of the field, their data, and the field itself.
+  // http://api.drupal.org/api/function/field_delete_field/7
+  foreach (array_keys(_profile_client_installed_fields()) as $field) {
+    field_delete_field($field);
+  }
+
+  // Loop over any remaining field instances attached to the node_example
+  // content type (such as the body field) and delete them individually.
+  // http://api.drupal.org/api/function/field_delete_field/7
+  $instances = field_info_instances('node', 'ou_profile');
+  foreach ($instances as $instance_name => $instance) {
+    field_delete_instance($instance);
+  }
+
+  // Delete our content type
+  // http://api.drupal.org/api/function/node_type_delete/7
+  node_type_delete('ou_profile');
+
+  // Purge all field infromation
+  // http://api.drupal.org/api/function/field_purge_batch/7
+  field_purge_batch(1000);
+}
+
+?>

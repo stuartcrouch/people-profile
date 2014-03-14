@@ -2069,7 +2069,7 @@ This is one of the criteria that can be used to determine sites your profile wil
         'default_value_php' => NULL,
       ),
       'type' => 'link_field',
-      'weight' => 84,
+      'weight' => 223,
     ),
     'widget_type' => 'link',
   );
@@ -2141,7 +2141,7 @@ This is one of the criteria that can be used to determine sites your profile wil
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 211,
+      'weight' => 92,
     ),
     'widget_type' => 'text_textfield',
   );
@@ -2441,7 +2441,7 @@ This is one of the criteria that can be used to determine sites your profile wil
         'default_value_php' => NULL,
       ),
       'type' => 'link_field',
-      'weight' => 88,
+      'weight' => 238,
     ),
     'widget_type' => 'link',
   );
@@ -2482,7 +2482,7 @@ This is one of the criteria that can be used to determine sites your profile wil
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 153,
+      'weight' => 154,
     ),
   );
 
@@ -2599,7 +2599,7 @@ This is one of the criteria that can be used to determine sites your profile wil
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 210,
+      'weight' => 92,
     ),
     'widget_type' => 'text_textarea',
   );
@@ -2677,7 +2677,7 @@ This is one of the criteria that can be used to determine sites your profile wil
         'rows' => 5,
       ),
       'type' => 'text_textarea',
-      'weight' => 209,
+      'weight' => 223,
     ),
     'widget_type' => 'text_textarea',
   );
@@ -2762,7 +2762,7 @@ This is one of the criteria that can be used to determine sites your profile wil
         'size' => 60,
       ),
       'type' => 'text_textarea',
-      'weight' => 208,
+      'weight' => 231,
     ),
     'widget_type' => 'text_textarea',
   );
@@ -3006,7 +3006,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       ),
     ),
     'deleted' => 0,
-    'description' => '',
+    'description' => 'You can choose to have the main content on the left hand side of your profile with your image and web links on the right (the content, sidebar option) or the other way around (the sidebar, content option)',
     'display' => array(
       'default' => array(
         'label' => 'above',
@@ -3058,7 +3058,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 219,
+      'weight' => 237,
     ),
     'widget_type' => 'optionwidgets_buttons',
   );
@@ -3112,7 +3112,7 @@ This is one of the criteria that can be used to determine sites your profile wil
     ),
     'entity_type' => 'node',
     'field_name' => 'field_oup_profile_layout_colour',
-    'label' => 'Light / Dark',
+    'label' => 'Light or Dark Theme',
     'required' => 1,
     'settings' => array(
       'text_processing' => 0,
@@ -3124,7 +3124,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 214,
+      'weight' => 225,
     ),
     'widget_type' => 'optionwidgets_buttons',
   );
@@ -3134,7 +3134,7 @@ This is one of the criteria that can be used to determine sites your profile wil
     'bundle' => 'profile',
     'default_value' => '',
     'deleted' => 0,
-    'description' => '',
+    'description' => 'You can choose to add a large banner image to the top of your profile.  The dimensions of this banner image are 922x300px.  Please ensure that you have the appropriate permission to use the image that you are uploading.',
     'display' => array(
       'default' => array(
         'label' => 'above',
@@ -3189,27 +3189,26 @@ This is one of the criteria that can be used to determine sites your profile wil
     ),
     'entity_type' => 'node',
     'field_name' => 'field_oup_profile_layout_image',
-    'label' => 'Image',
-    'required' => FALSE,
+    'label' => 'Banner image',
+    'required' => 0,
     'settings' => array(
       'alt_field' => 0,
       'default_image' => 0,
       'file_directory' => '',
       'file_extensions' => 'png gif jpg jpeg',
       'max_filesize' => '',
-      'max_resolution' => 0,
-      'min_resolution' => 0,
+      'max_resolution' => '',
+      'min_resolution' => '',
       'title_field' => 0,
       'user_register_form' => FALSE,
     ),
     'weight' => 127,
     'widget' => array(
-      'active' => 0,
+      'active' => 1,
       'module' => 'image',
       'settings' => array(
         'preview_image_style' => 'thumbnail',
         'progress_indicator' => 'bar',
-        'use_default_image' => 0,
       ),
       'type' => 'image_image',
       'weight' => 215,
@@ -3365,7 +3364,7 @@ This is one of the criteria that can be used to determine sites your profile wil
         'default_value_php' => NULL,
       ),
       'type' => 'link_field',
-      'weight' => 217,
+      'weight' => 231,
     ),
     'widget_type' => 'link',
   );
@@ -3578,7 +3577,7 @@ This is one of the criteria that can be used to determine sites your profile wil
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 85,
+      'weight' => 91,
     ),
     'widget_type' => 'text_textfield',
   );
@@ -3749,7 +3748,7 @@ This is one of the criteria that can be used to determine sites your profile wil
         'default_value_php' => NULL,
       ),
       'type' => 'link_field',
-      'weight' => 89,
+      'weight' => 226,
     ),
     'widget_type' => 'link',
   );
@@ -4317,7 +4316,7 @@ This is one of the criteria that can be used to determine sites your profile wil
         'size' => 60,
       ),
       'type' => 'text_textfield',
-      'weight' => 216,
+      'weight' => 230,
     ),
     'widget_type' => 'text_textfield',
   );
@@ -5250,7 +5249,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 217,
+      'weight' => 231,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -5807,7 +5806,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 83,
+      'weight' => 222,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -5872,7 +5871,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 210,
+      'weight' => 91,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -6132,7 +6131,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 87,
+      'weight' => 237,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -6175,6 +6174,47 @@ This is one of the criteria that can be used to determine sites your profile wil
       'settings' => array(),
       'type' => 'options_buttons',
       'weight' => 209,
+    ),
+  );
+
+  // Exported field_instance: 'node-profile-field_prv_oro'
+  $field_instances['node-profile-field_prv_oro'] = array(
+    'bundle' => 'profile',
+    'default_value' => array(
+      0 => array(
+        'nid' => 19916,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'node_reference',
+        'settings' => array(),
+        'type' => 'node_reference_default',
+        'weight' => 137,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_prv_oro',
+    'label' => 'Publications (privacy setting)',
+    'required' => 1,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_buttons',
+      'weight' => 90,
     ),
   );
 
@@ -6252,7 +6292,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 208,
+      'weight' => 91,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -6331,7 +6371,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 208,
+      'weight' => 222,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -6410,7 +6450,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 207,
+      'weight' => 230,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -6624,6 +6664,47 @@ This is one of the criteria that can be used to determine sites your profile wil
     'widget_type' => 'nodereference_buttons',
   );
 
+  // Exported field_instance: 'node-profile-field_prv_rps'
+  $field_instances['node-profile-field_prv_rps'] = array(
+    'bundle' => 'profile',
+    'default_value' => array(
+      0 => array(
+        'nid' => 19916,
+      ),
+    ),
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'node_reference',
+        'settings' => array(),
+        'type' => 'node_reference_default',
+        'weight' => 136,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'node',
+    'field_name' => 'field_prv_rps',
+    'label' => 'RPS data (privacy setting)',
+    'required' => 1,
+    'settings' => array(
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_buttons',
+      'weight' => 222,
+    ),
+  );
+
   // Exported field_instance: 'node-profile-field_prv_slideshare'
   $field_instances['node-profile-field_prv_slideshare'] = array(
     'bundle' => 'profile',
@@ -6684,7 +6765,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 216,
+      'weight' => 230,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -6828,7 +6909,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 84,
+      'weight' => 89,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -6893,7 +6974,7 @@ This is one of the criteria that can be used to determine sites your profile wil
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_buttons',
-      'weight' => 88,
+      'weight' => 225,
     ),
     'widget_type' => 'nodereference_buttons',
   );
@@ -6912,6 +6993,7 @@ This is one of the criteria that can be used to determine sites your profile wil
   t('Appt job title (privacy setting)');
   t('Areas of expertise');
   t('Areas of expertise (privacy setting)');
+  t('Banner image');
   t('Blog');
   t('Blog (privacy setting)');
   t('Enter an alternative Open University Email address if you have one.');
@@ -6921,7 +7003,6 @@ This is one of the criteria that can be used to determine sites your profile wil
   t('External contributions (privacy setting)');
   t('Flickr page');
   t('Flickr page (privacy settings)');
-  t('Image');
   t('Impact and engagement');
   t('Impact and engagement (privacy setting)');
   t('Include a relevant flickr page here');
@@ -6945,7 +7026,7 @@ This is one of the criteria that can be used to determine sites your profile wil
   t('Level 4 Establishment Unit code');
   t('Level 4 Establishment Unit name');
   t('Level 4 Establishment Unit name (privacy setting)');
-  t('Light / Dark');
+  t('Light or Dark Theme');
   t('Link to your slideshare account where your presentations may be stored');
   t('LinkedIn profile');
   t('LinkedIn profile (privacy setting)');
@@ -6973,6 +7054,8 @@ This is one of the criteria that can be used to determine sites your profile wil
   t('Preferred Staff Surname (privacy setting) ');
   t('Profile Taxonomy');
   t('Profile visibility');
+  t('Publications (privacy setting)');
+  t('RPS data (privacy setting)');
   t('Research interests');
   t('Research interests (privacy setting)');
   t('Site path');
@@ -7009,6 +7092,8 @@ This is one of the criteria that can be used to determine sites your profile wil
   t('Web links');
   t('Web links (privacy setting)');
   t('Write about any type of international collaboration');
+  t('You can choose to add a large banner image to the top of your profile.  The dimensions of this banner image are 922x300px.  Please ensure that you have the appropriate permission to use the image that you are uploading.');
+  t('You can choose to have the main content on the left hand side of your profile with your image and web links on the right (the content, sidebar option) or the other way around (the sidebar, content option)');
 
   return $field_instances;
 }

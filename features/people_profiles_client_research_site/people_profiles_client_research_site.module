@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the OU People Profile Client - Research Site feature.
+ */
+
+include_once 'people_profiles_client_research_site.features.inc';

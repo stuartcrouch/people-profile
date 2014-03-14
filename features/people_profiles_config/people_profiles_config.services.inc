@@ -52,6 +52,27 @@ function people_profiles_config_default_services_endpoint() {
         ),
       ),
     ),
+    'ou_profile_nid_list' => array(
+      'operations' => array(
+        'retrieve' => array(
+          'enabled' => '1',
+        ),
+      ),
+    ),
+    'ou_profile_get_node' => array(
+      'operations' => array(
+        'retrieve' => array(
+          'enabled' => '1',
+        ),
+      ),
+    ),
+    'ou_profile_get_taxonomy_tree' => array(
+      'operations' => array(
+        'retrieve' => array(
+          'enabled' => '1',
+        ),
+      ),
+    ),
   );
   $endpoint->debug = 0;
   $export['profile_export'] = $endpoint;

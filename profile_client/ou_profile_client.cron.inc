@@ -20,7 +20,7 @@ published profiles (content_type called profile) on the profiles server.
  * 
  */
 
-require_once drupal_get_path('module', 'ou_profile') .'/includes/local_functions.inc';
+require_once drupal_get_path('module', 'ou_profile') .'/includes/server_client_functions.inc';
 
 /**
  * Implementation of hook_cron().
@@ -41,11 +41,8 @@ function ou_profile_client_cron()
 	{
 
 		//We only import after 24 hours have elapsed since last import
-		$config_last_imported = variable_get('ou_profile_client_import_finish', '');
-		if( $config_last_imported == '' )
-		{
-			$config_last_imported == 'January 1 1970 00:00:00';
-		}
+		$config_last_imported = variable_get('ou_profile_client_import_finish', 'January 1 1970 00:00:00');
+
 		$next_import = strtotime( $config_last_imported.' + 24 hours' );
 		$nowtime = date("Y-m-d H:i:s", time() );
 		
@@ -66,21 +63,20 @@ function ou_profile_client_cron()
 				ou_profile_log( 'No profiles found to unpublish.' );
 			}
 
-
 			if( !empty( $profiles ) || !empty( $profiles2delete ) )
 			{
 
 				// Create the Drupal QUEUE items
 				$queue->createItem( array( 'start' ) );
-				foreach( $profiles2delete as $nid => $content )
+				foreach( $profiles2delete as $puid )
 				{
-					$queue->createItem( array( 'delete', $nid ) );
+					$queue->createItem( array( 'delete', $puid ) );
 				}
 
 				// Create the Drupal QUEUE items
-				foreach( $profiles as $pims_entity_id => $profile_entity_id )
+				foreach( $profiles as $profile )
 				{
-					$queue->createItem( array( 'import', $pims_entity_id, $profile_entity_id ) );
+					$queue->createItem( array( 'import', $profile[ 'pims_entity_id' ], $profile[ 'profile_entity_id' ] ) );
 				}
 
 				$queue->createItem( array( 'finished' ) );
@@ -104,7 +100,7 @@ function ou_profile_client_cron_queue_info()
 	//parameters. Alter TIME to adjust how long this is allowed to run.
 	$queues['ou_profile_client_profile_import'] = array(
 		'worker callback' => 'ou_profile_client_profile_import_process',
-		'time' => 150,
+		'time' => 200,
 	);
 	return $queues;
 }
@@ -188,20 +184,20 @@ function ou_profile_client_batch_import()
 		$operations[] = array();
 		$operations[] = array( 'ou_profile_client_batch_process', array( array( 'start' ) ) );
 
-		foreach( $profiles2delete as $nid => $content )
+		foreach( $profiles2delete as $puid )
 		{
 			$operations[] = array(
 				'ou_profile_client_batch_process',
-				array( array( 'delete', $nid ) )
+				array( array( 'delete', $puid ) )
 				);
 		}
 
 		// Create the Drupal BATCH items
-		foreach( $profiles as $pims_entity_id => $profile_entity_id )
+		foreach( $profiles as $profile )
 		{
 			$operations[] = array(
 				'ou_profile_client_batch_process',
-				array( array( 'import', $pims_entity_id, $profile_entity_id ) )
+				array( array( 'import', $profile[ 'pims_entity_id' ], $profile[ 'profile_entity_id' ] ) )
 				);
 		}
 		
@@ -300,176 +296,7 @@ function _ou_profile_client_tmpvar_add( $tmpvar, $value )
 //Get details of the profiles to import
 function _ou_profile_client_get_profile_nids()
 {
-	//local_functions.inc : ou_profile_lget_site_info() :
-	//Get details from the "allowed sites" document from the server about what profiles this site is allowed to view
-	$site_info = ou_profile_lget_site_info();
-
-	//Check if we are an allowed site
-	if ( !$site_info['visibility'] )
-	{
-		ou_profile_log( "This website (%site_path) is not an 'allowed site'",
-			array( '%site_path' => ou_profile_lget_site_path() ),
-			OU_PROFILE_REPORT_ERROR);
-		return( FALSE );
-	} else {
-		ou_profile_log("unit_code = %unit | visibility = %vis", array(
-				"%unit" => $site_info['unit_code'],
-				"%vis" => $site_info['visibility']
-			)
-		);
-	}
-
-	// Clear the caches. Must be done before switching dbs
-	//_ou_profile_cc();
-
-	// Set database to profiles
-	db_set_active('profiles');
-
-	// Grab the ids for the pims and profile nodes matching the PIMs unit code
-	$profiles_by_ou_unit = array();
-	if( isset( $site_info['unit_code'] ) )
-	{
-		//$profiles_by_ou_unit = array();
-		$query = db_select('node', 'n');
-		$query->join('field_data_field_oup_visibility', 'v', 'n.nid = v.entity_id');
-		$query->join('field_data_field_oup_staff_id', 'oup', 'n.nid = oup.entity_id');
-		$query->join('field_data_field_pims_staff_id', 'ps', 'oup.field_oup_staff_id_value = ps.field_pims_staff_id_value');
-		$query->join('field_data_'.$site_info['unit_code_field'], 'u', 'ps.entity_id = u.entity_id');
-		$query->addField('ps', 'entity_id', 'pims_entity_id');
-		$query->addField('n', 'nid', 'profile_entity_id');
-		$query->condition( 'n.status', 0, '>' )
-		->condition('v.field_oup_visibility_value', (((int)$site_info['visibility']) - 1),'>=')
-		->condition('u.'.$site_info['unit_code_field'].'_value', $site_info['unit_code'], '=');
-		$profiles_by_ou_unit = $query->execute()->fetchAllKeyed();
-	}
-
-	// Grab the ids for the pims and profile nodes matching the profile taxonomy
-	$profiles_by_taxonomy = array();
-	if( isset( $site_info['taxonomy'] ) )
-	{
-		$tmp_array = array();
-		$tids_children = array();
-
-		//Loop through each term and get child terms
-		foreach( $site_info['taxonomy'] as $list_item )
-		{
-			$result = taxonomy_get_children( $list_item[ 'tid' ] );
-			$tids_children = array_merge( $tids_children, $result );
-			
-			//Strip out the TID
-			$tmp_array[] = $list_item[ 'tid' ];
-		}
-		
-		//Process above returns objects, we just want the TID
-		foreach( $tids_children as $list_item )
-		{
-			$tmp_array[] = $list_item->tid;
-		}
-		
-		//Remove the dupes
-		$tids = array_unique( $tmp_array );
-		
-		$query = db_select('node', 'n');
-		$query->join('field_data_field_profile_taxonomy', 'tx', 'n.nid = tx.entity_id');
-		$query->join('field_data_field_oup_visibility', 'v', 'n.nid = v.entity_id');
-		$query->join('field_data_field_oup_staff_id', 'oup', 'n.nid = oup.entity_id');
-		$query->join('field_data_field_pims_staff_id', 'ps', 'oup.field_oup_staff_id_value = ps.field_pims_staff_id_value');
-		$query->addField('ps', 'entity_id', 'pims_entity_id');
-		$query->addField('n', 'nid', 'profile_entity_id');
-		$query->condition( 'n.status', 0, '>' )
-		->condition('v.field_oup_visibility_value', (((int)$site_info['visibility'])-1) ,'>=')
-		->condition('tx.field_profile_taxonomy_tid', $tids, 'IN')
-		->condition('tx.bundle', 'profile', '=');
-		$profiles_by_taxonomy = $query->execute()->fetchAllKeyed();
-
-		//Filter the list to just those found in OU_Unit
-		if( isset( $site_info['unit_code'] ) )
-		{
-			$profiles_by_taxonomy = array_intersect_assoc( $profiles_by_ou_unit, $profiles_by_taxonomy );
-			$profiles_by_ou_unit = $profiles_by_taxonomy; //Do this as we merge all output later
-		}
-		
-	}
-
-	// Grab the ids for the pims and profile nodes matching the media expertise
-	$profiles_by_media = array();
-	if( isset( $site_info['media'] ) )
-	{
-
-		$tmp_array = array();
-		$tids_children = array();
-
-		//Loop through each term and get child terms
-		foreach( $site_info['media'] as $list_item )
-		{
-			$result = taxonomy_get_children( $list_item[ 'tid' ] );
-			$tids_children = array_merge( $tids_children, $result );
-			
-			//Strip out the TID
-			$tmp_array[] = $list_item[ 'tid' ];
-		}
-		
-		//Process above returns objects, we just want the TID
-		foreach( $tids_children as $list_item )
-		{
-			$tmp_array[] = $list_item->tid;
-		}
-		
-		//Remove the dupes
-		$tids = array_unique( $tmp_array );
-		
-		$query = db_select('node', 'n');
-		$query->join('field_data_field_media_expertise', 'tx', 'n.nid = tx.entity_id');
-		$query->join('field_data_field_oup_visibility', 'v', 'n.nid = v.entity_id');
-		$query->join('field_data_field_oup_staff_id', 'oup', 'n.nid = oup.entity_id');
-		$query->join('field_data_field_pims_staff_id', 'ps', 'oup.field_oup_staff_id_value = ps.field_pims_staff_id_value');
-		$query->addField('ps', 'entity_id', 'pims_entity_id');
-		$query->addField('n', 'nid', 'profile_entity_id');
-		$query->condition( 'n.status', 0, '>' )
-		->condition('v.field_oup_visibility_value', (((int)$site_info['visibility'])-1) ,'>=')
-		->condition('tx.field_media_expertise_tid', $tids, 'IN')
-		->condition('tx.bundle', 'profile', '=');
-		$profiles_by_media = $query->execute()->fetchAllKeyed();
-
-		//Filter the list to just those found in OU_Unit
-		if( isset( $site_info['unit_code'] ) )
-		{
-			$profiles_by_media = array_intersect_assoc( $profiles_by_ou_unit, $profiles_by_media );
-			$profiles_by_ou_unit = $profiles_by_media; //Do this as we merge all output later
-		}
-		
-		//Finally filter the list to just those found in taxonomy
-		if( isset( $site_info['taxonomy'] ) )
-		{
-			$profiles_by_media = array_intersect_assoc( $profiles_by_taxonomy, $profiles_by_media );
-			$profiles_by_taxonomy = $profiles_by_media; //Do this as we merge all output later
-			$profiles_by_ou_unit = $profiles_by_media; //Do this as we merge all output later
-		}
-	}
-
-	// Clear the caches. Must be done before switching dbs
-	_ou_profile_cc();
-
-	// Set database back
-	db_set_active('default');
-
-	//Results could be duplicated (e.g. same profile returned for a match to ou unit & taxonomy). This will de-dupe the results
-	$profiles = array();
-
-	//This merges the arrays (we can't be sure which query ran, so just check for all of them)
-	//Don't use array_merge or array_merge_recursive, loses the key value
-	foreach( $profiles_by_ou_unit as $key => $content )
-	{
-		$profiles[ $key ] = $content;
-	}
-	foreach( $profiles_by_taxonomy as $key => $content )
-	{
-		$profiles[ $key ] = $content;
-	}
-	foreach( $profiles_by_media as $key => $content )
-	{
-		$profiles[ $key ] = $content;
-	}
+	$profiles = ou_profile_client_all_nids_rest_call();
 
 	//Check if results have been returned
 	if( empty( $profiles ) )
@@ -492,33 +319,21 @@ function _ou_profile_client_profile_import( $data, $context = NULL )
 	// Optional message displayed under the progressbar.
 	$context['message'] = 'Loading pims : '.$data[ 0 ].' and profile : '.$data[1];
 
-	// Clear the caches. Must be done before switching dbs
-	_ou_profile_cc();
+	$pims_data = ou_profile_client_get_pp_node( $data[ 0 ] );
+	$profile_data = ou_profile_client_get_pp_node( $data[ 1 ] );
 
-	// Set database to server and load PIMs profile & Person profile
-	db_set_active( 'profiles' );
-	
-	$pims_data = node_load( $data[ 0 ], NULL, TRUE );
-	$profile_data = node_load( $data[ 1 ], NULL, TRUE );
-	
-	// Clear the caches. Must be done before switching dbs
-	_ou_profile_cc();
-
-	db_set_active( 'default' );
-	
 	if( $pims_data && $profile_data )
 	{
-		
 		//Function to generate the profiles name
 		$profile_title = ou_profile_lcreate_name(
-			isset($pims_data->field_pims_staff_title['und'][0]['value']) ? $pims_data->field_pims_staff_title['und'][0]['value'] : '',
-			isset($pims_data->field_pims_staff_forenames['und'][0]['value']) ? $pims_data->field_pims_staff_forenames['und'][0]['value'] : '',
-			isset($pims_data->field_pims_staff_surname['und'][0]['value']) ? $pims_data->field_pims_staff_surname['und'][0]['value'] : '',
-			isset($pims_data->field_pims_pref_forenames['und'][0]['value']) ? $pims_data->field_pims_pref_forenames['und'][0]['value'] : '',
-			isset($pims_data->field_data_field_pims_pref_surname['und'][0]['value']) ? $pims_data->field_data_field_pims_pref_surname['und'][0]['value'] : ''
+			isset($pims_data['field_pims_staff_title']['und'][0]['value']) ? $pims_data['field_pims_staff_title']['und'][0]['value'] : '',
+			isset($pims_data['field_pims_staff_forenames']['und'][0]['value']) ? $pims_data['field_pims_staff_forenames']['und'][0]['value'] : '',
+			isset($pims_data['field_pims_staff_surname']['und'][0]['value']) ? $pims_data['field_pims_staff_surname']['und'][0]['value'] : '',
+			isset($pims_data['field_pims_pref_forenames']['und'][0]['value']) ? $pims_data['field_pims_pref_forenames']['und'][0]['value'] : '',
+			isset($pims_data['field_data_field_pims_pref_surname']['und'][0]['value']) ? $pims_data['field_data_field_pims_pref_surname']['und'][0]['value'] : ''
 		);
 	
-		$unique_id = $pims_data->field_pims_unique_id['und'][0]['value'];
+		$unique_id = $pims_data['field_pims_unique_id']['und'][0]['value'];
 		
 		ou_profile_log( 'Name = '.$profile_title.' Unique id = '.$unique_id );
 		
@@ -548,26 +363,51 @@ function _ou_profile_client_profile_import( $data, $context = NULL )
 			$oup_node->title = $profile_title;
 		}
 
-		$oup_node->field_oup_oucu = $profile_data->field_oup_oucu; //could do this in the create, but here it will catch existing sites
+		$oup_node->field_oup_oucu = $profile_data['field_oup_oucu']; //could do this in the create, but here it will catch existing sites
 		
 		//Set the client node fields. Unset the field if it doesn't exist on the server profile
-		//Overidden job title 
-		if( isset( $profile_data->field_oup_job_title['und'] ) )
+
+		//Surname (Preferred_surname, if used, else field_pims_staff_surname)
+		if( isset( $pims_data['field_data_field_pims_pref_surname']['und'][0]['value'] ) )
 		{
-			$oup_node->field_oup_job_title = $profile_data->field_oup_job_title;
+			$oup_node->field_pims_pref_surname = $pims_data['field_data_field_pims_pref_surname'];
 		} else {
-			unset( $oup_node->field_oup_job_title['und'] );
+			$oup_node->field_pims_pref_surname = $pims_data['field_pims_staff_surname'];
 		}
-		
-		//pims job title
-		if( isset( $pims_data->field_pims_appt_job_title['und'][0]['value'] ) )
+
+		//Forename (Preferred forename, if used, else field_pims_staff_forename)
+		if( isset( $pims_data['field_pims_pref_forenames']['und'][0]['value'] ) )
 		{
-			$oup_node->field_pims_appt_job_title = $pims_data->field_pims_appt_job_title;
+			$oup_node->field_pims_pref_forenames = $pims_data['field_pims_pref_forenames'];
+		} else {
+			$oup_node->field_pims_pref_forenames = $pims_data['field_pims_staff_forenames'];
+		}
+
+		//Name title
+		if( isset( $pims_data['field_pims_staff_title']['und'] ) )
+		{
+			$oup_node->field_pims_staff_title = $pims_data['field_pims_staff_title'];
+		} else {
+			unset( $oup_node->field_pims_staff_title['und'] );
+		}
+
+		//pims job title
+		if( isset( $pims_data['field_pims_appt_job_title']['und'][0]['value'] ) )
+		{
+			$oup_node->field_pims_appt_job_title = $pims_data['field_pims_appt_job_title'];
 			//Add to category list
-			_ou_profile_client_tmpvar_add( 'ou_profile_client_pims_job_title_tmp', $pims_data->field_pims_appt_job_title['und'][0]['value'] );
+			_ou_profile_client_tmpvar_add( 'ou_profile_client_pims_job_title_tmp', $pims_data['field_pims_appt_job_title']['und'][0]['value'] );
 			
 		} else {
-			unset( $oup_node->field_pims_appt_job_title );
+			unset( $oup_node->field_pims_appt_job_title['und'] );
+		}
+		
+		//Overidden job title 
+		if( isset( $profile_data['field_oup_job_title']['und'] ) )
+		{
+			$oup_node->field_oup_job_title = $profile_data['field_oup_job_title'];
+		} else {
+			unset( $oup_node->field_oup_job_title['und'] );
 		}
 		
 		//Tmp vars to store PIMS units
@@ -576,52 +416,52 @@ function _ou_profile_client_profile_import( $data, $context = NULL )
 		$pims_units[ 1 ] = '';
 		
 		//PIMs unit lv1
-		if( isset( $pims_data->field_pims_l1_estab_unit_desc['und'][0]['value'] ) )
+		if( isset( $pims_data['field_pims_l1_estab_unit_desc']['und'][0]['value'] ) )
 		{
-			if( $pims_data->field_pims_l1_estab_unit_desc['und'][0]['value'] != '' )
+			if( $pims_data['field_pims_l1_estab_unit_desc']['und'][0]['value'] != '' )
 			{
-				$oup_node->field_pims_l1_estab_unit_desc = $pims_data->field_pims_l1_estab_unit_desc;
-				$pims_units[ 0 ] = $pims_data->field_pims_l1_estab_unit_desc['und'][0]['value'];
-				$pims_units[ 1 ] = $pims_data->field_pims_l1_estab_unit_desc['und'][0]['value'].'~1';
+				$oup_node->field_pims_l1_estab_unit_desc = $pims_data['field_pims_l1_estab_unit_desc'];
+				$pims_units[ 0 ] = $pims_data['field_pims_l1_estab_unit_desc']['und'][0]['value'];
+				$pims_units[ 1 ] = $pims_data['field_pims_l1_estab_unit_desc']['und'][0]['value'].'~1';
 			}
 		} else {
 			unset( $oup_node->field_pims_l1_estab_unit_desc );
 		}
 		
 		//PIMs unit lv2
-		if( isset( $pims_data->field_pims_l2_estab_unit_name['und'][0]['value'] ) )
+		if( isset( $pims_data['field_pims_l2_estab_unit_name']['und'][0]['value'] ) )
 		{
-			if( $pims_data->field_pims_l2_estab_unit_name['und'][0]['value'] != '' )
+			if( $pims_data['field_pims_l2_estab_unit_name']['und'][0]['value'] != '' )
 			{
-				$oup_node->field_pims_l2_estab_unit_name = $pims_data->field_pims_l2_estab_unit_name;
-				$pims_units[ 0 ] = $pims_units[ 0 ].' - '.$pims_data->field_pims_l2_estab_unit_name['und'][0]['value'];
-				$pims_units[ 1 ] = $pims_data->field_pims_l2_estab_unit_name['und'][0]['value'].'~2';
+				$oup_node->field_pims_l2_estab_unit_name = $pims_data['field_pims_l2_estab_unit_name'];
+				$pims_units[ 0 ] = $pims_units[ 0 ].' - '.$pims_data['field_pims_l2_estab_unit_name']['und'][0]['value'];
+				$pims_units[ 1 ] = $pims_data['field_pims_l2_estab_unit_name']['und'][0]['value'].'~2';
 			}
 		} else {
 			unset( $oup_node->field_pims_l2_estab_unit_name );
 		}
 		
 		//PIMs unit lv3
-		if( isset( $pims_data->field_pims_l3_estab_unit_name['und'][0]['value'] ) )
+		if( isset( $pims_data['field_pims_l3_estab_unit_name']['und'][0]['value'] ) )
 		{
-			if( $pims_data->field_pims_l3_estab_unit_name['und'][0]['value'] != '' )
+			if( $pims_data['field_pims_l3_estab_unit_name']['und'][0]['value'] != '' )
 			{
-				$oup_node->field_pims_l3_estab_unit_name = $pims_data->field_pims_l3_estab_unit_name;
-				$pims_units[ 0 ] = $pims_units[ 0 ].' - '.$pims_data->field_pims_l3_estab_unit_name['und'][0]['value'];
-				$pims_units[ 1 ] = $pims_data->field_pims_l3_estab_unit_name['und'][0]['value'].'~3';
+				$oup_node->field_pims_l3_estab_unit_name = $pims_data['field_pims_l3_estab_unit_name'];
+				$pims_units[ 0 ] = $pims_units[ 0 ].' - '.$pims_data['field_pims_l3_estab_unit_name']['und'][0]['value'];
+				$pims_units[ 1 ] = $pims_data['field_pims_l3_estab_unit_name']['und'][0]['value'].'~3';
 			}
 		} else {
 			unset( $oup_node->field_pims_l3_estab_unit_name );
 		}
 
 		//PIMs unit lv4
-		if( isset( $pims_data->field_pims_l4_estab_unit_name['und'][0]['value'] ) )
+		if( isset( $pims_data['field_pims_l4_estab_unit_name']['und'][0]['value'] ) )
 		{
-			if( $pims_data->field_pims_l4_estab_unit_name['und'][0]['value'] != '' )
+			if( $pims_data['field_pims_l4_estab_unit_name']['und'][0]['value'] != '' )
 			{
-				$oup_node->field_pims_l4_estab_unit_name = $pims_data->field_pims_l4_estab_unit_name;
-				$pims_units[ 0 ] = $pims_units[ 0 ].' - '.$pims_data->field_pims_l4_estab_unit_name['und'][0]['value'];
-				$pims_units[ 1 ] = $pims_data->field_pims_l4_estab_unit_name['und'][0]['value'].'~4';
+				$oup_node->field_pims_l4_estab_unit_name = $pims_data['field_pims_l4_estab_unit_name'];
+				$pims_units[ 0 ] = $pims_units[ 0 ].' - '.$pims_data['field_pims_l4_estab_unit_name']['und'][0]['value'];
+				$pims_units[ 1 ] = $pims_data['field_pims_l4_estab_unit_name']['und'][0]['value'].'~4';
 			}
 		} else {
 			unset( $oup_node->field_pims_l4_estab_unit_name );
@@ -633,11 +473,11 @@ function _ou_profile_client_profile_import( $data, $context = NULL )
 		}
 		
 		//profile_taxonomy
-		if( isset( $profile_data->field_profile_taxonomy['und'][0]['tid'] ) )
+		if( isset( $profile_data['field_profile_taxonomy']['und'][0]['tid'] ) )
 		{
 			//We can't sent the TID, we need to sent the full taxonomy text name
 			$oup_node->field_profile_taxonomy['und'] = array();
-			$profile_taxonomy = _ou_profile_client_build_tid_name( $profile_data->field_profile_taxonomy['und'] );
+			$profile_taxonomy = _ou_profile_client_build_tid_name( $profile_data['field_profile_taxonomy']['und'] );
 			$oup_node->field_profile_taxonomy['und'] = $profile_taxonomy[ 0 ];
 
 			//Build the client site taxomony list
@@ -651,11 +491,11 @@ function _ou_profile_client_profile_import( $data, $context = NULL )
 		}
 		
 		//media_expertise
-		if( isset( $profile_data->field_media_expertise['und'][0]['tid'] ) )
+		if( isset( $profile_data['field_media_expertise']['und'][0]['tid'] ) )
 		{
 			//We can't sent the TID, we need to sent the full taxonomy text name
 			$oup_node->field_media_expertise['und'] = array();
-			$media_expertise = _ou_profile_client_build_tid_name( $profile_data->field_media_expertise['und'] );
+			$media_expertise = _ou_profile_client_build_tid_name( $profile_data['field_media_expertise']['und'] );
 			$oup_node->field_media_expertise['und'] = $media_expertise[ 0 ];
 		} else {
 			unset( $oup_node->field_media_expertise );
@@ -668,41 +508,13 @@ function _ou_profile_client_profile_import( $data, $context = NULL )
 //Helper function to build the full taxonomy name e.g. parent_taxonomy_name\taxonomy_name
 function _ou_profile_client_build_tid_name( $get_tid_details )
 {
-	// Clear the caches. Must be done before switching dbs
-	_ou_profile_cc();
 
-	// Set database to server and load PIMs profile & Person profile
-	db_set_active( 'profiles' );
-
-	$field_tid = array();
-	$tid_name = array();
-	
 	//Loop through all the terms
 	foreach( $get_tid_details as $selected_tid )
 	{
-		$this_tid_name = array();
-		
-		//Get the parents. Array is in reverse order. Term is first, then parent.
-		$parent_tids = taxonomy_get_parents_all( $selected_tid[ 'tid' ] );
-		
-		foreach( $parent_tids as $term )
-		{
-			//$this_tid_name = $term->name.'\\'.$this_tid_name;
-			$this_tid_name[] = $term->name;
-		}
-		$this_tid_name = array_reverse( $this_tid_name );
-		$this_tid_name_implode = implode( '\\', $this_tid_name );
-		$field_tid[]['value'] = $this_tid_name_implode;
-		$tid_name[] = $this_tid_name_implode.'|'.$selected_tid[ 'tid' ];
+		$data = ou_profile_client_get_tid_rest_call( $selected_tid[ 'tid' ] );
 	}
-	
-	// Clear the caches. Must be done before switching dbs
-	_ou_profile_cc();
-
-	// Set database to server and load PIMs profile & Person profile
-	db_set_active( 'default' );
-
-	return( array( $field_tid, $tid_name ) );
+	return( $data );
 }
 
 //Unpublish profiles that no longer exist in the import
@@ -710,62 +522,50 @@ function _ou_profile_client_profile_delete( $data, $context = NULL )
 {
 	//Store results in batch array
 	$context['results'][] = 'Unpublishing node : '.$data[ 0 ];
-	
+
 	// Optional message displayed under the progressbar.
 	$context['message'] = 'Unpublishing node : '.$data[ 0 ];
 
-	$oup_node = node_load( $data[ 0 ] );
-	if( $oup_node->status )
-	{ 
-		// Unpublish published profiles (no need to do it more than once!)
-		$oup_node->status = 0;
-		node_save($oup_node);
+	//Get the NID using the pims unique ID
+	$query = db_select( 'field_data_field_pims_unique_id', 'pims_id_table' );
+	$query->addField( 'pims_id_table', 'entity_id', 'nid' );
+	$query->condition( 'pims_id_table.field_pims_unique_id_value', $data[ 0 ], '=' );
+	$nid = $query->execute()->fetchField();
+
+	if( $nid )
+	{
+		$node = node_load( $nid );
+		if( $node )
+		{
+			node_unpublish_action( $node );
+			node_save( $node );
+		}
 	}
 }
 
 // Get a list of the local profile stubs to delete
-// $profiles['pims id'] = profiles id : parameter are the profiles to be imported
 function _ou_profile_client_cron_get_profiles2delete( $profiles )
 {
-	$local_profiles = array();
-	$query = db_select( 'field_data_field_pims_unique_id', 'pims_id_table');
-	$query->fields( 'pims_id_table', array('entity_id', 'field_pims_unique_id_value' ) );
-	$result = $query->execute();
-	
-	foreach ( $result as $data )
+
+	//Get all the local, published profiles
+	$query = db_select( 'node', 'n' );
+	$query->join( 'field_data_field_pims_unique_id', 'pims_id_table', 'n.nid = pims_id_table.entity_id' );
+	$query->addField( 'pims_id_table', 'field_pims_unique_id_value', 'puid' );
+	$query->condition( 'n.status', 0, '>' );
+	$local_puids = $query->execute()->fetchCol();
+
+	//Rekey the profile array form server
+	$server_puids = array();
+	foreach( $profiles as $profile )
 	{
-		$local_profiles[$data->entity_id] = $data->field_pims_unique_id_value;
+		$server_puids[] = $profile[ 'puid' ];
 	}
+	$server_puids = array_unique( $server_puids );
 
-	// Clear the caches. Must be done before switching dbs
-	_ou_profile_cc();
-
-	// Set database to server and load PIMs profile & Person profile
-	db_set_active( 'profiles' );
+	//Find all local profiles that are not in the server list
+	$profiles2delete = array_diff( $local_puids, $server_puids );
+	return( $profiles2delete );
 		
-	foreach( $profiles as $pims_entity_id => $profile_entity_id )
-	{
-		$pims_data = node_load( $pims_entity_id, NULL, TRUE );
-		$profile_data = node_load( $profile_entity_id, NULL, TRUE );
-		
-		if( $pims_data && $profile_data )
-		{
-			$unique_id = $pims_data->field_pims_unique_id['und'][0]['value'];
-			
-			$profile_exists = array_search( $unique_id, $local_profiles );
-			if( $profile_exists )
-			{
-
-				//Remove the unique ID from the list of local profiles. 
-				unset( $local_profiles[$profile_exists] );
-			}
-		}
-	}
-
-	// Clear the caches. Must be done before switching dbs
-	_ou_profile_cc();
-
-	db_set_active( 'default' );
-		
-	return $local_profiles;
 }
+
+?>

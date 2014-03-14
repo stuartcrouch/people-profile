@@ -350,7 +350,7 @@ Sustainability',
     'entity_types' => array(),
     'field_name' => 'field_oup_openlearn_bio',
     'field_permissions' => array(
-      'type' => 0,
+      'type' => 2,
     ),
     'foreign keys' => array(
       'format' => array(
@@ -648,6 +648,9 @@ Sustainability',
     'deleted' => 0,
     'entity_types' => array(),
     'field_name' => 'field_oup_profile_layout_image',
+    'field_permissions' => array(
+      'type' => 0,
+    ),
     'foreign keys' => array(
       'fid' => array(
         'columns' => array(
@@ -664,7 +667,7 @@ Sustainability',
     'locked' => 0,
     'module' => 'image',
     'settings' => array(
-      'default_image' => NULL,
+      'default_image' => 0,
       'description_field' => 0,
       'list_default' => 1,
       'list_field' => 0,
@@ -3121,7 +3124,7 @@ Sustainability',
     'entity_types' => array(),
     'field_name' => 'field_prv_openlearn_bio',
     'field_permissions' => array(
-      'type' => 0,
+      'type' => 2,
     ),
     'foreign keys' => array(
       'nid' => array(
@@ -3141,7 +3144,52 @@ Sustainability',
     'settings' => array(
       'referenceable_types' => array(
         'allowed_sites' => 0,
-        'feature' => 0,
+        'feed' => 0,
+        'feed_item' => 0,
+        'ou_profile' => 0,
+        'ou_unit' => 0,
+        'page' => 0,
+        'pims' => 0,
+        'privacy_value' => 'privacy_value',
+        'profile' => 0,
+        'profile_page' => 0,
+        'story' => 0,
+      ),
+      'view' => array(
+        'args' => array(),
+        'display_name' => 'references_1',
+        'view_name' => 'ordered_privacy_settings',
+      ),
+    ),
+    'translatable' => 0,
+    'type' => 'node_reference',
+  );
+
+  // Exported field_base: 'field_prv_oro'
+  $field_bases['field_prv_oro'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_prv_oro',
+    'foreign keys' => array(
+      'nid' => array(
+        'columns' => array(
+          'nid' => 'nid',
+        ),
+        'table' => 'node',
+      ),
+    ),
+    'indexes' => array(
+      'nid' => array(
+        0 => 'nid',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'node_reference',
+    'settings' => array(
+      'referenceable_types' => array(
+        'allowed_sites' => 0,
         'feed' => 0,
         'feed_item' => 0,
         'ou_profile' => 0,
@@ -3447,6 +3495,52 @@ Sustainability',
     'translatable' => 0,
     'type' => 'node_reference',
     'type_name' => 'profile',
+  );
+
+  // Exported field_base: 'field_prv_rps'
+  $field_bases['field_prv_rps'] = array(
+    'active' => 1,
+    'cardinality' => 1,
+    'deleted' => 0,
+    'entity_types' => array(),
+    'field_name' => 'field_prv_rps',
+    'foreign keys' => array(
+      'nid' => array(
+        'columns' => array(
+          'nid' => 'nid',
+        ),
+        'table' => 'node',
+      ),
+    ),
+    'indexes' => array(
+      'nid' => array(
+        0 => 'nid',
+      ),
+    ),
+    'locked' => 0,
+    'module' => 'node_reference',
+    'settings' => array(
+      'referenceable_types' => array(
+        'allowed_sites' => 0,
+        'feed' => 0,
+        'feed_item' => 0,
+        'ou_profile' => 0,
+        'ou_unit' => 0,
+        'page' => 0,
+        'pims' => 0,
+        'privacy_value' => 'privacy_value',
+        'profile' => 0,
+        'profile_page' => 0,
+        'story' => 0,
+      ),
+      'view' => array(
+        'args' => array(),
+        'display_name' => 'references_1',
+        'view_name' => 'ordered_privacy_settings',
+      ),
+    ),
+    'translatable' => 0,
+    'type' => 'node_reference',
   );
 
   // Exported field_base: 'field_prv_slideshare'

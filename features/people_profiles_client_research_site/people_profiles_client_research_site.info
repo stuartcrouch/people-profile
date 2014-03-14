@@ -1,0 +1,15 @@
+name = OU People Profile Client - Research Site
+description = Stores research site views for displaying people profiles. Found at www.open.ac.uk/[site]/people
+core = 7.x
+package = The Open University
+php = 5.2.4
+version = 7.x-1.0
+project = people_profiles_client_research_site
+dependencies[] = ctools
+dependencies[] = ou_profile_client
+dependencies[] = views
+features[ctools][] = views:views_default:3.0
+features[features_api][] = api:1
+features[views_view][] = faculties
+features[views_view][] = research_profiles
+project path = sites/www.open.ac.uk.pp-client-test/modules/people-profile/features

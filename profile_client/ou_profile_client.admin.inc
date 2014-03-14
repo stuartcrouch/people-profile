@@ -36,9 +36,12 @@ function ou_profile_client_config_form($form_state)
 		'#description'   => t('Sets the level of module logging for debugging. -1 for none, 3 to log all msgs, 4 to output to screen'),
 		'#size'         => '10',
 	);
+
 	$form['ou_profile_client_profile_categories'] = array(
 		'#type'  => 'fieldset',
 		'#title' => t('Profile categories'),
+		'#collapsible' => TRUE,
+		'#collapsed' => TRUE,
 	);
 
 	$form['ou_profile_client_profile_categories']['ou_profile_client_profile_taxonomy'] = array(
@@ -70,6 +73,7 @@ function ou_profile_client_config_form($form_state)
 
 	//Form submit processing
 	$form['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+
 	return $form;
 
 }
@@ -98,7 +102,8 @@ function ou_profile_client_config_form_submit($form, &$form_state)
 		// Set the finish time & tell the user
 		drupal_set_message(t('Profile data reloaded.'));
 	}
-
 	drupal_set_message(t('Configuration settings saved.'));
 	
 }
+
+?>

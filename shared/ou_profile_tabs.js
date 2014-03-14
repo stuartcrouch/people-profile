@@ -8,25 +8,34 @@
 //*********************************************************
 
 (function($){
-	$( document ).ready(function() {
-		
-		//Add click event for tabs
-		$( "ul.ou-sections.tabs a" ).click( function(){
+
+	function setTab()
+	{
+		//Work out the tab selected (e.g. "#tab2")
+		var thistab = $(location).attr('hash');
+		if( thistab.substr( 0, 4 ) == '#tab' )
+		{
 			//Deselect current tab
 			$( "ul.ou-sections.tabs a" ).removeClass( "ou-selected" );
 			//Select new tab
-			$( this ).addClass( "ou-selected" );
-
-			//Work out the tab selected (e.g. "tab2")
-			var thistabLink = $( this ).attr( "href" );
-			var thistab = thistabLink.substr( 1, thistabLink.length - 1 );
+			$( "ul.ou-sections.tabs a[href='"+thistab+"']" ).addClass( "ou-selected" );			
+			thistab = thistab.substr( 1, thistab.length - 1 );
 			
 			//Hide the current tab content
 			$( "div.ou-binder div.tab-content" ).removeClass( "selected" );
 			
 			//Show the selected tab content
 			$( "div.ou-binder div.tab-content." + thistab ).addClass( "selected" );
-			
-		});
+		}
+
+	}
+
+	$( document ).ready(function() {
+		setTab();
 	});
+	
+	window.onhashchange = function( e ) {
+		setTab();
+	}
+	
 })(jQuery);

@@ -441,9 +441,11 @@ function ou_profile_get_profile_nodes( $type = NULL )
 
   $a_site_info = ou_profile_lget_site_info();
   $site_path = ou_profile_lget_site_path();
-  $unit_code = $a_site_info['unit_code'];
-
-  ou_profile_log("Unit code = " . $unit_code);
+  if( isset( $a_site_info['unit_code'] ) )
+  {
+     $unit_code = $a_site_info['unit_code'];
+     ou_profile_log("Unit code = " . $unit_code);
+  }
 
   // Set database to profiles
   db_set_active('profiles');
@@ -458,17 +460,20 @@ function ou_profile_get_profile_nodes( $type = NULL )
   "FROM field_data_field_pims_unique_id pims_unique_id " .
   "INNER JOIN field_data_field_pims_pref_surname pims_pref_surname ON pims_unique_id.entity_id = pims_pref_surname.entity_id " .
   "INNER JOIN field_data_field_pims_staff_surname pims_staff_surname ON pims_unique_id.entity_id = pims_staff_surname.entity_id " .
-  "INNER JOIN field_data_".$a_site_info['unit_code_field']." pims_unit_code ON pims_unique_id.entity_id = pims_unit_code.entity_id " .
+
   "INNER JOIN field_data_field_pims_staff_id pims_staff_id ON pims_unique_id.entity_id = pims_staff_id.entity_id " .
   "INNER JOIN field_data_field_oup_staff_id oup_staff_id ON pims_staff_id.field_pims_staff_id_value = oup_staff_id.field_oup_staff_id_value " .
-  "INNER JOIN field_data_field_oup_visibility oup_visibility ON oup_staff_id.entity_id = oup_visibility.entity_id " .
-  "WHERE oup_visibility.field_oup_visibility_value >= " . ( ( (int)$a_site_info['visibility'] ) -1 ) . " "; // only return visible profiles
+  "INNER JOIN field_data_field_oup_visibility oup_visibility ON oup_staff_id.entity_id = oup_visibility.entity_id ";
 
   //Filter the ou_unit
-  if ($unit_code)
+  if( isset( $unit_code ) )
   {
-    $server_query .= "AND pims_unit_code.".$a_site_info['unit_code_field']."_value ='" . $unit_code . "' "; // only return results for unit
+    $server_query .= "INNER JOIN field_data_".$a_site_info['unit_code_field']." pims_unit_code ON pims_unique_id.entity_id = pims_unit_code.entity_id " .
+    "AND pims_unit_code.".$a_site_info['unit_code_field']."_value ='" . $unit_code . "' "; // only return results for unit
   }
+
+     $server_query .= "WHERE oup_visibility.field_oup_visibility_value >= " . ( ( (int)$a_site_info['visibility'] ) -1 ) . " "; // only return visible profiles
+
   $server_query .= "ORDER BY ordername ASC"; // order by preferred surname or surname if preferred surname is not set
   ou_profile_log("server_query = " . $server_query);
   
@@ -609,3 +614,5 @@ function theme_get_expertise_tags() {
 
   return $tags;
 }
+
+?>

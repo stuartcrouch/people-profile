@@ -128,3 +128,5 @@ function ou_profile_get_people_list_block() {
     return $block;
 
 }
+
+?>

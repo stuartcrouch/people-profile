@@ -24,3 +24,5 @@ function ou_profile_update_7103( &$sandbox )
 */
 
 }
+
+?>

@@ -70,3 +70,5 @@ foreach ($a_pims_schema as $field => $cols) {
   $a_pims_fields[$field]['start'] = $a_cols[0] - 1;
   $a_pims_fields[$field]['length'] = $a_cols[1] - $a_cols[0] + 1;
 }
+
+?>

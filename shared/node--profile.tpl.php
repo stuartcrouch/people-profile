@@ -65,6 +65,7 @@ if (!isset($node->ou_profile)):
   return;
 endif;
 ?>
+
 <!-- start node.tpl.php -->
 <div id="node-<?php print $node->nid; ?>" class="<?php print $classes; ?>"<?php print $attributes; ?>>
   <?php print $user_picture; ?>
@@ -74,8 +75,8 @@ endif;
     <?php print $title;
     if( isset( $node->ou_profile['pdata']['group_sss_overrides']['group_letters_after_name']['field_oup_letters']['value']['und']) )
 	{
-      print (" - " .$node->ou_profile['pdata']['group_sss_overrides']['group_letters_after_name']['field_oup_letters']['value']['und'][0]['value']);
-    } 
+      print (" " .$node->ou_profile['pdata']['group_sss_overrides']['group_letters_after_name']['field_oup_letters']['value']['und'][0]['value']);
+    }
     ?>
   </h1>
   <?php print render($title_suffix); ?>
@@ -236,10 +237,12 @@ endif;
           foreach ($item['value'] as $fields) {
             $fields = reset($fields);
             if (isset($fields['value'])) {
-              $fields_item .= $fields['value'];
+			  if( trim( $fields['value'] ) != '' )
+			  {
+                $fields_item .= $fields['value'];
+              }
             }
           }
-		  
 		  if( !empty( $fields_item ) )
 		  {
 			  $profile_bio .= '<h2 id="'.$item['label'].'">'.$item['label'].'</h2>'."\n<ul>".$fields_item."</ul>";
@@ -295,8 +298,15 @@ endif;
 	}
   }
   */
-  $oro = _ou_profile_generate_oro_html( $node );
+
+  //Display RPS data
+  if( isset( $node->ou_profile['rps_data'] ) )
+  {
+     $profile_content['Research Activity'] = $node->ou_profile['rps_data']['#markup'];
+  }
   
+  //Get ORO data
+  $oro = _ou_profile_generate_oro_html( $node );
   if( $oro <> "" )
   {
     $profile_content['Publications'] = $oro;

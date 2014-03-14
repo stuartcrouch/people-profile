@@ -77,5 +77,4 @@ $pims_field_var_names = array(
 
 $pims_field_index = array_flip($pims_field_var_names);
 
-
-
+?>

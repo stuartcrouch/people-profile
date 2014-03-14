@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the People Profiles Client Features feature.
+ */
+
+include_once 'people_profiles_client_features.features.inc';
